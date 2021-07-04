@@ -32,3 +32,4 @@ touch 1.txt 2.txt 3.txt 4.json 5.json
 mkdir dir_5 dir_6 dir_7
 ls -l
 mv -vi 1.txt 2.txt c:/QA/1/script/dir_2)
+Added line for pull process
