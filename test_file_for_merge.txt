@@ -1,6 +1,0 @@
-first line
-second line _ resolved
-third line
-fourth line
-fifth line
-six line _ resolved
