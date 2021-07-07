@@ -1,0 +1,14 @@
+ID
+Title
+Environment
+Buld
+Preconditions
+StepsToReproduce
+ActualResult
+ExpectedResult
+Attachments
+Severity
+Priority
+AssignedTo
+Status
+Author
