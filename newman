@@ -1,0 +1,6 @@
+1. Generate an API key
+2. Fetch a list of your collections from: https://api.getpostman.com/collections?apikey=$apiKey
+3. Get the collection link via its UID: https://api.getpostman.com/collections/$uid?apikey=$apiKey
+4. Obtain the environment URI from: https://api.getpostman.com/environments?apikey=$apiKey
+5. Using the collection and environment URIs acquired in steps 3 and 4, run the collection as follows: 
+	newman run "https://api.getpostman.com/collections/$uid?apikey=$apiKey" --environment "https://api.getpostman.com/environments/$uid?apikey=$apiKey"
