@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-#import psycopg2
+import psycopg2
 #from werkzeug.wrappers import request
 app = Flask(__name__)
 
