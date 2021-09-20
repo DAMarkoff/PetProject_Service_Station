@@ -1,6 +1,7 @@
+from os import curdir
 from flask import Flask, request, jsonify
 import psycopg2
-#from werkzeug.wrappers import request
+
 app = Flask(__name__)
 
 #conn = psycopg2.connect(dbname='test', user='postgres', password='qwe', host='localhost', port='5432')
@@ -24,21 +25,39 @@ def home():
 @app.route("/db", methods=['POST'])
 def db():
     if request.method == 'POST':
-        id = request.form.get(int('id'))
-
-    result = {'ID': id}
+        f_name = request.form.get('f_name')
+        l_name = request.form.get('l_name')
+        passw = request.form.get('passw')
+        phone = request.form.get('phone')
+        email = request.form.get('email')
 
     if conn:
 
         print('CONN =======')
 
-        base_data = (id)
-
-        p_query = "INSET INTO first (id) VALUES (%s)"
+        base_data = (f_name, l_name, passw, phone, email)
+        p_query = "INSERT INTO users (first_name, last_name, password, phone, email) VALUES (%s, %s, %s, %s, %s)"
         cursor.execute(p_query, base_data)
         conn.commit()
         cursor.close
 
+        base_data = (f_name)
+        p_query = "SELECT id FROM users WHERE first_name = %s"
+        cursor.execute(p_query, base_data)
+        id_d = cursor.fetchone()
+        result = {'ID': id_d}
+    return jsonify(result)
+
+@app.route("/cl", methods=['GET'])
+def cl():
+
+    if conn:
+        p_query = "DELETE FROM users"
+        cursor.execute(p_query)
+        conn.commit()
+        cursor.close
+
+    result = {'result':'OK'}
     return jsonify(result)
 
 if __name__ == '__main__':
