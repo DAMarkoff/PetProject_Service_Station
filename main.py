@@ -17,7 +17,7 @@ def home():
         age = request.form.get('age')
 
     resp = {'Name': name + ' Pop',
-            'Age': int(age) * 2}
+            'Age': int(age) * 3}
 
     return jsonify(resp)
 
