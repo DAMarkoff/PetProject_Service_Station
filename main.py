@@ -88,13 +88,13 @@ def login():
         print('CONN =======')
 
 
-        base_data = (email, passw)
+        base_data = (email)
         p_query = "SELECT password FROM users WHERE email = %s"
         cursor.execute(p_query, base_data)
         conn.commit()
         res  = cursor.fetchone()
         cursor.close
-        if passw == res:
+        if passw == str(res[0]):
             print('OK')
         else:
             print('pass not')
