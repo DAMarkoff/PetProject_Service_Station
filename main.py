@@ -37,12 +37,11 @@ def db():
         conn.commit()
         cursor.close
 
-        #base_data = (f_name)
-        #p_query = "SELECT id FROM users WHERE first_name = %s"
-        #cursor.execute(p_query, base_data)
-        #id_d = cursor.fetchone()
-        #result = {'ID': id_d}
-    return jsonify({"result":"OK"})
+    return jsonify({"f_name": f_name,
+                    "l_name": l_name,
+                    "pass": passw,
+                    "phone": phone,
+                    "email": email})
 
 @app.route("/cl", methods=['GET'])
 def cl():
@@ -73,15 +72,35 @@ def all():
                         "phone": res[i][3],
                         "email": res[i][4],
                         "passw": res[i][5]})
-#            result_dict = {"ID": res[i][0],
-#                    "f_name": res[i][1],
-#                    "l_name": res[i][2],
-#                    "phone": res[i][3],
-#                    "email": res[i][4],
-#                    "passw": res[i][5]}
-#            result.append(result_dict)
+        
         cursor.close
     return jsonify(result)
+
+
+@app.route("/login", methods=['POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        passw = request.form.get('passw')
+
+    if conn:
+
+        print('CONN =======')
+
+
+        base_data = (email, passw)
+        p_query = "SELECT password FROM users WHERE email = %s"
+        cursor.execute(p_query, base_data)
+        conn.commit()
+        res  = cursor.fetchone()
+        cursor.close
+        if passw == res:
+            print('OK')
+        else:
+            print('pass not')
+        
+    return jsonify({"pass": passw,
+                    "email": email})
 
 if __name__ == '__main__':
     app.run()
