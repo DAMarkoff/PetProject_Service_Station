@@ -48,7 +48,7 @@ def db():
 @app.route("/add_users", methods=['POST'])
 def add_users():
     if request.method == 'POST':
-        params = request.form.get('file')
+        params = jsonify(request.form.get('file'))
     print(params)
     print(len(params.f_names))
     return jsonify({"result": "OK"})
