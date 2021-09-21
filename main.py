@@ -1,6 +1,7 @@
 from os import curdir
 from flask import Flask, request, jsonify
 import psycopg2
+import uuid
 
 app = Flask(__name__)
 
@@ -93,13 +94,11 @@ def login():
         res  = cursor.fetchone()
         cursor.close
         if passw == str(res[0]):
-            print('OK')
+            token = uuid.uuid4()
         else:
             print('pass not')
         
-    return jsonify({"pass": passw,
-                    "pass_db": res,
-                    "email": email})
+    return jsonify({"token": token})
 
 if __name__ == '__main__':
     app.run()
