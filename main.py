@@ -73,7 +73,7 @@ def all():
                     "phone": res[i][3],
                     "email": res[i][4],
                     "passw": res[i][5]}
-            result[i] = result_dict
+            result.append(result_dict)
         cursor.close
     return jsonify(result)
 
