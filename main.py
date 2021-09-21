@@ -72,7 +72,7 @@ def all():
         result = {"ID": res[0],
                 "f_name": res[1]}
         cursor.close
-    return jsonify(result)
+    return jsonify(res)
 
 if __name__ == '__main__':
     app.run()
