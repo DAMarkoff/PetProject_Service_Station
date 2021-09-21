@@ -2,6 +2,7 @@ from os import curdir
 from flask import Flask, request, jsonify
 import psycopg2
 import uuid
+import json
 
 app = Flask(__name__)
 
@@ -49,8 +50,8 @@ def db():
 def add_users():
     if request.method == 'POST':
         params = request.form.get('file')
-#    print(params)
-    print(jsonify(params))
+    data = json.loads(params)
+    print(data)
 #    print(len(params.f_names))
     return jsonify({"result": "OK"})
 #    if conn:
