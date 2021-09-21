@@ -65,8 +65,9 @@ def all():
         conn.commit()
         res  = cursor.fetchall()
         print(res)
+        result = {}
         for i in range(len(res)):
-            result = {"ID": res[i][0],
+            result += {"ID": res[i][0],
                     "f_name": res[i][1],
                     "l_name": res[i][2],
                     "phone": res[i][3],
