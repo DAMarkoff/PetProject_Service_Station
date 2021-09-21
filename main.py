@@ -89,7 +89,7 @@ def login():
 
 
         base_data = (email)
-        p_query = "SELECT password FROM users WHERE email = %s"
+        p_query = "SELECT password FROM users WHERE email = '%s'"
         cursor.execute(p_query, base_data)
         conn.commit()
         res  = cursor.fetchone()
