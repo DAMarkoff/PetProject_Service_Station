@@ -88,7 +88,7 @@ def login():
         print('CONN =======')
 
 
-        base_data = (email)
+        base_data = (str(email))
         p_query = "SELECT password FROM users WHERE email = '%s'"
         cursor.execute(p_query, base_data)
         conn.commit()
