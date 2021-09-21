@@ -69,7 +69,7 @@ def all():
         conn.commit()
         result = cursor.fetchall()
         cursor.close
-    return result
+    return jsonify(result)
 
 if __name__ == '__main__':
     app.run()
