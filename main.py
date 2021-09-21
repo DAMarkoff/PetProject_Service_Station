@@ -63,7 +63,6 @@ def all():
         cursor.execute(p_query)
         conn.commit()
         res  = cursor.fetchall()
-        print(res)
         result = []
         for i in range(len(res)):
             result.append({"ID": res[i][0],
@@ -86,11 +85,10 @@ def login():
     if conn:
 
         print('CONN =======')
-
-
-        base_data = (str(email))
-        p_query = "SELECT password FROM users WHERE email = '%s'"
-        cursor.execute(p_query, base_data)
+        print(email)
+        base_data = (email)
+        p_query = "SELECT password FROM users WHERE email = {0}".format(email)
+        cursor.execute(p_query)
         conn.commit()
         res  = cursor.fetchone()
         cursor.close
@@ -100,6 +98,7 @@ def login():
             print('pass not')
         
     return jsonify({"pass": passw,
+                    "pass_db": res,
                     "email": email})
 
 if __name__ == '__main__':
