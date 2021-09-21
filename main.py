@@ -68,6 +68,7 @@ def all():
         cursor.execute(p_query)
         conn.commit()
         res  = cursor.fetchone()
+        print(res)
         result = {"ID": res[0],
                 "f_name": res[1]}
         cursor.close
