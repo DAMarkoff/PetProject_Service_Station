@@ -67,9 +67,11 @@ def all():
         p_query = "SELECT * FROM users"
         cursor.execute(p_query)
         conn.commit()
-        result = cursor.fetchone()
+        res  = cursor.fetchone()
+        result = {"ID": res.id,
+                "f_name": res.first_name}
         cursor.close
-    return result
+    return jsonify(result)
 
 if __name__ == '__main__':
     app.run()
