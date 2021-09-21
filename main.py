@@ -7,10 +7,6 @@ app = Flask(__name__)
 conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', host='159.69.151.133', port='5056')
 cursor = conn.cursor()
 
-@app.route("/")
-def hello():
-    return "Hello World!"
-
 @app.route("/home", methods=['POST'])
 def home():
     if request.method == 'POST':
@@ -69,10 +65,10 @@ def all():
         conn.commit()
         res  = cursor.fetchall()
         print(res)
-        result = {"ID": res[0],
-                "f_name": res[1]}
+        result = {"ID": res[0][1],
+                "f_name": res[0][1]}
         cursor.close
-    return jsonify(res)
+    return jsonify(result)
 
 if __name__ == '__main__':
     app.run()
