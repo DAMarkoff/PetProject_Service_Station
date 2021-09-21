@@ -4,8 +4,8 @@ import psycopg2
 
 app = Flask(__name__)
 
-#conn = psycopg2.connect(dbname='test', user='postgres', password='qwe', host='localhost', port='5432')
-#cursor = conn.cursor()
+conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', host='159.69.151.133', port='5056')
+cursor = conn.cursor()
 
 @app.route("/")
 def hello():
