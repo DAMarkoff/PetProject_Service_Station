@@ -67,13 +67,19 @@ def all():
         print(res)
         result = []
         for i in range(len(res)):
-            result_dict = {"ID": res[i][0],
-                    "f_name": res[i][1],
-                    "l_name": res[i][2],
-                    "phone": res[i][3],
-                    "email": res[i][4],
-                    "passw": res[i][5]}
-            result.append(result_dict)
+            result.append({"ID": res[i][0],
+                        "f_name": res[i][1],
+                        "l_name": res[i][2],
+                        "phone": res[i][3],
+                        "email": res[i][4],
+                        "passw": res[i][5]})
+#            result_dict = {"ID": res[i][0],
+#                    "f_name": res[i][1],
+#                    "l_name": res[i][2],
+#                    "phone": res[i][3],
+#                    "email": res[i][4],
+#                    "passw": res[i][5]}
+#            result.append(result_dict)
         cursor.close
     return jsonify(result)
 
