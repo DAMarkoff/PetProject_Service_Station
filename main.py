@@ -56,7 +56,9 @@ def add_users():
 #    print(f_names)
 #    print(len(f_names))
 #    print(len(params.f_names))
+    print(params)
     print(data)
+    
     return jsonify({"result": "OK"})
 #    if conn:
 #
