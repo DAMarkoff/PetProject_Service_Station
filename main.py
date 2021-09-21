@@ -60,5 +60,16 @@ def cl():
     result = {'result':'OK'}
     return jsonify(result)
 
+@app.route("/all", methods=['GET'])
+def all():
+
+    if conn:
+        p_query = "SELECT * FROM users"
+        cursor.execute(p_query)
+        conn.commit()
+        result = cursor.fetchall()
+        cursor.close
+    return jsonify(result)
+
 if __name__ == '__main__':
     app.run()
