@@ -50,6 +50,7 @@ def add_users():
     if request.method == 'POST':
         params = request.get_json()
     print(params)
+    return jsonify({"result": "OK"})
 #    if conn:
 #
 #        print('CONN =======')
