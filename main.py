@@ -68,8 +68,8 @@ def all():
         cursor.execute(p_query)
         conn.commit()
         res  = cursor.fetchone()
-        result = {"ID": res.id,
-                "f_name": res.first_name}
+        result = {"ID": res[0],
+                "f_name": res[1]}
         cursor.close
     return jsonify(result)
 
