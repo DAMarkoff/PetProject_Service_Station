@@ -41,12 +41,12 @@ def db():
         conn.commit()
         cursor.close
 
-        base_data = (f_name)
-        p_query = "SELECT id FROM users WHERE first_name = %s"
-        cursor.execute(p_query, base_data)
-        id_d = cursor.fetchone()
-        result = {'ID': id_d}
-    return jsonify(result)
+        #base_data = (f_name)
+        #p_query = "SELECT id FROM users WHERE first_name = %s"
+        #cursor.execute(p_query, base_data)
+        #id_d = cursor.fetchone()
+        #result = {'ID': id_d}
+    return jsonify({"result":"OK"})
 
 @app.route("/cl", methods=['GET'])
 def cl():
