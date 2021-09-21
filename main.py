@@ -50,6 +50,7 @@ def add_users():
     if request.method == 'POST':
         params = request.form.get('file')
     print(params)
+    print(len(params.f_names))
     return jsonify({"result": "OK"})
 #    if conn:
 #
