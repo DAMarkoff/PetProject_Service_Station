@@ -44,6 +44,29 @@ def db():
                     "phone": phone,
                     "email": email})
 
+
+@app.route("/add_users", methods=['POST'])
+def add_users():
+    if request.method == 'POST':
+        params = request.get_json()
+    print(params)
+#    if conn:
+#
+#        print('CONN =======')
+#
+#        base_data = (f_name, l_name, passw, phone, email)
+#        p_query = "INSERT INTO users (first_name, last_name, password, phone, email) VALUES (%s, %s, %s, %s, %s)"
+#        cursor.execute(p_query, base_data)
+#        conn.commit()
+#        cursor.close
+#
+#    return jsonify({"f_name": f_name,
+#                    "l_name": l_name,
+#                    "pass": passw,
+#                    "phone": phone,
+#                    "email": email})
+
+
 @app.route("/cl", methods=['GET'])
 def cl():
 
