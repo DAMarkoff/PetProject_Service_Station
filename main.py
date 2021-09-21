@@ -67,7 +67,7 @@ def all():
         p_query = "SELECT * FROM users"
         cursor.execute(p_query)
         conn.commit()
-        result = cursor.fetchall()
+        result = cursor.fetchone()
         cursor.close
     return result
 
