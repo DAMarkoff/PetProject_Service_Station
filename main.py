@@ -65,14 +65,15 @@ def all():
         conn.commit()
         res  = cursor.fetchall()
         print(res)
-        result = {}
+        result = []
         for i in range(len(res)):
-            result += {"ID": res[i][0],
+            result_dict = {"ID": res[i][0],
                     "f_name": res[i][1],
                     "l_name": res[i][2],
                     "phone": res[i][3],
                     "email": res[i][4],
                     "passw": res[i][5]}
+            result[i] = result_dict
         cursor.close
     return jsonify(result)
 
