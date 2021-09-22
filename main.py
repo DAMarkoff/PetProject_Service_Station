@@ -3,8 +3,11 @@ from flask import Flask, request, jsonify
 import psycopg2
 import uuid
 import json
+import redis
 
 app = Flask(__name__)
+r = redis.StrictRedis(host='localhost', port=6379, db=0)
+
 
 conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', host='159.69.151.133', port='5056')
 cursor = conn.cursor()
@@ -51,14 +54,10 @@ def add_users():
     if request.method == 'POST':
         params = request.form.get('file')
     data = json.loads(params)
-#    f_names = []
-#    f_names.append(data[1])
-#    print(f_names)
-#    print(len(f_names))
-#    print(len(params.f_names))
+
     print(params)
     print(data)
-    
+    print(data[])
     return jsonify({"result": "OK"})
 #    if conn:
 #
@@ -119,19 +118,19 @@ def login():
     if conn:
 
         print('CONN =======')
-        print(email)
-        base_data = (email)
-        p_query = "SELECT password FROM users WHERE email = '{0}'".format(email)
+
+        p_query = "SELECT password, user_id FROM users WHERE email = '{0}'".format(email)
         cursor.execute(p_query)
         conn.commit()
         res  = cursor.fetchone()
         cursor.close
         if passw == str(res[0]):
             token = uuid.uuid4()
+            r.set(res[1], token)
         else:
             print('pass not')
         
-    return jsonify({"token": token})
+    return jsonify({"token": r.get(res[1])})
 
 if __name__ == '__main__':
     app.run()
