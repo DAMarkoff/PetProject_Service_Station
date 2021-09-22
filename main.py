@@ -129,14 +129,14 @@ def login():
         if passw == res[0]:
             print(r.exists(res[1]))
             if r.exists(res[1]) == 0:
-                token = str(uuid.uuid4())            
+                token = str(uuid.uuid4()) #установить срок токена
                 r.set(res[1], token)
             else:
-                pass #пролонгация токена    
+                token = r.get(res[1]) #пролонгация токена    
         else:
             print('pass not')
 
-    return jsonify({"token": token, "id": res[1]})
+    return jsonify({"token": token, "email": email, "user_id": res[1]})
 
 
 @app.route("/user_info", methods=['POST'])
