@@ -148,16 +148,16 @@ def user_info():
         print('CONN =======')
 
         
-"""         p_query = "SELECT user_id, first_name, last_name, email, phone, passw FROM users WHERE user_id = '{0}'".format(user_id)
-        cursor.execute(p_query)
-        conn.commit()
-        res  = cursor.fetchone()
-        cursor.close
+        # p_query = "SELECT user_id, first_name, last_name, email, phone, passw FROM users WHERE user_id = '{0}'".format(user_id)
+        # cursor.execute(p_query)
+        # conn.commit()
+        # res  = cursor.fetchone()
+        # cursor.close
         
-        if token == r.get(res[0]):
-            print(res)
-        else:
-            print('pass not') """
+        # if token == r.get(res[0]):
+        #     print(res)
+        # else:
+        #     print('pass not')
 
     return jsonify({"token": token, "id": res[0]})
 
