@@ -6,7 +6,7 @@ import json
 import redis
 
 app = Flask(__name__)
-r = redis.StrictRedis(host='localhost', port=6379, db=0)
+r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode_responses=True)
 
 
 conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', host='159.69.151.133', port='5056')
@@ -124,17 +124,42 @@ def login():
         conn.commit()
         res  = cursor.fetchone()
         cursor.close
-        if passw == str(res[0]):
-            token = str(uuid.uuid4())
-            
-            r.set(res[1], token)
+        
+        if passw == res[0]:
+            if r.exists(res[1]) == 0:
+                token = uuid.uuid4()            
+                r.set(res[1], token)
+            else:
+                pass #пролонгация токена    
         else:
             print('pass not')
-    r_token = str(r.get(res[1]))
-    print(r_token)
-    if r_token == passw:
-        print('test ok')    
+
     return jsonify({"token": token, "id": res[1]})
+
+
+@app.route("/user_info", methods=['POST'])
+def user_info():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        token = request.form.get('token')
+
+    if conn:
+
+        print('CONN =======')
+
+        
+        p_query = "SELECT user_id, first_name, last_name, email, phone, passw FROM users WHERE email = '{0}'".format(email)
+        cursor.execute(p_query)
+        conn.commit()
+        res  = cursor.fetchone()
+        cursor.close
+        
+        if token == r.get(res[0]):
+            print(res)
+        else:
+            print('pass not')
+
+    return jsonify({"token": token, "id": res[0]})
 
 if __name__ == '__main__':
     app.run()
