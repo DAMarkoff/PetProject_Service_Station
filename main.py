@@ -55,9 +55,9 @@ def add_users():
         params = request.form.get('file')
     data = json.loads(params)
 
-    print(params)
-    print(data)
-    print(data[])
+#    print(params)
+#    print(data)
+#    print(data[])
     return jsonify({"result": "OK"})
 #    if conn:
 #
