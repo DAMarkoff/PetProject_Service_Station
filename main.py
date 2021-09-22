@@ -126,11 +126,12 @@ def login():
         cursor.close
         if passw == str(res[0]):
             token = str(uuid.uuid4())
-            r.set(res[1], token)
+            
+#            r.set(res[1], token)
         else:
             print('pass not')
         
-    return jsonify({"token": r.get(res[1])})
+    return jsonify({"token": token, "id": res[1])
 
 if __name__ == '__main__':
     app.run()
