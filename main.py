@@ -123,11 +123,11 @@ def login():
         cursor.execute(p_query)
         conn.commit()
         res  = cursor.fetchone()
-        cursor.close
+        cursor.closes
         if passw == str(res[0]):
             token = str(uuid.uuid4())
             
-            r.set(res[1], token)
+            r.set(res[1], str(token))
         else:
             print('pass not')
     print(r.get(res[1]))    
