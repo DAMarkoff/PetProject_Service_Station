@@ -142,12 +142,13 @@ def user_info():
     if request.method == 'POST':
         token = request.form.get('token')
     user_id = r.scan(0, match=token)
+    print(user_id) 
     if conn:
 
         print('CONN =======')
 
         
-        p_query = "SELECT user_id, first_name, last_name, email, phone, passw FROM users WHERE user_id = '{0}'".format(user_id)
+"""         p_query = "SELECT user_id, first_name, last_name, email, phone, passw FROM users WHERE user_id = '{0}'".format(user_id)
         cursor.execute(p_query)
         conn.commit()
         res  = cursor.fetchone()
@@ -156,7 +157,7 @@ def user_info():
         if token == r.get(res[0]):
             print(res)
         else:
-            print('pass not')
+            print('pass not') """
 
     return jsonify({"token": token, "id": res[0]})
 
