@@ -140,15 +140,14 @@ def login():
 @app.route("/user_info", methods=['POST'])
 def user_info():
     if request.method == 'POST':
-        email = request.form.get('email')
         token = request.form.get('token')
-
+    user_id = r.scan(0, match: token)
     if conn:
 
         print('CONN =======')
 
         
-        p_query = "SELECT user_id, first_name, last_name, email, phone, passw FROM users WHERE email = '{0}'".format(email)
+        p_query = "SELECT user_id, first_name, last_name, email, phone, passw FROM users WHERE user_id = '{0}'".format(user_id)
         cursor.execute(p_query)
         conn.commit()
         res  = cursor.fetchone()
