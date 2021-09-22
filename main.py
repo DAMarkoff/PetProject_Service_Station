@@ -127,7 +127,7 @@ def login():
         if passw == str(res[0]):
             token = str(uuid.uuid4())
             
-#            r.set(res[1], token)
+            r.set(res[1], token)
         else:
             print('pass not')
         
