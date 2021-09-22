@@ -141,7 +141,7 @@ def login():
 def user_info():
     if request.method == 'POST':
         token = request.form.get('token')
-    user_id = r.scan(0, match: token)
+    user_id = r.scan(0, match=token)
     if conn:
 
         print('CONN =======')
