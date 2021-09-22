@@ -159,7 +159,7 @@ def user_info():
         # else:
         #     print('pass not')
 
-    return jsonify({"token": token, "id": res[0]})
+    return jsonify({"token": token})
 
 if __name__ == '__main__':
     app.run()
