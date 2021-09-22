@@ -131,7 +131,7 @@ def login():
         else:
             print('pass not')
         
-    return jsonify({"token": token, "id": res[1])
+    return jsonify({"token": token, "id": res[1]})
 
 if __name__ == '__main__':
     app.run()
