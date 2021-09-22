@@ -127,10 +127,12 @@ def login():
         if passw == str(res[0]):
             token = str(uuid.uuid4())
             
-            r.set(res[1], str(token))
+            r.set(res[1], token)
         else:
             print('pass not')
-    print(r.get(res[1]))    
+    print(r.get(res[1]))
+    if r.get(res[1]) == passw:
+        print('test ok')    
     return jsonify({"token": token, "id": res[1]})
 
 if __name__ == '__main__':
