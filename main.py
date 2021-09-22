@@ -130,7 +130,7 @@ def login():
             r.set(res[1], token)
         else:
             print('pass not')
-    r_token = r.get(res[1])        
+    r_token = str(r.get(res[1]))
     print(r_token)
     if r_token == passw:
         print('test ok')    
