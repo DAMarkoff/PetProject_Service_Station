@@ -119,7 +119,7 @@ def login():
 
         print('CONN =======')
 
-        p_query = "SELECT password, user_id FROM users WHERE email = '{0}'".format(email)
+        p_query = "SELECT pass, user_id FROM users WHERE email = '{0}'".format(email)
         cursor.execute(p_query)
         conn.commit()
         res  = cursor.fetchone()
