@@ -130,7 +130,7 @@ def login():
             r.set(res[1], token)
         else:
             print('pass not')
-        
+    print(r.get(res[1]))    
     return jsonify({"token": token, "id": res[1]})
 
 if __name__ == '__main__':
