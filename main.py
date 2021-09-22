@@ -125,6 +125,7 @@ def login():
         res  = cursor.fetchone()
         cursor.close
         
+        token = ""
         if passw == res[0]:
             if r.exists(res[1]) == 0:
                 token = str(uuid.uuid4())            
@@ -141,23 +142,24 @@ def login():
 def user_info():
     if request.method == 'POST':
         token = request.form.get('token')
-    user_id = r.scan(0, match=token)
-    print(user_id) 
+        email = request.form.get('email')
+    
+
     if conn:
 
         print('CONN =======')
 
         
-        # p_query = "SELECT user_id, first_name, last_name, email, phone, passw FROM users WHERE user_id = '{0}'".format(user_id)
-        # cursor.execute(p_query)
-        # conn.commit()
-        # res  = cursor.fetchone()
-        # cursor.close
+        p_query = "SELECT user_id, first_name, last_name, email, phone, passw FROM users WHERE email = '{0}'".format(email)
+        cursor.execute(p_query)
+        conn.commit()
+        res  = cursor.fetchone()
+        cursor.close
         
-        # if token == r.get(res[0]):
-        #     print(res)
-        # else:
-        #     print('pass not')
+        if token == r.get(res[0]):
+            print(res)
+        else:
+            print('pass not')
 
     return jsonify({"token": token})
 
