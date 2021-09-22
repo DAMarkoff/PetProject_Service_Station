@@ -151,7 +151,7 @@ def user_info():
         print('CONN =======')
 
         
-        p_query = "SELECT user_id, first_name, last_name, email, phone, passw FROM users WHERE email = '{0}'".format(email)
+        p_query = "SELECT user_id, first_name, last_name, email, phone, pass FROM users WHERE email = '{0}'".format(email)
         cursor.execute(p_query)
         conn.commit()
         res  = cursor.fetchone()
@@ -162,7 +162,7 @@ def user_info():
         else:
             print('pass not')
 
-    return jsonify({"token": token})
+    return jsonify({"token": token, "info": res})
 
 if __name__ == '__main__':
     app.run()
