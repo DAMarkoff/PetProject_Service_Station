@@ -127,7 +127,7 @@ def login():
         
         if passw == res[0]:
             if r.exists(res[1]) == 0:
-                token = uuid.uuid4()            
+                token = str(uuid.uuid4())            
                 r.set(res[1], token)
             else:
                 pass #пролонгация токена    
