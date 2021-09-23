@@ -238,8 +238,7 @@ def new_st_ord():
         email = request.form.get('email')
         start_date = request.form.get('start_date')
         stop_date = request.form.get('stop_date')
-        size_id = request.form.get('size_id')
-        shelf_id = request.form.get('shelf_id')
+        size_name = request.form.get('size_name')
 
     if not user_exist(email):
             return "user does not exist"
@@ -247,10 +246,17 @@ def new_st_ord():
         #if token exists in redis db
         if token_exist(email, token):
             
+            # if conn:
+                
+            #     p_query = "SELECT availabe FROM warehouse WHERE size_id = '{0}'".format(size_id_by_name(size_name))
+            #     cursor.execute(p_query)
+            #     conn.commit()
+            #     avail  = cursor.fetchone()
+            #     cursor.close                
+            return shelf_exist(size_name)
 
 
-
-            pass
+            
         else:
             return "token does not valid, please login" #redirect to /login
 
