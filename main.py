@@ -12,7 +12,7 @@ r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode
 conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', host='159.69.151.133', port='5056')
 cursor = conn.cursor()
 
-@app.route("/home", methods=['POST'])
+@app.route("/home", methods=['POST']) #for fun :)
 def home():
     if request.method == 'POST':
         name = request.form.get('name')
@@ -23,7 +23,7 @@ def home():
 
     return jsonify(resp)
 
-@app.route("/reg", methods=['POST'])
+@app.route("/reg", methods=['POST']) #reg new user
 def reg():
     if request.method == 'POST':
         f_name = request.form.get('f_name')
@@ -44,7 +44,7 @@ def reg():
 
         #print(usr_id_[0])
         if usr_id_ is not None:
-            return "email exists"
+            return "email exists" #note that the email exists and redirect to /reg
         else:
             base_data = (f_name, l_name, passw, phone, email)
             p_query = "INSERT INTO users (first_name, last_name, pass, phone, email) VALUES (%s, %s, %s, %s, %s)"
@@ -68,34 +68,12 @@ def reg():
         return jsonify(result)
 
 
-@app.route("/add_users", methods=['POST'])
+@app.route("/add_users", methods=['POST']) #reg many users - to do
 def add_users():
-    if request.method == 'POST':
-        params = request.form.get('file')
-    data = json.loads(params)
-
-#    print(params)
-#   print(data)
-#   print(data[])
-    return jsonify({"result": "OK"})
-#   if conn:
-#
-#        print('CONN =======')
-#
-#        base_data = (f_name, l_name, passw, phone, email)
-#        p_query = "INSERT INTO users (first_name, last_name, password, phone, email) VALUES (%s, %s, %s, %s, %s)"
-#        cursor.execute(p_query, base_data)
-#        conn.commit()
-#        cursor.close
-#
-#    return jsonify({"f_name": f_name,
-#                    "l_name": l_name,
-#                    "pass": passw,
-#                    "phone": phone,
-#                    "email": email})
+    pass
 
 
-@app.route("/cl", methods=['GET'])
+@app.route("/cl", methods=['GET']) #clear users DB
 def cl():
 
     if conn:
@@ -107,7 +85,7 @@ def cl():
     result = {'result':'OK'}
     return jsonify(result)
 
-@app.route("/all", methods=['GET'])
+@app.route("/all", methods=['GET']) #get a list of all users
 def all():
 
     if conn:
@@ -128,7 +106,7 @@ def all():
     return jsonify(result)
 
 
-@app.route("/login", methods=['POST'])
+@app.route("/login", methods=['POST']) #login :)
 def login():
     if request.method == 'POST':
         email = request.form.get('email')
@@ -158,7 +136,7 @@ def login():
     return jsonify({"token": token, "email": email, "user_id": res[1]})
 
 
-@app.route("/user_info", methods=['POST'])
+@app.route("/user_info", methods=['POST']) #get info about the logged user
 def user_info():
     if request.method == 'POST':
         token = request.form.get('token')
@@ -169,24 +147,38 @@ def user_info():
 
         print('CONN =======')
 
-        
-        p_query = "SELECT user_id, first_name, last_name, email, phone, pass FROM users WHERE email = '{0}'".format(email)
+        #get user_id from DB on email
+        p_query = "SELECT user_id FROM users WHERE email = '{0}'".format(email)
         cursor.execute(p_query)
         conn.commit()
-        res  = cursor.fetchone()
-        cursor.close
+        usr_id_  = cursor.fetchone()
+        cursor.close        
 
-        result = ({"ID": res[0],
-                "f_name": res[1],
-                "l_name": res[2],
-                "email": res[3],
-                "phone": res[4],
-                "passw": res[5]})
+        #if user_id does not exist
+        if usr_id_ is None:
+            return "user does not exist"
         
-        if token == r.get(res[0]):
+        #if token exists in redis db
+        elif token == r.get(email):
+            p_query = "SELECT user_id, first_name, last_name, email, phone, pass FROM users WHERE email = '{0}'".format(email)
+            cursor.execute(p_query)
+            conn.commit()
+            res  = cursor.fetchone()
+            cursor.close
+
+            result = ({"ID": res[0],
+                    "f_name": res[1],
+                    "l_name": res[2],
+                    "email": res[3],
+                    "phone": res[4],
+                    "passw": res[5]})
+            
+            
             return jsonify(result)
+        
+        #if token does not exist in redis db    
         else:
-            return "token no"
+            return "token no" #redirect to /login
 
 if __name__ == '__main__':
     app.run()
