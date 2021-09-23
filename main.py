@@ -33,6 +33,31 @@ def token_exist(email, token):
         return True
     return False
 
+def size_id_by_name(size_name):
+    if conn:
+
+        p_query = "SELECT size_id FROM sizes WHERE size_name = '{0}'".format(size_name)
+        cursor.execute(p_query)
+        conn.commit()
+        size_id_  = cursor.fetchone()
+        cursor.close
+
+        return size_id_[0]        
+
+
+def shelf_exist(size_name):
+    if conn:
+
+        p_query = "SELECT availabe FROM warehouse WHERE size_id = '{0}'".format(size_id_by_name(size_name))
+        cursor.execute(p_query)
+        conn.commit()
+        avail  = cursor.fetchone()
+        cursor.close
+
+        if avail:
+            return True
+        return False    
+
 @app.route("/home", methods=['POST']) #for fun :)
 def home():
     if request.method == 'POST':
@@ -216,8 +241,18 @@ def new_st_ord():
         size_id = request.form.get('size_id')
         shelf_id = request.form.get('shelf_id')
 
-    pass
+    if not user_exist(email):
+            return "user does not exist"
+    else:    
+        #if token exists in redis db
+        if token_exist(email, token):
+            
 
+
+
+            pass
+        else:
+            return "token does not valid, please login" #redirect to /login
 
 if __name__ == '__main__':
     app.run()
