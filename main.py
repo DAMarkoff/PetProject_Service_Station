@@ -1,5 +1,6 @@
 from os import curdir
 from flask import Flask, request, jsonify
+from jinja2 import Template
 import psycopg2
 import uuid
 import json
@@ -129,7 +130,7 @@ def login():
 
         #if user exists in redis db
         else:      
-            p_query = "SELECT pass, user_id FROM users WHERE email = '{0}'".format(email)
+            p_query = "SELECT pass, user_id, f_name, l_name FROM users WHERE email = '{0}'".format(email)
             cursor.execute(p_query)
             conn.commit()
             res  = cursor.fetchone()
@@ -145,8 +146,10 @@ def login():
                     r.set(email, token, ex=600) #пролонгация токена, срок - 600 сек.   
             else:
                 return 'you shall not pass :) password is not valid' #неверный пароль, перелогинтесь
-
-            return jsonify({"token": token, "email": email, "user_id": res[1]})
+            text = 'Hello {{ name }}!'
+            template = Template(text)
+            return template.render(name=res[2]+res[3])
+            #return jsonify({"token": token, "email": email, "user_id": res[1]})
 
 
 @app.route("/user_info", methods=['POST']) #get info about the logged user
