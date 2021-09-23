@@ -13,6 +13,26 @@ r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode
 conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', host='159.69.151.133', port='5056')
 cursor = conn.cursor()
 
+def user_exist(email):
+    if conn:
+
+    #get user_id from DB on email
+        p_query = "SELECT user_id FROM users WHERE email = '{0}'".format(email)
+        cursor.execute(p_query)
+        conn.commit()
+        usr_id_  = cursor.fetchone()
+        cursor.close        
+
+    #if user_id does not exist
+        if usr_id_ is None:
+            return False
+    return True
+
+def token_exist(email, token):
+    if token == r.get(email):
+        return True
+    return False
+
 @app.route("/home", methods=['POST']) #for fun :)
 def home():
     if request.method == 'POST':
@@ -160,23 +180,11 @@ def user_info():
         email = request.form.get('email')
     
 
-    if conn:
-
-        print('CONN =======')
-
-        #get user_id from DB on email
-        p_query = "SELECT user_id FROM users WHERE email = '{0}'".format(email)
-        cursor.execute(p_query)
-        conn.commit()
-        usr_id_  = cursor.fetchone()
-        cursor.close        
-
-        #if user_id does not exist
-        if usr_id_ is None:
+    if not user_exist(email):
             return "user does not exist"
-        
+    else:    
         #if token exists in redis db
-        elif token == r.get(email):
+        if token_exist(email, token):
             p_query = "SELECT user_id, first_name, last_name, email, phone, pass FROM users WHERE email = '{0}'".format(email)
             cursor.execute(p_query)
             conn.commit()
@@ -196,6 +204,20 @@ def user_info():
         #if token does not exist in redis db    
         else:
             return "token does not valid, please login" #redirect to /login
+
+
+@app.route("/new_storage_order", methods=['POST'])
+def new_st_ord():
+    if request.method == 'POST':
+        token = request.form.get('token')
+        email = request.form.get('email')
+        start_date = request.form.get('start_date')
+        stop_date = request.form.get('stop_date')
+        size_id = request.form.get('size_id')
+        shelf_id = request.form.get('shelf_id')
+
+    pass
+
 
 if __name__ == '__main__':
     app.run()
