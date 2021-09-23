@@ -116,24 +116,36 @@ def login():
 
         print('CONN =======')
 
-        p_query = "SELECT pass, user_id FROM users WHERE email = '{0}'".format(email)
+        #get user_id from DB on email
+        p_query = "SELECT user_id FROM users WHERE email = '{0}'".format(email)
         cursor.execute(p_query)
         conn.commit()
-        res  = cursor.fetchone()
-        cursor.close
-        
-        token = ""
-        if passw == res[0]:
-            print(r.exists(res[1]))
-            if r.exists(res[1]) == 0:
-                token = str(uuid.uuid4()) #установить срок токена
-                r.set(res[1], token)
-            else:
-                token = r.get(res[1]) #пролонгация токена    
-        else:
-            print('pass not')
+        usr_id_  = cursor.fetchone()
+        cursor.close  
 
-    return jsonify({"token": token, "email": email, "user_id": res[1]})
+        #if user does not exist
+        if usr_id_ is None:
+            return "user does not exist"
+
+        #if user exists in redis db
+        else:      
+            p_query = "SELECT pass, user_id FROM users WHERE email = '{0}'".format(email)
+            cursor.execute(p_query)
+            conn.commit()
+            res  = cursor.fetchone()
+            cursor.close
+            
+            token = ""
+            if passw == res[0]: #если пароль верен
+                if r.exists(email) == 0: #если токен уже выдан
+                    token = str(uuid.uuid4()) #генерация и установка срока токена
+                    r.set(email, token)
+                else:
+                    token = r.get(email) #возврат и пролонгация токена    
+            else:
+                return 'you shall not pass :) password is not valid'
+
+            return jsonify({"token": token, "email": email, "user_id": res[1]})
 
 
 @app.route("/user_info", methods=['POST']) #get info about the logged user
