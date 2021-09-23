@@ -54,7 +54,7 @@ def shelf_exist(size_name):
         avail  = cursor.fetchone()
         cursor.close
 
-        if avail[0]:
+        if avail[0] == True:
             return True
         return False    
 
@@ -253,7 +253,7 @@ def new_st_ord():
             #     conn.commit()
             #     avail  = cursor.fetchone()
             #     cursor.close                
-            return shelf_exist(size_name)
+            return size_id_by_name(size_name)
 
 
             
