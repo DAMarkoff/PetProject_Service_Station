@@ -143,14 +143,15 @@ def login():
                     r.set(email, token, ex=600) #запись токена в redis bd, срок - 600 сек.
                 else:
                     token = r.get(email) #возврат токена
-                    r.set(email, token, ex=600) #пролонгация токена, срок - 600 сек.   
+                    r.set(email, token, ex=600) #пролонгация токена, срок - 600 сек.
+                
+                #генерация Hello message (For fun :)
+                text = 'Hello {{ name }}!'
+                template = Template(text)
+            
+                return jsonify({"result":template.render(name=res[2]+" "+res[3]), "token": token, "email": email, "user_id": res[1]})                           
             else:
                 return 'you shall not pass :) password is not valid' #неверный пароль, перелогинтесь
-            text = 'Hello {{ name }}!'
-            template = Template(text)
-            #return template.render(name=res[2]+" "+res[3])
-            return jsonify({"result":template.render(name=res[2]+" "+res[3]), "token": token, "email": email, "user_id": res[1]})
-
 
 @app.route("/user_info", methods=['POST']) #get info about the logged user
 def user_info():
