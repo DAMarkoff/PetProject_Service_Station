@@ -54,7 +54,7 @@ def shelf_exist(size_name):
         avail  = cursor.fetchone()
         cursor.close
 
-        if avail:
+        if avail[0]:
             return True
         return False    
 
