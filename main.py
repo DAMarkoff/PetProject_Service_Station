@@ -246,19 +246,27 @@ def new_st_ord():
         #if token exists in redis db
         if token_exist(email, token):
             
-            # if conn:
+            if conn:
                 
-            #     p_query = "SELECT availabe FROM warehouse WHERE size_id = '{0}'".format(size_id_by_name(size_name))
-            #     cursor.execute(p_query)
-            #     conn.commit()
-            #     avail  = cursor.fetchone()
-            #     cursor.close                
-            return size_id_by_name(size_name)
+                # p_query = "SELECT availabe FROM warehouse WHERE size_id = '{0}'".format(size_id_by_name(size_name))
+                # cursor.execute(p_query)
+                # conn.commit()
+                # avail  = cursor.fetchone()
+                # cursor.close
 
+                p_query = "SELECT size_id FROM sizes WHERE size_name = '{0}'".format(size_name)
+                cursor.execute(p_query)
+                conn.commit()
+                size_id_  = cursor.fetchone()
+                cursor.close
 
-            
+                return size_id_                 
+            # return size_id_by_name(size_name)
+
         else:
             return "token does not valid, please login" #redirect to /login
+
+
 
 if __name__ == '__main__':
     app.run()
