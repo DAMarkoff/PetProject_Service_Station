@@ -23,8 +23,8 @@ def home():
 
     return jsonify(resp)
 
-@app.route("/db", methods=['POST'])
-def db():
+@app.route("/reg", methods=['POST'])
+def reg():
     if request.method == 'POST':
         f_name = request.form.get('f_name')
         l_name = request.form.get('l_name')
@@ -36,17 +36,36 @@ def db():
 
         print('CONN =======')
 
-        base_data = (f_name, l_name, passw, phone, email)
-        p_query = "INSERT INTO users (first_name, last_name, password, phone, email) VALUES (%s, %s, %s, %s, %s)"
-        cursor.execute(p_query, base_data)
+        p_query = "SELECT user_id FROM users WHERE email = '{0}'".format(email)
+        cursor.execute(p_query)
         conn.commit()
-        cursor.close
+        usr_id_  = cursor.fetchone()
+        cursor.close        
 
-    return jsonify({"f_name": f_name,
-                    "l_name": l_name,
-                    "pass": passw,
-                    "phone": phone,
-                    "email": email})
+
+        if usr_id_[0] == "":
+            return "email exists"
+        else:
+            base_data = (f_name, l_name, passw, phone, email)
+            p_query = "INSERT INTO users (first_name, last_name, password, phone, email) VALUES (%s, %s, %s, %s, %s)"
+            cursor.execute(p_query, base_data)
+            conn.commit()
+            cursor.close
+
+            p_query = "SELECT user_id, first_name, last_name, email, phone, pass FROM users WHERE email = '{0}'".format(email)
+            cursor.execute(p_query)
+            res  = cursor.fetchone()
+            conn.commit()
+            cursor.close
+
+            result = ({"ID": res[0],
+                    "f_name": res[1],
+                    "l_name": res[2],
+                    "email": res[3],
+                    "phone": res[4],
+                    "passw": res[5]})        
+
+        return jsonify(result)
 
 
 @app.route("/add_users", methods=['POST'])
