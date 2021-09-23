@@ -156,13 +156,18 @@ def user_info():
         conn.commit()
         res  = cursor.fetchone()
         cursor.close
+
+        result = ({"ID": res[0],
+                "f_name": res[1],
+                "l_name": res[2],
+                "email": res[3],
+                "phone": res[4],
+                "passw": res[5]})
         
         if token == r.get(res[0]):
-            print(res)
+            return jsonify(result)
         else:
-            print('pass not')
-
-    return jsonify(res)
+            return "token no"
 
 if __name__ == '__main__':
     app.run()
