@@ -42,7 +42,7 @@ def size_id_by_name(size_name):
         size_id_  = cursor.fetchone()
         cursor.close
 
-        return size_id_[0]        
+        return size_id_       
 
 
 def shelf_exist(size_name):
