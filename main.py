@@ -43,7 +43,7 @@ def reg():
         cursor.close        
 
 
-        if usr_id_[0] == "":
+        if usr_id_[0] == None:
             return "email exists"
         else:
             base_data = (f_name, l_name, passw, phone, email)
