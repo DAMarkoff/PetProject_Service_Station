@@ -148,8 +148,8 @@ def login():
                 return 'you shall not pass :) password is not valid' #неверный пароль, перелогинтесь
             text = 'Hello {{ name }}!'
             template = Template(text)
-            return template.render(name=res[2]+" "+res[3])
-            #return jsonify({"token": token, "email": email, "user_id": res[1]})
+            #return template.render(name=res[2]+" "+res[3])
+            return jsonify({"result":template.render(name=res[2]+" "+res[3]), "token": token, "email": email, "user_id": res[1]})
 
 
 @app.route("/user_info", methods=['POST']) #get info about the logged user
