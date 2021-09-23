@@ -47,7 +47,7 @@ def reg():
             return "email exists"
         else:
             base_data = (f_name, l_name, passw, phone, email)
-            p_query = "INSERT INTO users (first_name, last_name, password, phone, email) VALUES (%s, %s, %s, %s, %s)"
+            p_query = "INSERT INTO users (first_name, last_name, pass, phone, email) VALUES (%s, %s, %s, %s, %s)"
             cursor.execute(p_query, base_data)
             conn.commit()
             cursor.close
@@ -75,10 +75,10 @@ def add_users():
     data = json.loads(params)
 
 #    print(params)
-#    print(data)
-#    print(data[])
+#   print(data)
+#   print(data[])
     return jsonify({"result": "OK"})
-#    if conn:
+#   if conn:
 #
 #        print('CONN =======')
 #
