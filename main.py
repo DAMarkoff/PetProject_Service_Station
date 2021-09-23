@@ -138,12 +138,13 @@ def login():
             token = ""
             if passw == res[0]: #если пароль верен
                 if r.exists(email) == 0: #если токен уже выдан
-                    token = str(uuid.uuid4()) #генерация и установка срока токена
-                    r.set(email, token)
+                    token = str(uuid.uuid4()) #генерация токена
+                    r.set(email, token, ex=600) #запись токена в redis bd, срок - 600 сек.
                 else:
-                    token = r.get(email) #возврат и пролонгация токена    
+                    token = r.get(email) #возврат токена
+                    r.set(email, token, ex=600) #пролонгация токена, срок - 600 сек.   
             else:
-                return 'you shall not pass :) password is not valid'
+                return 'you shall not pass :) password is not valid' #неверный пароль, перелогинтесь
 
             return jsonify({"token": token, "email": email, "user_id": res[1]})
 
@@ -190,7 +191,7 @@ def user_info():
         
         #if token does not exist in redis db    
         else:
-            return "token no" #redirect to /login
+            return "token does not valid, please login" #redirect to /login
 
 if __name__ == '__main__':
     app.run()
