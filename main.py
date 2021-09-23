@@ -48,7 +48,7 @@ def size_id_by_name(size_name):
 def shelf_exist(size_name):
     if conn:
 
-        p_query = "SELECT availabe FROM warehouse WHERE size_id = '{0}'".format(size_id_by_name(size_name))
+        p_query = "SELECT available FROM warehouse WHERE size_id = '{0}'".format(size_id_by_name(size_name))
         cursor.execute(p_query)
         conn.commit()
         avail  = cursor.fetchone()
