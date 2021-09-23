@@ -42,8 +42,8 @@ def reg():
         usr_id_  = cursor.fetchone()
         cursor.close        
 
-
-        if usr_id_[0] == None:
+        print(usr_id_[0])
+        if usr_id_[0] is None:
             return "email exists"
         else:
             base_data = (f_name, l_name, passw, phone, email)
