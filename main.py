@@ -281,7 +281,6 @@ def new_st_ord():
                                 VALUES('{0}', '{1}', '{2}', '{3}', '{4}');""".format(get_user_id(email), start_date, stop_date, size_id_by_name(size_name), shelf_id)
                     cursor.execute(p_query)
                     conn.commit()
-                    res  = cursor.fetchone()
                     cursor.close
 
                     #set shelf_id as not available
