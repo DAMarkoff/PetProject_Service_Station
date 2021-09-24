@@ -241,24 +241,46 @@ def user_info():
                              "phone": res[4],
                              "passw": res[5]})
             
-            p_query = "SELECT * FROM storage_orders WHERE user_id = '{0}'".format(2)
+
+            p_query = "SELECT * FROM storage_orders WHERE user_id = '{0}'".format(get_user_id(email))
             cursor.execute(p_query)
             conn.commit()
             res_  = cursor.fetchall()
             cursor.close
 
-            result_ord_ = []
-            for i in range(len(res_)):
-                result_ord_.append({"storage_order_id": res_[i][0],
-                                    "start_date": res_[i][2],
-                                    "stop_date": res_[i][3],
-                                    "order cost": "not implemented by now, please, come back later",
-                                    "shelf_id": res_[i][6]
-                                    })
+            if res_ is None:
+                result_order = 'There are no orders for storage from the user'
+            else:
+                result_order = []
+                for i in range(len(res_)):
+                    result_order.append({"storage_order_id": res_[i][0],
+                                        "start_date": res_[i][2],
+                                        "stop_date": res_[i][3],
+                                        "order cost": "not implemented by now, please, come back later",
+                                        "shelf_id": res_[i][6]
+                                        })
             
-            result_orders = {'storage orders info:': result_ord_}
             
-            return jsonify({'user info': result_users}, {'storage orders info:': result_ord_})
+            p_query = """SELECT u_veh_id, vehicle_name, size_name FROM user_vehicle 
+                         JOIN vehicle USING (vehicle_id)
+                         JOIN sizes USING (size_id) 
+                         WHERE user_id = '{0}'""".format(2)
+            cursor.execute(p_query)
+            conn.commit()
+            res_  = cursor.fetchall()
+            cursor.close
+
+            if res_ is None:
+                result_vehicle = 'The user does not have a vehicle'
+            else:
+                result_vehicle = []
+                for i in range(len(res_)):
+                    result_vehicle.append({'vehicle_id': res_[i][0],
+                                           'vehicle_type': res_[i][1],
+                                           'tire size': res_[i][2]
+                                          })
+
+            return jsonify({'user info': result_users}, {'storage orders info:': result_order}, {"user's vehicle": result_vehicle})
         
         #if token does not exist in redis db    
         else:
