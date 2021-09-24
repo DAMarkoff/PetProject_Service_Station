@@ -247,14 +247,16 @@ def user_info():
             res_  = cursor.fetchall()
             cursor.close
 
-            result_orders = []
+            result_ord_ = []
             for i in range(len(res_)):
-                result_orders.append({"storage_order_id": res_[i][0],
-                                      "start_date": res_[i][2],
-                                      "stop_date": res_[i][3],
-                                      "order cost": "not implemented by now, please, come back later",
-                                      "shelf_id": res_[i][6]
+                result_ord_.append({"storage_order_id": res_[i][0],
+                                    "start_date": res_[i][2],
+                                    "stop_date": res_[i][3],
+                                    "order cost": "not implemented by now, please, come back later",
+                                    "shelf_id": res_[i][6]
                                     })
+            
+            result_orders = {'storage orders info:': result_ord_}
             
             return jsonify(result_users, result_orders)
         
