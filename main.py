@@ -57,15 +57,15 @@ def size_id_by_name(size_name):
 def shelf_avail(size_name):
     if conn:
 
-        p_query = "SELECT available FROM warehouse WHERE size_id = '{0}'".format(size_id_by_name(size_name))
+        p_query = "SELECT shelf_id FROM warehouse WHERE size_id = '{0}' AND available = 'True'".format(size_id_by_name(size_name))
         cursor.execute(p_query)
         conn.commit()
         avail  = cursor.fetchone()
         cursor.close
 
-        if avail[0]:
+        if avail is not None:
             return True
-        return False 
+    return False 
 
 def shelf_id_by_size(size_name):
     if conn:
@@ -135,7 +135,7 @@ def reg():
         return jsonify(result)
 
 
-@app.route("/add_users", methods=['POST']) #reg many users - to do
+@app.route("/add_users", methods=['POST']) #reg many users at once - to do
 def add_users():
     pass
 
@@ -178,7 +178,7 @@ def all():
     return jsonify(result)
 
 
-@app.route("/login", methods=['POST']) #login :)
+@app.route("/login", methods=['POST']) #login :) suddenly
 def login():
     if request.method == 'POST':
         email = request.form.get('email')
@@ -186,17 +186,8 @@ def login():
 
     if conn:
 
-        print('CONN =======')
-
-        #get user_id from DB on email
-        p_query = "SELECT user_id FROM users WHERE email = '{0}'".format(email)
-        cursor.execute(p_query)
-        conn.commit()
-        usr_id_  = cursor.fetchone()
-        cursor.close  
-
         #if user does not exist
-        if usr_id_ is None:
+        if not user_exist(email):
             return "user does not exist"
 
         #if user exists in redis db
@@ -209,7 +200,7 @@ def login():
             
             token = ""
             if passw == res[0]: #если пароль верен
-                if r.exists(email) == 0: #если токен уже выдан
+                if r.exists(email) == 0: #если токена нет в redis db
                     token = str(uuid.uuid4()) #генерация токена
                     r.set(email, token, ex=600) #запись токена в redis bd, срок - 600 сек.
                 else:
@@ -222,7 +213,7 @@ def login():
             
                 return jsonify({"result":template.render(name=res[2]+" "+res[3]), "token": token, "email": email, "user_id": res[1]})                           
             else:
-                return 'you shall not pass :) password is not valid' #неверный пароль, перелогинтесь
+                return 'you shall not pass :) password is invalid' #неверный пароль. перелогиньтесь, товарищ майор ;)
 
 
 @app.route("/user_info", methods=['POST']) #get info about the logged user
