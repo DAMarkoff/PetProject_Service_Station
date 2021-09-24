@@ -113,9 +113,8 @@ def reg():
         if usr_id_ is not None:
             return "email exists" #note that the email exists and redirect to /reg
         else:
-            base_data = (f_name, l_name, passw, phone, email)
-            p_query = "INSERT INTO users (first_name, last_name, pass, phone, email) VALUES (%s, %s, %s, %s, %s)"
-            cursor.execute(p_query, base_data)
+            p_query = "INSERT INTO users (first_name, last_name, pass, phone, email) VALUES ({0}, {1}, {2}, {3}, {4})".format(f_name, l_name, passw, phone, email)
+            cursor.execute(p_query)
             conn.commit()
             cursor.close
 
@@ -140,17 +139,19 @@ def add_users():
     pass
 
 
-@app.route("/cl", methods=['GET']) #clear users DB
+@app.route("/cl", methods=['POST']) #clear users DB
 def cl():
+    if request.method == 'POST':
+        passw = request.form.get('pass')
+    
+    if passw == 'He_He_Boy!':
+        if conn:
+            p_query = "DELETE FROM users"
+            cursor.execute(p_query)
+            conn.commit()
+            cursor.close
 
-    if conn:
-        p_query = "DELETE FROM users"
-        cursor.execute(p_query)
-        conn.commit()
-        cursor.close
-
-    result = {'result':'OK'}
-    return jsonify(result)
+    return jsonify({'result':'OK or not OK?'})
 
 
 @app.route("/all", methods=['GET']) #get a list of all users
@@ -188,9 +189,9 @@ def login():
 
         #if user does not exist
         if not user_exist(email):
-            return "user does not exist"
+            return "The user does not exist. Please, register"
 
-        #if user exists in redis db
+        #if user exists
         else:      
             p_query = "SELECT pass, user_id, first_name, last_name FROM users WHERE email = '{0}'".format(email)
             cursor.execute(p_query)
@@ -228,6 +229,8 @@ def user_info():
     else:    
         #if token exists in redis db
         if token_exist(email, token):
+
+            #collecting the user's personal data from the users db
             p_query = "SELECT user_id, first_name, last_name, email, phone, pass FROM users WHERE email = '{0}'".format(email)
             cursor.execute(p_query)
             conn.commit()
@@ -242,6 +245,7 @@ def user_info():
                              "passw": res[5]})
             
 
+            #collecting the user's storage orders data from the storage_orders db
             p_query = "SELECT * FROM storage_orders WHERE user_id = '{0}'".format(get_user_id(email))
             cursor.execute(p_query)
             conn.commit()
@@ -261,6 +265,7 @@ def user_info():
                                         })
             
             
+            #collecting data about the user's vehicles from the user_vehicle, vehicle and sizes db's
             p_query = """SELECT u_veh_id, vehicle_name, size_name FROM user_vehicle 
                          JOIN vehicle USING (vehicle_id)
                          JOIN sizes USING (size_id) 
@@ -270,7 +275,8 @@ def user_info():
             res_  = cursor.fetchall()
             cursor.close
 
-            if res_ is None:
+            empty_result = []
+            if res_ == empty_result:
                 result_vehicle = 'The user does not have a vehicle'
             else:
                 result_vehicle = []
