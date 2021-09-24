@@ -234,15 +234,29 @@ def user_info():
             res  = cursor.fetchone()
             cursor.close
 
-            result = ({"ID": res[0],
-                    "f_name": res[1],
-                    "l_name": res[2],
-                    "email": res[3],
-                    "phone": res[4],
-                    "passw": res[5]})
+            result_users = ({"ID": res[0],
+                             "f_name": res[1],
+                             "l_name": res[2],
+                             "email": res[3],
+                             "phone": res[4],
+                             "passw": res[5]})
             
+            p_query = "SELECT * FROM storage_orders WHERE user_id = '{0}'".format(2)
+            cursor.execute(p_query)
+            conn.commit()
+            res_  = cursor.fetchall()
+            cursor.close
+
+            result_orders = []
+            for i in range(len(res_)):
+                result_orders.append({"storage_order_id": res_[i][0],
+                                      "start_date": res_[i][2],
+                                      "stop_date": res_[i][3],
+                                      "order cost": "not implemented by now, please, come back later",
+                                      "shelf_id": res_[i][6]
+                                    })
             
-            return jsonify(result)
+            return jsonify(result_users, result_orders)
         
         #if token does not exist in redis db    
         else:
