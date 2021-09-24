@@ -1,0 +1,277 @@
+{
+	"info": {
+		"_postman_id": "50c81922-9ecb-4d6a-a676-ecc5ab4a30e8",
+		"name": "Pet",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "test",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "name",
+							"value": "John",
+							"type": "text"
+						},
+						{
+							"key": "age",
+							"value": "30",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/home",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"home"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "f_name",
+							"value": "Adolf",
+							"type": "text"
+						},
+						{
+							"key": "l_name",
+							"value": "Gitler",
+							"type": "text"
+						},
+						{
+							"key": "passw",
+							"value": "qwerty",
+							"type": "text"
+						},
+						{
+							"key": "email",
+							"value": "foma@gitler.com",
+							"type": "text"
+						},
+						{
+							"key": "phone",
+							"value": "5557555581",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/reg",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"reg"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "clear users db",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/cl",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"cl"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "all users",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "23.88.52.139:5006/all",
+					"host": [
+						"23",
+						"88",
+						"52",
+						"139"
+					],
+					"port": "5006",
+					"path": [
+						"all"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"let jsonData = JSON.parse(responseBody)\r",
+							"pm.environment.set(\"token\", jsonData.token);\r",
+							"pm.environment.set(\"email\", jsonData.email);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "dan@dan.us",
+							"type": "text"
+						},
+						{
+							"key": "passw",
+							"value": "qwe",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add users",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/C:/QA/Serv/users.json"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/add_users",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"add_users"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "user_info",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "text"
+						},
+						{
+							"key": "email",
+							"value": "{{email}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/user_info",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"user_info"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "new_storage_order",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "{{email}}",
+							"type": "text"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "text"
+						},
+						{
+							"key": "size_name",
+							"value": "15",
+							"type": "text"
+						},
+						{
+							"key": "start_date",
+							"value": "2021.09.25",
+							"type": "text"
+						},
+						{
+							"key": "stop_date",
+							"value": "2021.09.27",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/new_storage_order",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"new_storage_order"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
