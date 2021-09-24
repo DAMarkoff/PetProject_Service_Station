@@ -109,9 +109,9 @@ def reg():
         usr_id_  = cursor.fetchone()
         cursor.close        
 
-        #print(usr_id_[0])
+
         if usr_id_ is not None:
-            return "email exists" #note that the email exists and redirect to /reg
+            return "The user with this email is already exists" #note that the email exists and redirect to /reg
         else:
             p_query = "INSERT INTO users (first_name, last_name, pass, phone, email) VALUES ({0}, {1}, {2}, {3}, {4})".format(f_name, l_name, passw, phone, email)
             cursor.execute(p_query)
@@ -277,7 +277,7 @@ def user_info():
 
             empty_result = []
             if res_ == empty_result:
-                result_vehicle = 'The user does not have a vehicle'
+                result_vehicle = 'The user does not have a vehicle. BUT! If suddenly the user wants to get a vehicle, call 8-800-THIS-IS-NOT-A-SCAM right now!'
             else:
                 result_vehicle = []
                 for i in range(len(res_)):
@@ -304,7 +304,7 @@ def new_st_ord():
 
     #if user exists
     if not user_exist(email):
-            return "user does not exist"
+            return "The user does not exist. Please, register"
     else:    
         #if token exists in redis db
         if token_exist(email, token):
