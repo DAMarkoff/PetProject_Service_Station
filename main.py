@@ -8,8 +8,6 @@ import redis
 
 app = Flask(__name__)
 r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode_responses=True)
-
-
 conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', host='159.69.151.133', port='5056')
 cursor = conn.cursor()
 
@@ -56,7 +54,6 @@ def size_id_by_name(size_name):
 
         return size_id_[0]       
 
-
 def shelf_avail(size_name):
     if conn:
 
@@ -91,6 +88,7 @@ def home():
             'Age': int(age) * 3}
 
     return jsonify(resp)
+
 
 @app.route("/reg", methods=['POST']) #reg new user
 def reg():
@@ -154,6 +152,7 @@ def cl():
     result = {'result':'OK'}
     return jsonify(result)
 
+
 @app.route("/all", methods=['GET']) #get a list of all users
 def all():
 
@@ -162,16 +161,20 @@ def all():
         cursor.execute(p_query)
         conn.commit()
         res  = cursor.fetchall()
-        result = []
-        for i in range(len(res)):
-            result.append({"ID": res[i][0],
-                        "f_name": res[i][1],
-                        "l_name": res[i][2],
-                        "phone": res[i][3],
-                        "email": res[i][4],
-                        "passw": res[i][5]})
-        
         cursor.close
+        
+        if res is not None:
+            result = []
+            for i in range(len(res)):
+                result.append({"ID": res[i][0],
+                            "f_name": res[i][1],
+                            "l_name": res[i][2],
+                            "phone": res[i][3],
+                            "email": res[i][4],
+                            "passw": res[i][5]})
+        else:
+            return 'There are no users in the DB'
+        
     return jsonify(result)
 
 
@@ -221,6 +224,7 @@ def login():
             else:
                 return 'you shall not pass :) password is not valid' #неверный пароль, перелогинтесь
 
+
 @app.route("/user_info", methods=['POST']) #get info about the logged user
 def user_info():
     if request.method == 'POST':
@@ -251,10 +255,10 @@ def user_info():
         
         #if token does not exist in redis db    
         else:
-            return "token does not valid, please login" #redirect to /login
+            return "The token is invalid, please log in" #redirect to /login
 
 
-@app.route("/new_storage_order", methods=['POST'])
+@app.route("/new_storage_order", methods=['POST']) #create new storage order
 def new_st_ord():
     if request.method == 'POST':
         token = request.form.get('token')
@@ -291,9 +295,9 @@ def new_st_ord():
 
 
             else:
-                return "Sorry, we have not storage you need"
+                return "Sorry, we do not have the storage you need"
         else:
-            return "token does not valid, please login" #redirect to /login
+            return "The token is invalid, please log in" #redirect to /login
 
     return jsonify({'shelf_id': shelf_id})
 
