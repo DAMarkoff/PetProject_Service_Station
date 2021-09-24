@@ -258,7 +258,7 @@ def user_info():
             
             result_orders = {'storage orders info:': result_ord_}
             
-            return jsonify(result_users, result_orders)
+            return jsonify({'user info': result_users}, {'storage orders info:': result_ord_})
         
         #if token does not exist in redis db    
         else:
