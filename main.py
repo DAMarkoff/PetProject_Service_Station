@@ -28,6 +28,18 @@ def user_exist(email):
             return False
     return True
 
+def get_user_id(email):
+    if conn:
+
+    #get user_id from DB on email
+        p_query = "SELECT user_id FROM users WHERE email = '{0}'".format(email)
+        cursor.execute(p_query)
+        conn.commit()
+        usr_id_  = cursor.fetchone()
+        cursor.close        
+
+    return usr_id_[0]
+
 def token_exist(email, token):
     if token == r.get(email):
         return True
@@ -42,10 +54,10 @@ def size_id_by_name(size_name):
         size_id_  = cursor.fetchone()
         cursor.close
 
-        return size_id_       
+        return size_id_[0]       
 
 
-def shelf_exist(size_name):
+def shelf_avail(size_name):
     if conn:
 
         p_query = "SELECT available FROM warehouse WHERE size_id = '{0}'".format(size_id_by_name(size_name))
@@ -54,9 +66,20 @@ def shelf_exist(size_name):
         avail  = cursor.fetchone()
         cursor.close
 
-        if avail[0] == True:
+        if avail[0]:
             return True
-        return False    
+        return False 
+
+def shelf_id_by_size(size_name):
+    if conn:
+
+        p_query = "SELECT MIN(shelf_id) FROM warehouse WHERE size_id = '{0}' AND available = 'True'".format(size_id_by_name(size_name))
+        cursor.execute(p_query)
+        conn.commit()
+        shelf_id_ = cursor.fetchone()
+        cursor.close
+
+        return shelf_id_[0]
 
 @app.route("/home", methods=['POST']) #for fun :)
 def home():
@@ -240,32 +263,40 @@ def new_st_ord():
         stop_date = request.form.get('stop_date')
         size_name = request.form.get('size_name')
 
+    #if user exists
     if not user_exist(email):
             return "user does not exist"
     else:    
         #if token exists in redis db
         if token_exist(email, token):
-            
-            if conn:
+
+            #is there the necessary free storage space
+            if shelf_avail(size_name):
+                shelf_id = shelf_id_by_size(size_name)
                 
-                # p_query = "SELECT availabe FROM warehouse WHERE size_id = '{0}'".format(size_id_by_name(size_name))
-                # cursor.execute(p_query)
-                # conn.commit()
-                # avail  = cursor.fetchone()
-                # cursor.close
+                if conn:
 
-                p_query = "SELECT size_id FROM sizes WHERE size_name = '{0}'".format(size_name)
-                cursor.execute(p_query)
-                conn.commit()
-                size_id_  = cursor.fetchone()
-                cursor.close
+                    #create storage order
+                    p_query = """INSERT INTO storage_orders (user_id, start_date, stop_date, size_id, shelf_id) 
+                                VALUES('{0}', '{1}', '{2}', '{3}', '{4}');""".format(get_user_id(email), start_date, stop_date, size_id_by_name(size_name), shelf_id)
+                    cursor.execute(p_query)
+                    conn.commit()
+                    res  = cursor.fetchone()
+                    cursor.close
 
-                return size_id_                 
-            # return size_id_by_name(size_name)
+                    #set shelf_id as not available
+                    p_query = """UPDATE warehouse SET available = False WHERE shelf_id = '{0}';""".format(shelf_id)
+                    cursor.execute(p_query)
+                    conn.commit()
+                    cursor.close
 
+
+            else:
+                return "Sorry, we have not storage you need"
         else:
             return "token does not valid, please login" #redirect to /login
 
+    return jsonify({'shelf_id': shelf_id})
 
 
 if __name__ == '__main__':
