@@ -157,7 +157,7 @@ def cl():
 def all():
 
     if conn:
-        p_query = "SELECT * FROM users"
+        p_query = "SELECT user_id, first_name, last_name, phone, email, pass FROM users"
         cursor.execute(p_query)
         conn.commit()
         res  = cursor.fetchall()
