@@ -1,0 +1,106 @@
+click==8.0.1
+Flask==2.0.1
+itsdangerous==2.0.1
+Jinja2==3.0.1
+MarkupSafe==2.0.1
+psycopg2-binary==2.9.1
+redis==3.5.3
+Werkzeug==2.0.1
+
+Serv: ssh user_105@23.88.52.139, password: 123
+DB: 159.69.151.133:5056, Database: user_20_db, Username: user_20, Password: 123
+
+
+/login [POST] - login user
+	input:  
+			email
+			pass
+		
+	output: 
+			Hello message
+			email
+			token
+			user_id
+
+	if email does not exist in DB: note
+	else:
+		if pass does not valid: note
+		else:
+			if token exists in the redis db: set new ex time and return the token
+			else: generate new token, add to the redis db and return it
+
+/reg [POST] - register a new user
+	input: 
+			f_name
+			l_name
+			email
+			phone
+			passw
+		   
+	output: 
+			user_id
+			f_name
+			l_name
+			email
+			phone
+			passw
+			
+	if email exisis in the DB: note and redirect to /reg
+	else: add new user to the DB and return info from the DB with user_id
+	
+/cl [GET] - clear users DB
+
+/all [GET] - get a list of all users
+	output:
+			user_id
+			f_name
+			l_name
+			email
+			phone
+			passw
+	
+	if there are no users in the DB: note
+
+/user_info [POST] - get info about the logged user
+	input: 
+			email
+			token
+
+	output:
+			user_id
+			f_name
+			l_name
+			email
+			phone
+			passw
+	
+	if email does not exist in the DB: return "user is not exist" and redirect to /reg
+	else: 	
+		if the token does not exist in redis db: redirect to /login
+		else: 
+			return info
+	
+/new_storage_order [POST] - create new storage order
+	input:
+			token
+			email
+			start_date
+			stop_date
+			size_name
+	
+	output:
+			email
+			start_date
+			stop_date
+			size_id
+			shelf_id
+			st_ord_id
+
+	if email does not exist in the DB: return "user is not exist" and redirect to /reg
+	else: 
+		if the token does not exist in redis db: redirect to /login
+		else: 
+			if there is no available shelf of the size needed in the warehouse: note
+			else:			
+				add in the "storage_order" base info about the storage order
+				update in the "warehouse" base availability of the occupied storage place
