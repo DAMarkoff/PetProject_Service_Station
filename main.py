@@ -5,6 +5,7 @@ import psycopg2
 import uuid
 import json
 import redis
+import datetime
 
 app = Flask(__name__)
 r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode_responses=True)
@@ -383,11 +384,11 @@ def change_storage_order():
                             return 'The stop date can not be less than the start date'
 
                     if start_date is not None and stop_date is None:
-                        if start_date > stop_date_db:
+                        if datetime.datetime.strptime(start_date, '%Y-%m-%d') > stop_date_db:
                             return 'The start date can not be greater than the stop date'
 
                     if start_date is None and stop_date is not None:        
-                        if stop_date < start_date_db:
+                        if datetime.datetime.strptime(stop_date, '%Y-%m-%d') < start_date_db:
                             return 'The stop date can not be less than the start date'                        
 
                     if start_date is None:
