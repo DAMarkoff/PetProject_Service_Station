@@ -365,7 +365,7 @@ def change_storage_order():
             res_ = cursor.fetchone()
             cursor.close
 
-            start_date_db, stop_date_db, size_id_db, st_ord_cost_db, shelf_id_db= res_[0], res_[1], res_[2], res_[3], res_[4]
+            start_date_db, stop_date_db, size_id_db, st_ord_cost_db, shelf_id_db, shelf_id = res_[0], res_[1], res_[2], res_[3], res_[4], None
 
             if start_date is None:
                 start_date = start_date_db

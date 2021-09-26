@@ -106,3 +106,31 @@ ToDo: update the token's TTL in the redis db after each user action
 			else:			
 				add in the "storage_order" base info about the storage order
 				update in the "warehouse" base availability of the occupied storage place
+				
+/change_storage_order [POST] - suddenly, change storage order				
+	input:
+			st_ord_id 			- required
+			email				- required
+			token				- required
+			start_date			- optional
+			stop_date			- optional
+			st_ord_cost			- optional
+			size_id				- optional
+			
+	output:
+			st_ord_id
+			start_date
+			stop_date
+			size_id
+			st_ord_cost
+			shelf_id
+	
+	if email does not exist in the DB: return "user is not exist" and redirect to /reg
+	else: 
+		if the token does not exist in redis db: redirect to /login
+		else: 
+			if optional data is None: take the data needed from DB
+			if size_id is need to be changed make sure that the warehouse has an availabe shelf
+			update data
+			request updated data from DB
+			return data
