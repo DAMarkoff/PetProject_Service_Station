@@ -392,7 +392,7 @@ def change_storage_order():
                 else: 
                     return 'Sorry, no connection with the DB'
 
-            if shelf_id == 0:
+            if shelf_id == 0:   
                 shelf_id = shelf_id_db
 
             #update data in the DB
@@ -410,7 +410,7 @@ def change_storage_order():
             #get new date from the DB
             if conn:
 
-                p_query = """SELECT start_date, stop_date, size_id, st_ord_cost, shelf_id FROM srotage_orders WHERE st_ord_id = '{0}';""".format(st_ord_id)
+                p_query = """SELECT start_date, stop_date, size_id, st_ord_cost, shelf_id FROM storage_orders WHERE st_ord_id = '{0}';""".format(st_ord_id)
                 cursor.execute(p_query)
                 conn.commit()
                 res_ = cursor.fetchone()

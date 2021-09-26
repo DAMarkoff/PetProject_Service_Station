@@ -31,6 +31,7 @@ ToDo: update the token's TTL in the redis db after each user action
 			if token exists in the redis db: set new ex time and return the token
 			else: generate new token, add to the redis db and return it
 
+
 /reg [POST] - register a new user
 	input: 
 			f_name
@@ -49,8 +50,10 @@ ToDo: update the token's TTL in the redis db after each user action
 			
 	if email exisis in the DB: note and redirect to /reg
 	else: add new user to the DB and return info from the DB with user_id
+
 	
 /cl [GET] - clear users DB
+
 
 /all [GET] - get a list of all users
 	output:
@@ -62,6 +65,7 @@ ToDo: update the token's TTL in the redis db after each user action
 			passw
 	
 	if there are no users in the DB: note
+
 
 /user_info [POST] - get info about the logged user
 	input: 
@@ -81,6 +85,7 @@ ToDo: update the token's TTL in the redis db after each user action
 		if the token does not exist in redis db: redirect to /login
 		else: 
 			return info
+
 	
 /new_storage_order [POST] - create new storage order
 	input:
@@ -106,6 +111,7 @@ ToDo: update the token's TTL in the redis db after each user action
 			else:			
 				add in the "storage_order" base info about the storage order
 				update in the "warehouse" base availability of the occupied storage place
+
 				
 /change_storage_order [POST] - suddenly, change storage order				
 	input:
