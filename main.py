@@ -373,14 +373,23 @@ def change_storage_order():
                 if get_user_id(email) != user_id_db:
                     return 'Ouch! This is not your storage order!'
                 else:
-
-                    #check dates
-                    if start_date > stop_date:
-                        return 'The start date can not be greater than the stop date'
-                    if stop_date < start_date:
-                        return 'The stop date can not be less than the start date'
-
+                    
                     #what data should be changed
+                    #check dates
+                    if start_date is not None and stop_date is not None:
+                        if start_date > stop_date:
+                            return 'The start date can not be greater than the stop date'
+                        if stop_date < start_date:
+                            return 'The stop date can not be less than the start date'
+
+                    if start_date is not None and stop_date is None:
+                        if start_date > stop_date_db:
+                            return 'The start date can not be greater than the stop date'
+
+                    if start_date is None and stop_date is not None:        
+                        if stop_date < start_date_db:
+                            return 'The stop date can not be less than the start date'                        
+
                     if start_date is None:
                         start_date = start_date_db
                     if stop_date is None:
