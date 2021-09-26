@@ -53,7 +53,7 @@ def size_id_by_name(size_name):
         size_id_  = cursor.fetchone()
         cursor.close
 
-        if size_id_[0] is None:
+        if size_id_ is None:
             return 'Unknown'
         return size_id_[0]   
 
@@ -66,7 +66,7 @@ def vehicle_id_by_name(vehicle_name):
         vehicle_id_  = cursor.fetchone()
         cursor.close
 
-        if vehicle_id_[0] is None:
+        if vehicle_id_ is None:
             return 'Unknown'
         return vehicle_id_[0]             
 
