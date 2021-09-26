@@ -337,5 +337,19 @@ def new_st_ord():
     return jsonify({'shelf_id': shelf_id})
 
 
+@app.route("/change_storage_order", methods=['UPDATE']) #get info about the logged user
+def change_storage_order():
+    if request.method == 'POST':
+        st_ord_id = request.form.get('st_ord_id')
+        email = request.form.get('email')
+        start_date = request.form.get('start_date')
+        stop_date = request.form.get('stop_date')
+        cost = request.form.get('cost')
+        shelf_id = request.form.get('shelf_id')
+        size_id = request.form.get('size_id')
+
+    print(st_ord_id, email, start_date, stop_date, cost, shelf_id, size_id)
+
+
 if __name__ == '__main__':
     app.run()
