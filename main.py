@@ -253,7 +253,7 @@ def user_info():
                     result_order.append({"storage_order_id": res_[i][0],
                                         "start_date": res_[i][2],
                                         "stop_date": res_[i][3],
-                                        "order cost": "not implemented by now, please, come back later",
+                                        "order cost": res_[i][5],
                                         "shelf_id": res_[i][6]
                                         })
             
