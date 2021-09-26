@@ -384,7 +384,7 @@ def change_storage_order():
                             return 'The stop date can not be less than the start date'
 
                     if start_date is not None and stop_date is None:
-                        if datetime.date.strptime(start_date, '%Y-%m-%d') > stop_date_db:
+                        if datetime.strptime(start_date, '%Y-%m-%d') > stop_date_db:
                             return 'The start date can not be greater than the stop date'
 
                     if start_date is None and stop_date is not None:        
