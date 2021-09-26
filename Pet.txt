@@ -15,8 +15,8 @@ ToDo: update the token's TTL in the redis db after each user action
 
 /login [POST] - login user
 	input:  
-			email
-			pass
+			email			- required
+			pass			- required
 		
 	output: 
 			Hello message
@@ -34,11 +34,11 @@ ToDo: update the token's TTL in the redis db after each user action
 
 /reg [POST] - register a new user
 	input: 
-			f_name
-			l_name
-			email
-			phone
-			passw
+			f_name			- required
+			l_name			- required
+			email			- required
+			phone			- required
+			passw			- required
 		   
 	output: 
 			user_id
@@ -58,7 +58,7 @@ ToDo: update the token's TTL in the redis db after each user action
 /all [GET] - get a list of all users
 	output:
 			user_id
-			f_name
+			f_name			
 			l_name
 			email
 			phone
@@ -69,8 +69,8 @@ ToDo: update the token's TTL in the redis db after each user action
 
 /user_info [POST] - get info about the logged user
 	input: 
-			email
-			token
+			email			- required
+			token			- required
 
 	output:
 			user_id
@@ -89,11 +89,11 @@ ToDo: update the token's TTL in the redis db after each user action
 	
 /new_storage_order [POST] - create new storage order
 	input:
-			token
-			email
-			start_date
-			stop_date
-			size_name
+			token			- required
+			email			- required
+			start_date		- required
+			stop_date		- required
+			size_name		- required
 	
 	output:
 			email
@@ -135,8 +135,10 @@ ToDo: update the token's TTL in the redis db after each user action
 	else: 
 		if the token does not exist in redis db: redirect to /login
 		else: 
-			if optional data is None: take the data needed from DB
-			if size_id is need to be changed make sure that the warehouse has an availabe shelf
-			update data
-			request updated data from DB
-			return data
+			if the provided dates are invalid: note
+			else:
+				if optional data is None: take the data needed from DB
+				if size_id is need to be changed make sure that the warehouse has an availabe shelf
+				update data
+				request updated data from DB
+				return data

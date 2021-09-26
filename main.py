@@ -249,7 +249,7 @@ def user_info():
                 result_order = 'There are no orders for storage from the user'
             else:
                 result_order = []
-                for i in range(len(res_)):
+                for i in range(len(res_)): #does the user need the size_id or size_name data?
                     result_order.append({"storage_order_id": res_[i][0],
                                         "start_date": res_[i][2],
                                         "stop_date": res_[i][3],
