@@ -378,28 +378,29 @@ def change_storage_order():
                 if size_id is None:
                     size_id = size_id_db
                 else:
-
-                    p_query = """SELECT shelf_id FROM warehouse WHERE available = 'True' AND size_id = '{0}';""".format(size_id)
-                    cursor.execute(p_query)
-                    conn.commit()
-                    shelf_avail = cursor.fetchone()
-                    cursor.close
-
-                    if shelf_avail is not None and size_id != size_id_db:
-                        shelf_id = shelf_avail[0]
-
-                        p_query = """UPDATE warehouse SET available = 'True' WHERE shelf_id = '{0}';""".format(shelf_id_db)
+                    
+                    if size_id != size_id_db:
+                        p_query = """SELECT shelf_id FROM warehouse WHERE available = 'True' AND size_id = '{0}';""".format(size_id)
                         cursor.execute(p_query)
                         conn.commit()
+                        shelf_avail = cursor.fetchone()
                         cursor.close
+                    
+                        if shelf_avail is not None:
+                            shelf_id = shelf_avail[0]
 
-                        p_query = """UPDATE warehouse SET available = 'False' WHERE shelf_id = '{0}';""".format(shelf_id)
-                        cursor.execute(p_query)
-                        conn.commit()
-                        cursor.close
+                            p_query = """UPDATE warehouse SET available = 'True' WHERE shelf_id = '{0}';""".format(shelf_id_db)
+                            cursor.execute(p_query)
+                            conn.commit()
+                            cursor.close
 
-                    else:
-                        return 'Sorry, we do not have the storage you need'
+                            p_query = """UPDATE warehouse SET available = 'False' WHERE shelf_id = '{0}';""".format(shelf_id)
+                            cursor.execute(p_query)
+                            conn.commit()
+                            cursor.close
+
+                        else:
+                            return 'Sorry, we do not have the storage you need'
 
                 if shelf_id == 0:   
                     shelf_id = shelf_id_db
