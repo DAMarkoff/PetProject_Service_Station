@@ -54,7 +54,7 @@ def size_id_by_name(size_name):
         cursor.close
 
         if size_id_[0] is None:
-            return 'Attention!!! Unknown tire size, add the tire size data to the sizes DB'
+            return 'Unknown'
         return size_id_[0]   
 
 def vehicle_id_by_name(vehicle_name):
@@ -67,7 +67,7 @@ def vehicle_id_by_name(vehicle_name):
         cursor.close
 
         if vehicle_id_[0] is None:
-            return 'Attention!!! Unknown type of vehicle, add the vehicle type data to the vehicle DB'
+            return 'Unknown'
         return vehicle_id_[0]             
 
 def shelf_avail(size_name):
@@ -484,8 +484,11 @@ def new_user_vehicle():
     size_id = size_id_by_name(size_name)
     vehicle_id = vehicle_id_by_name(vehicle_name)
 
+    if size_id == 'Unknown':
+        return 'Attention!!! Unknown tire size, add the tire size data to the sizes DB'
 
-
+    if vehicle_id == 'Unknown':
+        return 'Unknown'
 
     
     #if user exists
