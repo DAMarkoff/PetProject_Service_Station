@@ -339,7 +339,7 @@ def new_st_ord():
     return jsonify({'shelf_id': shelf_id})
 
 
-@app.route("/change_storage_order", methods=['PATCH']) #change info in the storage order
+@app.route("/change_storage_order", methods=['PATCH']) #change the data in the storage order
 def change_storage_order():
     if request.method == 'PATCH':
         st_ord_id = request.form.get('st_ord_id')
@@ -360,67 +360,76 @@ def change_storage_order():
         if token_exist(email, token):
 
             if conn:
-
-                p_query = """SELECT start_date, stop_date, size_id, st_ord_cost, shelf_id FROM storage_orders WHERE st_ord_id = '{0}';""".format(st_ord_id)
+                #get the initial data of the storage order
+                p_query = """SELECT start_date, stop_date, size_id, st_ord_cost, shelf_id, user_id FROM storage_orders WHERE st_ord_id = '{0}';""".format(st_ord_id)
                 cursor.execute(p_query)
                 conn.commit()
                 res_ = cursor.fetchone()
                 cursor.close
 
-                start_date_db, stop_date_db, size_id_db, st_ord_cost_db, shelf_id_db, shelf_id = res_[0], res_[1], res_[2], res_[3], res_[4], 0
+                start_date_db, stop_date_db, size_id_db, st_ord_cost_db, shelf_id_db, user_id_db, shelf_id = res_[0], res_[1], res_[2], res_[3], res_[4], res_[5], 0 
 
-                if start_date is None:
-                    start_date = start_date_db
-                if stop_date is None:
-                    stop_date = stop_date_db
-                if st_ord_cost is None:
-                    st_ord_cost = st_ord_cost_db
-                if size_id is None:
-                    size_id = size_id_db
+                #verify, that the storage order is created by user
+                if get_user_id(email) != user_id_db:
+                    return 'Ouch! This is not your storage order!'
                 else:
-
-                    if int(size_id) != size_id_db:
-                        p_query = """SELECT shelf_id FROM warehouse WHERE available = 'True' AND size_id = '{0}';""".format(size_id)
-                        cursor.execute(p_query)
-                        conn.commit()
-                        shelf_avail = cursor.fetchone()
-                        cursor.close
-                    
-                        if shelf_avail is not None:
-                            shelf_id = shelf_avail[0]
-
-                            p_query = """UPDATE warehouse SET available = 'True' WHERE shelf_id = '{0}';""".format(shelf_id_db)
+                    #what data should be changed
+                    if start_date is None:
+                        if start_date > stop_date:
+                            return 'The start date can not be greater than the stop date'
+                        start_date = start_date_db
+                    if stop_date is None:
+                        if stop_date < start_date:
+                            return 'The stop date can not be less than the start date'
+                        stop_date = stop_date_db
+                    if st_ord_cost is None:
+                        st_ord_cost = st_ord_cost_db
+                    if size_id is None:
+                        size_id = size_id_db
+                    else:
+                        #if the tire size data needs to be changed
+                        if int(size_id) != size_id_db:
+                            p_query = """SELECT MIN(shelf_id) FROM warehouse WHERE available = 'True' AND size_id = '{0}';""".format(size_id)
                             cursor.execute(p_query)
                             conn.commit()
+                            shelf_avail = cursor.fetchone()
                             cursor.close
+                        
+                            if shelf_avail is not None:
+                                shelf_id = shelf_avail[0]
 
-                            p_query = """UPDATE warehouse SET available = 'False' WHERE shelf_id = '{0}';""".format(shelf_id)
-                            cursor.execute(p_query)
-                            conn.commit()
-                            cursor.close
+                                p_query = """UPDATE warehouse SET available = 'True' WHERE shelf_id = '{0}';""".format(shelf_id_db)
+                                cursor.execute(p_query)
+                                conn.commit()
+                                cursor.close
 
-                        else:
-                            return 'Sorry, we do not have the storage you need'
+                                p_query = """UPDATE warehouse SET available = 'False' WHERE shelf_id = '{0}';""".format(shelf_id)
+                                cursor.execute(p_query)
+                                conn.commit()
+                                cursor.close
 
-                if shelf_id == 0:   
-                    shelf_id = shelf_id_db
+                            else:
+                                return 'Sorry, we do not have the storage you need'
 
-                #update data in the DB
+                    if shelf_id == 0:   
+                        shelf_id = shelf_id_db
 
-                p_query = """UPDATE storage_orders SET start_date = '{0}', stop_date = '{1}', size_id = '{2}', st_ord_cost = '{3}', shelf_id = '{4}' 
-                                WHERE st_ord_id = '{5}';""".format(start_date, stop_date, size_id, st_ord_cost, shelf_id, st_ord_id)
-                cursor.execute(p_query)
-                conn.commit()
-                cursor.close
+                    #update data in the DB
 
-                #get new date from the DB
-                p_query = """SELECT start_date, stop_date, size_id, st_ord_cost, shelf_id FROM storage_orders WHERE st_ord_id = '{0}';""".format(st_ord_id)
-                cursor.execute(p_query)
-                conn.commit()
-                res_ = cursor.fetchone()
-                cursor.close
+                    p_query = """UPDATE storage_orders SET start_date = '{0}', stop_date = '{1}', size_id = '{2}', st_ord_cost = '{3}', shelf_id = '{4}' 
+                                    WHERE st_ord_id = '{5}';""".format(start_date, stop_date, size_id, st_ord_cost, shelf_id, st_ord_id)
+                    cursor.execute(p_query)
+                    conn.commit()
+                    cursor.close
 
-                result = ({'storage_order': st_ord_id, 'start_date': res_[0], 'stop_date': res_[1], 'size_id': res_[2], 'size_id_db': size_id_db, 'storage_order_cost': res_[3], 'shelf_id': res_[4], 'shelf_id_db': shelf_id_db})
+                    #get new date from the DB
+                    p_query = """SELECT start_date, stop_date, size_id, st_ord_cost, shelf_id FROM storage_orders WHERE st_ord_id = '{0}';""".format(st_ord_id)
+                    cursor.execute(p_query)
+                    conn.commit()
+                    res_ = cursor.fetchone()
+                    cursor.close
+
+                    result = ({'storage_order': st_ord_id, 'start_date': res_[0], 'stop_date': res_[1], 'size_id': res_[2], 'size_id_db': size_id_db, 'storage_order_cost': res_[3], 'shelf_id': res_[4], 'shelf_id_db': shelf_id_db})
             
             else: 
                 return 'Could not connect to the DB'
