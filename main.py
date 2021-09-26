@@ -328,6 +328,8 @@ def new_st_ord():
                     conn.commit()
                     cursor.close
 
+                else: 
+                    return 'Sorry, no connection with the DB'
 
             else:
                 return "Sorry, we do not have the storage you need"
@@ -337,22 +339,93 @@ def new_st_ord():
     return jsonify({'shelf_id': shelf_id})
 
 
-@app.route("/change_storage_order", methods=['PATCH']) #get info about the logged user
+@app.route("/change_storage_order", methods=['PATCH']) #change info in the storage order
 def change_storage_order():
     if request.method == 'PATCH':
         st_ord_id = request.form.get('st_ord_id')
+        token = request.form.get('token')
         email = request.form.get('email')
-        # start_date = request.form.get('start_date')
-        # stop_date = request.form.get('stop_date')
-        # cost = request.form.get('cost')
-        # shelf_id = request.form.get('shelf_id')
-        # size_id = request.form.get('size_id')
+        start_date = request.form.get('start_date')
+        stop_date = request.form.get('stop_date')
+        st_ord_cost = request.form.get('cost')
+        size_id = request.form.get('size_id')
+    else:
+        return 'Ouch! Not allowed method!'
 
-    if st_ord_id is None:
-        st_ord_id = ''
-    if email is None:
-        email = ''
-    result = ({'st_ord_id': st_ord_id, 'email': email})
+    #if user exists
+    if not user_exist(email):
+        return "The user does not exist. Please, register"
+    else:    
+        #if token exists in redis db
+        if token_exist(email, token):
+
+            p_query = """SELECT start_date, stop_date, size_id, st_ord_cost, shelf_id FROM storage_orders WHERE st_ord_id = '{0}';""".format(st_ord_id)
+            cursor.execute(p_query)
+            conn.commit()
+            res_ = cursor.fetchone()
+            cursor.close
+
+            start_date_db, stop_date_db, size_id_db, st_ord_cost_db, shelf_id_db= res_[0], res_[1], res_[2], res_[3], res_[4]
+
+            if start_date is None:
+                start_date = start_date_db
+            if stop_date is None:
+                stop_date = stop_date_db
+            if st_ord_cost is None:
+                st_ord_cost = st_ord_cost_db
+            if size_id is None:
+                size_id = size_id_db
+            else:
+                if conn:
+
+                    p_query = """SELECT shelf_id FROM warehouse WHERE available = 'TRUE' AND size_id = '{0}';""".format(size_id)
+                    cursor.execute(p_query)
+                    conn.commit()
+                    shelf_avail = cursor.fetchone()
+                    cursor.close
+
+                    if shelf_avail is not None:
+                        shelf_id = shelf_avail[0]
+                    else:
+                        return 'Sorry, we do not have the storage you need'
+                    
+                else: 
+                    return 'Sorry, no connection with the DB'
+
+            if shelf_id is None:
+                shelf_id = shelf_id_db
+
+            #update data in the DB
+            if conn:
+
+                p_query = """UPDATE storage_orders SET start_date = '{0}', stop_date = '{1}', size_id = '{2}', st_ord_cost = '{3}', shelf_id = '{4}' 
+                             WHERE st_ord_id = '{5}';""".format(start_date, stop_date, size_id, st_ord_cost, shelf_id, st_ord_id)
+                cursor.execute(p_query)
+                conn.commit()
+                cursor.close
+            
+            else: 
+                return 'Sorry, no connection with the DB'
+
+            #get new date from the DB
+            if conn:
+
+                p_query = """SELECT start_date, stop_date, size_id, st_ord_cost, shelf_id FROM srotage_orders WHERE st_ord_id = '{0}';""".format(st_ord_id)
+                cursor.execute(p_query)
+                conn.commit()
+                res_ = cursor.fetchone()
+                cursor.close
+            
+            else: 
+                return 'Sorry, no connection with the DB'
+
+            result = ({'storage_order': st_ord_id, 'start_date': res_[0], 'stop_date': res_[1], 'size_id': res_[2], 'storage_order_cost': res_[3], 'shelf_id': res_[4]})
+        
+        
+        else:
+            return "The token is invalid, please log in" #redirect to /login    
+
+    # result = ({'st_ord_id': st_ord_id, 'email': email})
     # result = ({'st_ord_id': st_ord_id, 'email': email, {start_date}: start_date, 'stop_date': stop_date, 'cost': cost, 'shelf_id': shelf_id, 'size_id': size_id})
     # print(st_ord_id, email, start_date, stop_date, cost, shelf_id, size_id)
     return jsonify(result)
