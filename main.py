@@ -262,7 +262,7 @@ def user_info():
             p_query = """SELECT u_veh_id, vehicle_name, size_name FROM user_vehicle 
                          JOIN vehicle USING (vehicle_id)
                          JOIN sizes USING (size_id) 
-                         WHERE user_id = '{0}'""".format(2)
+                         WHERE user_id = '{0}'""".format(get_user_id(email))
             cursor.execute(p_query)
             conn.commit()
             res_  = cursor.fetchall()
