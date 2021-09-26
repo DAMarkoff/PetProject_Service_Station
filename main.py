@@ -378,8 +378,8 @@ def change_storage_order():
                 if size_id is None:
                     size_id = size_id_db
                 else:
-                    
-                    if size_id != size_id_db:
+
+                    if int(size_id) != size_id_db:
                         p_query = """SELECT shelf_id FROM warehouse WHERE available = 'True' AND size_id = '{0}';""".format(size_id)
                         cursor.execute(p_query)
                         conn.commit()
