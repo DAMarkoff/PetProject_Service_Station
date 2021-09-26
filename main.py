@@ -488,7 +488,7 @@ def new_user_vehicle():
         return 'Attention!!! Unknown tire size, add the tire size data to the sizes DB'
 
     if vehicle_id == 'Unknown':
-        return 'Unknown'
+        return 'Attention!!! Unknown type of the vehicle, add the vehicle type data to the sizes DB'
 
     
     #if user exists
@@ -502,7 +502,7 @@ def new_user_vehicle():
 
             if conn:
 
-                p_query = """INSERT INTO user_vehicle (user_id, vehicle_id, size_id) VALUES ('{0}', '{1}, '{2}'):'""".format(user_id, vehicle_id, size_id)
+                p_query = """INSERT INTO user_vehicle (user_id, vehicle_id, size_id) VALUES ('{0}', '{1}', '{2}'):'""".format(user_id, vehicle_id, size_id)
                 cursor.execute(p_query)
                 conn.commit()
                 cursor.close
