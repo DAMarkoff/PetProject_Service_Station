@@ -347,7 +347,7 @@ def change_storage_order():
         email = request.form.get('email')
         start_date = request.form.get('start_date')
         stop_date = request.form.get('stop_date')
-        st_ord_cost = request.form.get('cost')
+        st_ord_cost = request.form.get('st_ord_cost')
         size_id = request.form.get('size_id')
     else:
         return 'Ouch! Not allowed method!'
