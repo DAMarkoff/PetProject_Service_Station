@@ -53,7 +53,18 @@ def size_id_by_name(size_name):
         size_id_  = cursor.fetchone()
         cursor.close
 
-        return size_id_[0]       
+        return size_id_[0]   
+
+def vehicle_id_by_name(vehicle_name):
+    if conn:
+
+        p_query = "SELECT vehicle_id FROM vehicle WHERE vehicle_name = '{0}'".format(vehicle_name)
+        cursor.execute(p_query)
+        conn.commit()
+        vehicle_id_  = cursor.fetchone()
+        cursor.close
+
+        return vehicle_id_[0]             
 
 def shelf_avail(size_name):
     if conn:
@@ -451,6 +462,48 @@ def change_storage_order():
             return "The token is invalid, please log in" #redirect to /login    
 
     return jsonify(result)
+
+
+@app.route("/new_user_vehicle", methods=['POST']) #add new user vehicle :)
+def new_user_vehicle():
+    if request.method == 'PATCH':
+        token = request.form.get('token')
+        email = request.form.get('email')
+        vehicle_name = request.form.get('vehicle_name')
+        size_name = request.form.get('size_name')
+
+    if token is None or email is None or vehicle_name is None or size_name is None:
+        return 'The token, email, vehicle_name and size_name data are required'
+
+    #get needed data
+    user_id = get_user_id(email)
+    size_id = size_id_by_name(size_name)
+    vehicle_id = vehicle_id_by_name(vehicle_name)
+    
+    #if user exists
+    if not user_exist(email):
+        return 'The user does not exist. Please, register'
+    else:
+        #if token exists in redis db
+        if not token_exist(email, token):
+            return 'The token is invalid, please log in' #redirect to /login    
+        else:
+
+            if conn:
+
+                p_query = """INSERT INTO user_vehicle (user_id, vehicle_id, size_id) VALUES ('{0}', '{1}, '{2}'):'""".format(user_id, vehicle_id, size_id)
+                cursor.execute(p_query)
+                conn.commit()
+                cursor.close
+
+                p_query = """SELECT MAX(u_veh_id) FROM user_vehicle WHERE user_id = '{0}'""".format(user_id)
+                cursor.execute(p_query)
+                conn.commit()
+                res_ = cursor.fetchone()
+                cursor.close
+
+    return {'new_vehicle_id': res_[0], 'vehicle_name': vehicle_name, 'tire_size': size_name}
+
 
 if __name__ == '__main__':
     app.run()
