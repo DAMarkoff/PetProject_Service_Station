@@ -385,7 +385,7 @@ def change_storage_order():
                     shelf_avail = cursor.fetchone()
                     cursor.close
 
-                    if shelf_avail is not None and shelf_id != shelf_id_db:
+                    if shelf_avail is not None and size_id != size_id_db:
                         shelf_id = shelf_avail[0]
 
                         p_query = """UPDATE warehouse SET available = 'True' WHERE shelf_id = '{0}';""".format(shelf_id_db)
