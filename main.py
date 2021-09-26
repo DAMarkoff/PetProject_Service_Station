@@ -348,8 +348,9 @@ def change_storage_order():
         shelf_id = request.form.get('shelf_id')
         size_id = request.form.get('size_id')
 
+    result = {'st_ord_id': st_ord_id, 'email': email, {start_date}: start_date, 'stop_date': stop_date, 'cost': cost, 'shelf_id': shelf_id, 'size_id': size_id}
     print(st_ord_id, email, start_date, stop_date, cost, shelf_id, size_id)
-
+    return jsonify(result)
 
 if __name__ == '__main__':
     app.run()
