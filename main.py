@@ -342,15 +342,19 @@ def change_storage_order():
     if request.method == 'PATCH':
         st_ord_id = request.form.get('st_ord_id')
         email = request.form.get('email')
-        start_date = request.form.get('start_date')
-        stop_date = request.form.get('stop_date')
-        cost = request.form.get('cost')
-        shelf_id = request.form.get('shelf_id')
-        size_id = request.form.get('size_id')
+        # start_date = request.form.get('start_date')
+        # stop_date = request.form.get('stop_date')
+        # cost = request.form.get('cost')
+        # shelf_id = request.form.get('shelf_id')
+        # size_id = request.form.get('size_id')
 
-    # result = (})
-    result = ({'st_ord_id': st_ord_id, 'email': email, {start_date}: start_date, 'stop_date': stop_date, 'cost': cost, 'shelf_id': shelf_id, 'size_id': size_id})
-    print(st_ord_id, email, start_date, stop_date, cost, shelf_id, size_id)
+    if st_ord_id is None:
+        st_ord_id = ''
+    if email is None:
+        email = ''
+    result = ({'st_ord_id': st_ord_id, 'email': email})
+    # result = ({'st_ord_id': st_ord_id, 'email': email, {start_date}: start_date, 'stop_date': stop_date, 'cost': cost, 'shelf_id': shelf_id, 'size_id': size_id})
+    # print(st_ord_id, email, start_date, stop_date, cost, shelf_id, size_id)
     return jsonify(result)
 
 if __name__ == '__main__':
