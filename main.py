@@ -386,6 +386,17 @@ def change_storage_order():
 
                     if shelf_avail is not None:
                         shelf_id = shelf_avail[0]
+
+                        p_query = """UPDATE warehouse SET available = 'True' WHERE shelf_id = '{0}';""".format(shelf_id_db)
+                        cursor.execute(p_query)
+                        conn.commit()
+                        cursor.close
+
+                        p_query = """UPDATE warehouse SET available = 'False' WHERE shelf_id = '{0}';""".format(shelf_id)
+                        cursor.execute(p_query)
+                        conn.commit()
+                        cursor.close
+
                     else:
                         return 'Sorry, we do not have the storage you need'
                     
