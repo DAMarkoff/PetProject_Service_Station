@@ -79,17 +79,6 @@ def shelf_id_by_size(size_name):
 
         return shelf_id_[0]
 
-@app.route("/home", methods=['POST']) #for fun :)
-def home():
-    if request.method == 'POST':
-        name = request.form.get('name')
-        age = request.form.get('age')
-
-    resp = {'Name': name + ' Pop',
-            'Age': int(age) * 3}
-
-    return jsonify(resp)
-
 
 @app.route("/reg", methods=['POST']) #reg new user
 def reg():
@@ -99,6 +88,9 @@ def reg():
         passw = request.form.get('passw')
         phone = request.form.get('phone')
         email = request.form.get('email')
+
+    if f_name is None or l_name is None or passw is None or phone is None or email is None:
+        return 'The f_name, l_name, passw, phone and email data are required'
 
     if conn:
 
@@ -133,11 +125,6 @@ def reg():
                     "passw": res[5]})        
 
         return jsonify(result)
-
-
-@app.route("/add_users", methods=['POST']) #reg many users at once - to do
-def add_users():
-    pass
 
 
 @app.route("/cl", methods=['POST']) #clear users DB
@@ -186,6 +173,9 @@ def login():
         email = request.form.get('email')
         passw = request.form.get('passw')
 
+    if passw is None or email is None:
+        return 'The pass and email data are required'         
+
     if conn:
 
         #if user does not exist
@@ -224,6 +214,8 @@ def user_info():
         token = request.form.get('token')
         email = request.form.get('email')
     
+    if token is None or email is None:
+        return 'The token and email data are required'    
 
     if not user_exist(email):
             return "user does not exist"
@@ -303,12 +295,17 @@ def new_st_ord():
         stop_date = request.form.get('stop_date')
         size_name = request.form.get('size_name')
 
+    if token is None or email is None or start_date is None or stop_date is None or size_name is None:
+        return 'The token, email, start_date, stop_date and size_name data are required'
+  
     #if user exists
     if not user_exist(email):
             return "The user does not exist. Please, register"
     else:    
         #if token exists in redis db
         if token_exist(email, token):
+
+
 
             #is there the necessary free storage space
             if shelf_avail(size_name):
@@ -350,8 +347,9 @@ def change_storage_order():
         stop_date = request.form.get('stop_date')
         st_ord_cost = request.form.get('st_ord_cost')
         size_id = request.form.get('size_id')
-    else:
-        return 'Ouch! Not allowed method!'
+
+    if token is None or email is None or st_ord_id is None:
+        return 'The token, email, st_ord_id data are required'
 
     #if user exists
     if not user_exist(email):
@@ -407,10 +405,12 @@ def change_storage_order():
                             conn.commit()
                             shelf_avail = cursor.fetchone()
                             cursor.close
-                        
+
+                            #if there is available storage
                             if shelf_avail is not None:
                                 shelf_id = shelf_avail[0]
 
+                                #update changed storage places
                                 p_query = """UPDATE warehouse SET available = 'True' WHERE shelf_id = '{0}';""".format(shelf_id_db)
                                 cursor.execute(p_query)
                                 conn.commit()
