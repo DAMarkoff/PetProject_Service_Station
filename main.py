@@ -385,7 +385,7 @@ def change_storage_order():
                     shelf_avail = cursor.fetchone()
                     cursor.close
 
-                    if shelf_avail is not None:
+                    if shelf_avail is not None and shelf_id != shelf_id_db:
                         shelf_id = shelf_avail[0]
 
                         p_query = """UPDATE warehouse SET available = 'True' WHERE shelf_id = '{0}';""".format(shelf_id_db)
@@ -419,7 +419,7 @@ def change_storage_order():
                 res_ = cursor.fetchone()
                 cursor.close
 
-                result = ({'storage_order': st_ord_id, 'start_date': res_[0], 'stop_date': res_[1], 'size_id': res_[2], 'size_id_db': size_id_db, 'storage_order_cost': res_[3], 'shelf_id': res_[4]})
+                result = ({'storage_order': st_ord_id, 'start_date': res_[0], 'stop_date': res_[1], 'size_id': res_[2], 'size_id_db': size_id_db, 'storage_order_cost': res_[3], 'shelf_id': res_[4], 'shelf_id_db': shelf_id_db})
             
             else: 
                 return 'Could not connect to the DB'
