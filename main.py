@@ -314,8 +314,8 @@ def new_st_ord():
                 if conn:
 
                     #create storage order
-                    p_query = """INSERT INTO storage_orders (user_id, start_date, stop_date, size_id, shelf_id) 
-                                VALUES('{0}', '{1}', '{2}', '{3}', '{4}');""".format(get_user_id(email), start_date, stop_date, size_id_by_name(size_name), shelf_id)
+                    p_query = """INSERT INTO storage_orders (user_id, start_date, stop_date, size_id, shelf_id, st_ord_cost) 
+                                VALUES('{0}', '{1}', '{2}', '{3}', '{4}');""".format(get_user_id(email), start_date, stop_date, size_id_by_name(size_name), shelf_id, 1000)
                     cursor.execute(p_query)
                     conn.commit()
                     cursor.close
