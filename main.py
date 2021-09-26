@@ -466,7 +466,7 @@ def change_storage_order():
 
 @app.route("/new_user_vehicle", methods=['POST']) #add new user vehicle :)
 def new_user_vehicle():
-    if request.method == 'PATCH':
+    if request.method == 'POST':
         token = request.form.get('token')
         email = request.form.get('email')
         vehicle_name = request.form.get('vehicle_name')
