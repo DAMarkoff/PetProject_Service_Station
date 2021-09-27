@@ -152,7 +152,7 @@ def reg():
             return "the user with this email already exists"
     else:   
         if conn: 
-            p_query = """INSERT INTO users (first_name, last_name, pass, phone, email) VALUES ({0}, {1}, {2}, {3}, {4})""".format(f_name, l_name, passw, phone, email)
+            p_query = """INSERT INTO users (first_name, last_name, pass, phone, email) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')""".format(f_name, l_name, passw, phone, email)
             cursor.execute(p_query)
             conn.commit()
             cursor.close
