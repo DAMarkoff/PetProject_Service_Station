@@ -148,21 +148,11 @@ def reg():
     if not check_email['result']:
         return check_email['text']
 
-    if conn:
-
-        print('CONN =======')
-
-        p_query = "SELECT user_id FROM users WHERE email = '{0}'".format(email)
-        cursor.execute(p_query)
-        conn.commit()
-        usr_id_  = cursor.fetchone()
-        cursor.close        
-
-
-        if usr_id_ is not None:
-            return "The user with this email is already exists" #note that the email exists and redirect to /reg
-        else:
-            p_query = "INSERT INTO users (first_name, last_name, pass, phone, email) VALUES ({0}, {1}, {2}, {3}, {4})".format(f_name, l_name, passw, phone, email)
+    if user_exist(email):
+            return "the user with this email already exists"
+    else:   
+        if conn: 
+            p_query = """INSERT INTO users (first_name, last_name, pass, phone, email) VALUES ({0}, {1}, {2}, {3}, {4})""".format(f_name, l_name, passw, phone, email)
             cursor.execute(p_query)
             conn.commit()
             cursor.close
@@ -179,8 +169,10 @@ def reg():
                     "email": res[3],
                     "phone": res[4],
                     "passw": res[5]})        
+        else: 
+            return 'Sorry, no connection with the DB'
 
-        return jsonify(result)
+    return jsonify(result)
 
 
 @app.route("/cl", methods=['POST']) #clear users DB
@@ -277,69 +269,73 @@ def user_info():
             return "user does not exist"
     else:    
         #if token exists in redis db
-        if token_exist(email, token):
-
-            #collecting the user's personal data from the users db
-            p_query = "SELECT user_id, first_name, last_name, email, phone, pass FROM users WHERE email = '{0}'".format(email)
-            cursor.execute(p_query)
-            conn.commit()
-            res  = cursor.fetchone()
-            cursor.close
-
-            result_users = ({"ID": res[0],
-                             "f_name": res[1],
-                             "l_name": res[2],
-                             "email": res[3],
-                             "phone": res[4],
-                             "passw": res[5]})
-            
-
-            #collecting the user's storage orders data from the storage_orders db
-            p_query = "SELECT * FROM storage_orders WHERE user_id = '{0}'".format(get_user_id(email))
-            cursor.execute(p_query)
-            conn.commit()
-            res_  = cursor.fetchall()
-            cursor.close
-
-            if res_ is None:
-                result_order = 'There are no orders for storage from the user'
-            else:
-                result_order = []
-                for i in range(len(res_)): #does the user need the size_id or size_name data?
-                    result_order.append({"storage_order_id": res_[i][0],
-                                        "start_date": res_[i][2],
-                                        "stop_date": res_[i][3],
-                                        "order cost": res_[i][5],
-                                        "shelf_id": res_[i][6]
-                                        })
-            
-            
-            #collecting data about the user's vehicles from the user_vehicle, vehicle and sizes db's
-            p_query = """SELECT u_veh_id, vehicle_name, size_name FROM user_vehicle 
-                         JOIN vehicle USING (vehicle_id)
-                         JOIN sizes USING (size_id) 
-                         WHERE user_id = '{0}'""".format(get_user_id(email))
-            cursor.execute(p_query)
-            conn.commit()
-            res_  = cursor.fetchall()
-            cursor.close
-
-            empty_result = []
-            if res_ == empty_result:
-                result_vehicle = 'The user does not have a vehicle. BUT! If suddenly the user wants to get a vehicle, call 8-800-THIS-IS-NOT-A-SCAM right now!'
-            else:
-                result_vehicle = []
-                for i in range(len(res_)):
-                    result_vehicle.append({'vehicle_id': res_[i][0],
-                                           'vehicle_type': res_[i][1],
-                                           'tire size': res_[i][2]
-                                          })
-
-            return jsonify({'user info': result_users}, {'storage orders info:': result_order}, {"user's vehicle": result_vehicle})
-        
-        #if token does not exist in redis db    
-        else:
+        if not token_exist(email, token):
             return "The token is invalid, please log in" #redirect to /login
+        else:
+
+            if conn:
+
+                #collecting the user's personal data from the users db
+                p_query = "SELECT user_id, first_name, last_name, email, phone, pass FROM users WHERE email = '{0}'".format(email)
+                cursor.execute(p_query)
+                conn.commit()
+                res  = cursor.fetchone()
+                cursor.close
+
+                result_users = ({"ID": res[0],
+                                "f_name": res[1],
+                                "l_name": res[2],
+                                "email": res[3],
+                                "phone": res[4],
+                                "passw": res[5]})
+                
+
+                #collecting the user's storage orders data from the storage_orders db
+                p_query = "SELECT * FROM storage_orders WHERE user_id = '{0}'".format(get_user_id(email))
+                cursor.execute(p_query)
+                conn.commit()
+                res_  = cursor.fetchall()
+                cursor.close
+
+                if res_ is None:
+                    result_order = 'There are no orders for storage from the user'
+                else:
+                    result_order = []
+                    for i in range(len(res_)): #does the user need the size_id or size_name data?
+                        result_order.append({"storage_order_id": res_[i][0],
+                                            "start_date": res_[i][2],
+                                            "stop_date": res_[i][3],
+                                            "order cost": res_[i][5],
+                                            "shelf_id": res_[i][6]
+                                            })
+                
+                
+                #collecting data about the user's vehicles from the user_vehicle, vehicle and sizes db's
+                p_query = """SELECT u_veh_id, vehicle_name, size_name FROM user_vehicle 
+                            JOIN vehicle USING (vehicle_id)
+                            JOIN sizes USING (size_id) 
+                            WHERE user_id = '{0}'""".format(get_user_id(email))
+                cursor.execute(p_query)
+                conn.commit()
+                res_  = cursor.fetchall()
+                cursor.close
+
+                empty_result = []
+                if res_ == empty_result:
+                    result_vehicle = 'The user does not have a vehicle. BUT! If suddenly the user wants to get a vehicle, call 8-800-THIS-IS-NOT-A-SCAM right now!'
+                else:
+                    result_vehicle = []
+                    for i in range(len(res_)):
+                        result_vehicle.append({'vehicle_id': res_[i][0],
+                                            'vehicle_type': res_[i][1],
+                                            'tire size': res_[i][2]
+                                            })
+
+                return jsonify({'user info': result_users}, {'storage orders info:': result_order}, {"user's vehicle": result_vehicle})
+
+            else: 
+                return 'Sorry, no connection with the DB'
+            
 
 
 @app.route("/new_storage_order", methods=['POST']) #create new storage order
