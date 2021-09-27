@@ -132,7 +132,8 @@ def reg():
     check_passw = validate_password(passw)
     print(check_passw)
     if not check_passw['result']:
-        return check_passw['text'], '/n', passw
+        # res = 
+        return check_passw['text'], '\n', passw
 
     if conn:
 
