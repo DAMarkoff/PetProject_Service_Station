@@ -130,6 +130,7 @@ def reg():
         return 'The f_name, l_name, passw, phone and email data are required'
 
     check_passw = validate_password(passw)
+    print(check_passw)
     if not check_passw['result']:
         return check_passw['text'], '/n', passw
 
