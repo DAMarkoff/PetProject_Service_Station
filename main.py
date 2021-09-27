@@ -133,7 +133,7 @@ def reg():
     print(check_passw)
     if not check_passw['result']:
         # res = 
-        return check_passw['text'], '\n', passw
+        return check_passw['text']#, '\n', passw
 
     if conn:
 
