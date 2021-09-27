@@ -25,11 +25,10 @@ ToDo: update the token's TTL in the redis db after each user action
 			user_id
 
 	if email does not exist in DB: note
-	else:
 		if pass does not valid: note
-		else:
 			if token exists in the redis db: set new ex time and return the token
-			else: generate new token, add to the redis db and return it
+			else: 
+				generate new token, add to the redis db and return it
 
 
 /reg [POST] - register a new user
@@ -49,7 +48,8 @@ ToDo: update the token's TTL in the redis db after each user action
 			passw
 			
 	if email does not exisis in the DB: note and redirect to /reg
-	else: add new user to the DB and return info from the DB with user_id
+	else: 
+		add new user to the DB and return info from the DB with user_id
 
 	
 /cl [GET] - clear users DB
@@ -81,9 +81,7 @@ ToDo: update the token's TTL in the redis db after each user action
 			passw
 	
 	if email does not exist in the DB: return "user is not exist" and redirect to /reg
-	else: 	
 		if the token does not exist in redis db: redirect to /login
-		else: 
 			return info
 
 	
@@ -104,11 +102,8 @@ ToDo: update the token's TTL in the redis db after each user action
 			st_ord_id
 
 	if email does not exist in the DB: return "user is not exist" and redirect to /reg
-	else: 
 		if the token does not exist in redis db: redirect to /login
-		else: 
-			if there is no available shelf of the size needed in the warehouse: note
-			else:			
+			if there is no available shelf of the size needed in the warehouse: note		
 				add in the "storage_order" base info about the storage order
 				update in the "warehouse" base availability of the occupied storage place
 
@@ -132,16 +127,11 @@ ToDo: update the token's TTL in the redis db after each user action
 			shelf_id
 	
 	if email does not exist in the DB: return "user is not exist" and redirect to /reg
-	else: 
 		if the token does not exist in redis db: redirect to /login
-		else: 
 			if the provided dates are invalid: note
-			else:
 				if the optional data is None: take the data needed from DB
 				if size_id is need to be changed make sure that the warehouse has an availabe shelf
-				update data
-				request updated data from DB
-				return data
+
 				
 /new_user_vehicle [POST] - add new user vehicle
 	input:
@@ -155,12 +145,9 @@ ToDo: update the token's TTL in the redis db after each user action
 			vehicle_name
 			size_name
 			
-		if email does not exist in the DB: return "user is not exist" and redirect to /reg
-	else: 
+	if email does not exist in the DB: return "user is not exist" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
-		else: 
 			if the vehcile type or tire size is not specified in the DB: note 
-			else:
 				add the date in to the DB
 				
 /change_user_info [PATCH] - suddenly, change the user info				
@@ -169,7 +156,7 @@ ToDo: update the token's TTL in the redis db after each user action
 			token				- required
 			f_name				- optional
 			l_name				- optional
-			email				- optional
+			new_email			- optional
 			passw				- optional
 
 			
@@ -182,10 +169,6 @@ ToDo: update the token's TTL in the redis db after each user action
 			passw
 	
 	if email does not exist in the DB: return "user is not exist" and redirect to /reg
-	else: 
 		if the token does not exist in redis db: redirect to /login
-		else: 
 			if the optional data is None: take the data needed from DB
-			update data
-			request updated data from DB
-			return data				
+				if the password and/or email have been changed - the user must log in again

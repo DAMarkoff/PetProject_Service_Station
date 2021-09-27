@@ -495,7 +495,7 @@ def change_storage_order():
     return jsonify(result)
 
 
-@app.route("/change_user_info", methods=['PATCH'])
+@app.route("/change_user_info", methods=['PATCH']) #change the data of the logged user
 def change_user_info():
     if request.method == 'PATCH':
         token = request.form.get('token')
