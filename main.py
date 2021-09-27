@@ -96,25 +96,25 @@ def shelf_id_by_size(size_name):
 
 def validate_password(passw):
     SpecialSym=['$','@','#', '!', '%']
-    return_val=True
+    return_val = {'result': True, 'text': ''}
     if len(passw) < 8:
-        print('The password must be at least 8 characters long')
-        return_val=False
+        return_val['text'] = 'The password must be at least 8 characters long'
+        return_val['result'] = False
     if len(passw) > 32:
-        print('the password length should not exceed 32 chars')
-        return_val=False
+        return_val['text'] = 'the password length should not exceed 32 chars'
+        return_val['result'] = False
     if not any(char.isdigit() for char in passw):
-        print('The password must contain at least one digit')
-        return_val=False
+        return_val['text'] = 'The password must contain at least one digit'
+        return_val['result'] = False
     if not any(char.isupper() for char in passw):
-        print('The password must contain at least one uppercase letter')
-        return_val=False
+        return_val['text'] = 'The password must contain at least one uppercase letter'
+        return_val['result'] = False
     if not any(char.islower() for char in passw):
-        print('The password must contain at least one lowercase letter')
-        return_val=False
+        return_val['text'] = 'The password must contain at least one lowercase letter'
+        return_val['result'] = False
     if not any(char in SpecialSym for char in passw):
-        print('The password must contain at least one of the symbols $@#!%')
-        return_val=False
+        return_val['text'] = 'The password must contain at least one of the symbols $@#!%'
+        return_val['result'] = False
     return return_val
 
 @app.route("/reg", methods=['POST']) #reg new user
@@ -129,8 +129,9 @@ def reg():
     if f_name is None or l_name is None or passw is None or phone is None or email is None:
         return 'The f_name, l_name, passw, phone and email data are required'
 
-    if not validate_password(passw):
-        return 'Current pass -', passw
+    check_passw = validate_password(passw)
+    if not check_passw['result']:
+        return check_passw['text'], '/n', passw
 
     if conn:
 
