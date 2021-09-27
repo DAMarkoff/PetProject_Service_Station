@@ -3,7 +3,7 @@ from flask import Flask, request, jsonify
 from jinja2 import Template
 import psycopg2
 import uuid
-import json
+import re
 import redis
 import datetime
 
@@ -117,6 +117,14 @@ def validate_password(passw):
         return_val['result'] = False
     return return_val
 
+def validate_email(email):
+    return_val = {'result': True, 'text': ''}
+    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+        return_val['result'] = False
+        return_val['text'] = 'Please provide a valid email address'
+    return return_val
+
+
 @app.route("/reg", methods=['POST']) #reg new user
 def reg():
     if request.method == 'POST':
@@ -129,11 +137,16 @@ def reg():
     if f_name is None or l_name is None or passw is None or phone is None or email is None:
         return 'The f_name, l_name, passw, phone and email data are required'
 
+    #making sure that the password is strong enough 8-32 chars, min one digit, min one upper and min one lower letter, min one special char
     check_passw = validate_password(passw)
     print(check_passw)
     if not check_passw['result']:
-        # res = 
-        return check_passw['text']#, '\n', passw
+        return check_passw['text']
+
+    #the email must contain @ and .
+    check_email = validate_email(email)
+    if not check_email['result']:
+        return check_email['text']
 
     if conn:
 
