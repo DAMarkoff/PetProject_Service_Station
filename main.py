@@ -561,7 +561,7 @@ def change_user_info():
 
                 #update data in the DB
                 p_query = """UPDATE users SET first_name = '{0}', last_name = '{1}', email = '{2}', phone = '{3}', pass = '{4}' 
-                                WHERE user_id = '{5}';""".format(f_name, l_name, email, phone, passw, user_id_db)
+                                WHERE user_id = '{5}';""".format(f_name, l_name, new_email, phone, passw, user_id_db)
                 cursor.execute(p_query)
                 conn.commit()
                 cursor.close
