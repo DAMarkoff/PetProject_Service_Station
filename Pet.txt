@@ -15,8 +15,8 @@ ToDo: update the token's TTL in the redis db after each user action
 
 /login [POST] - login user
 	input:  
-			email			- required
-			pass			- required
+			email				- required
+			pass				- required
 		
 	output: 
 			Hello message
@@ -34,11 +34,11 @@ ToDo: update the token's TTL in the redis db after each user action
 
 /reg [POST] - register a new user
 	input: 
-			f_name			- required
-			l_name			- required
-			email			- required
-			phone			- required
-			passw			- required
+			f_name				- required
+			l_name				- required
+			email				- required
+			phone				- required
+			passw				- required
 		   
 	output: 
 			user_id
@@ -48,7 +48,7 @@ ToDo: update the token's TTL in the redis db after each user action
 			phone
 			passw
 			
-	if email exisis in the DB: note and redirect to /reg
+	if email does not exisis in the DB: note and redirect to /reg
 	else: add new user to the DB and return info from the DB with user_id
 
 	
@@ -69,8 +69,8 @@ ToDo: update the token's TTL in the redis db after each user action
 
 /user_info [POST] - get info about the logged user
 	input: 
-			email			- required
-			token			- required
+			email				- required
+			token				- required
 
 	output:
 			user_id
@@ -89,11 +89,11 @@ ToDo: update the token's TTL in the redis db after each user action
 	
 /new_storage_order [POST] - create new storage order
 	input:
-			token			- required
-			email			- required
-			start_date		- required
-			stop_date		- required
-			size_name		- required
+			token				- required
+			email				- required
+			start_date			- required
+			stop_date			- required
+			size_name			- required
 	
 	output:
 			email
@@ -142,3 +142,23 @@ ToDo: update the token's TTL in the redis db after each user action
 				update data
 				request updated data from DB
 				return data
+				
+/new_user_vehicle [POST] - add new user vehicle
+	input:
+			email				-required
+			token				-required
+			vehicle_name		-required
+			size_name			-required
+	
+	output:
+			u_veh_id
+			vehicle_name
+			size_name
+			
+		if email does not exist in the DB: return "user is not exist" and redirect to /reg
+	else: 
+		if the token does not exist in redis db: redirect to /login
+		else: 
+			if the vehcile type or tire size is not specified in the DB: note 
+			else:
+				add the date in to the DB

@@ -94,6 +94,28 @@ def shelf_id_by_size(size_name):
 
         return shelf_id_[0]
 
+def validate_password(passw):
+    SpecialSym=['$','@','#', '!', '%']
+    return_val=True
+    if len(passw) < 8:
+        print('The password must be at least 8 characters long')
+        return_val=False
+    if len(passw) > 32:
+        print('the password length should not exceed 32 chars')
+        return_val=False
+    if not any(char.isdigit() for char in passw):
+        print('The password must contain at least one digit')
+        return_val=False
+    if not any(char.isupper() for char in passw):
+        print('The password must contain at least one uppercase letter')
+        return_val=False
+    if not any(char.islower() for char in passw):
+        print('The password must contain at least one lowercase letter')
+        return_val=False
+    if not any(char in SpecialSym for char in passw):
+        print('The password must contain at least one of the symbols $@#!%')
+        return_val=False
+    return return_val
 
 @app.route("/reg", methods=['POST']) #reg new user
 def reg():
@@ -106,6 +128,9 @@ def reg():
 
     if f_name is None or l_name is None or passw is None or phone is None or email is None:
         return 'The f_name, l_name, passw, phone and email data are required'
+
+    if not validate_password(passw):
+        return 'Current pass -', passw
 
     if conn:
 
@@ -512,6 +537,9 @@ def new_user_vehicle():
                 conn.commit()
                 res_ = cursor.fetchone()
                 cursor.close
+
+            else: 
+                return 'Could not connect to the DB'
 
     return {'new_vehicle_id': res_[0], 'vehicle_name': vehicle_name, 'tire_size': size_name}
 
