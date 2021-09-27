@@ -139,7 +139,6 @@ def reg():
 
     #making sure that the password is strong enough 8-32 chars, min one digit, min one upper and min one lower letter, min one special char
     check_passw = validate_password(passw)
-    print(check_passw)
     if not check_passw['result']:
         return check_passw['text']
 
@@ -337,7 +336,6 @@ def user_info():
                 return 'Sorry, no connection with the DB'
             
 
-
 @app.route("/new_storage_order", methods=['POST']) #create new storage order
 def new_st_ord():
     if request.method == 'POST':
@@ -408,9 +406,13 @@ def change_storage_order():
         return "The user does not exist. Please, register"
     else:    
         #if token exists in redis db
-        if token_exist(email, token):
+        if not token_exist(email, token):
+            return "The token is invalid, please log in" #redirect to /login
+        else:
 
-            if conn:
+            if not conn:
+                return 'Could not connect to the DB'
+            else:
                 #get the initial data of the storage order
                 p_query = """SELECT start_date, stop_date, size_id, st_ord_cost, shelf_id, user_id FROM storage_orders WHERE st_ord_id = '{0}';""".format(st_ord_id)
                 cursor.execute(p_query)
@@ -487,22 +489,81 @@ def change_storage_order():
                     conn.commit()
                     cursor.close
 
-                    #get new date from the DB
-                    p_query = """SELECT start_date, stop_date, size_id, st_ord_cost, shelf_id FROM storage_orders WHERE st_ord_id = '{0}';""".format(st_ord_id)
-                    cursor.execute(p_query)
-                    conn.commit()
-                    res_ = cursor.fetchone()
-                    cursor.close
-
-                    result = ({'storage_order': st_ord_id, 'start_date': res_[0], 'stop_date': res_[1], 'size_id': res_[2], 'size_id_db': size_id_db, 'storage_order_cost': res_[3], 'shelf_id': res_[4], 'shelf_id_db': shelf_id_db})
-            
-            else: 
-                return 'Could not connect to the DB'
-        
-        else:
-            return "The token is invalid, please log in" #redirect to /login    
+                    result = ({'storage_order': st_ord_id, 'start_date': start_date, 'stop_date': stop_date, 'size_id_new': size_id, 'size_id_old': size_id_db,
+                               'storage_order_cost': st_ord_cost, 'shelf_id_new': shelf_id, 'shelf_id_old': shelf_id_db})
 
     return jsonify(result)
+
+
+@app.route("/change_user_info", methods=['PATCH'])
+def change_user_info():
+    if request.method == 'PATCH':
+        token = request.form.get('token')
+        email = request.form.get('email')
+        f_name = request.form.get('f_name')
+        l_name = request.form.get('l_name')
+        phone = request.form.get('phone')
+        new_email = request.form.get('new_email')
+        passw = request.form.get('passw')
+
+    if token is None or email is None:
+        return 'The token, email are required'
+    
+    #if user exists
+    if not user_exist(email):
+        return "The user does not exist. Please, register"
+    else:    
+
+        #if token exists in redis db
+        if not token_exist(email, token):
+            return "The token is invalid, please log in" #redirect to /login
+        else:        
+
+            if not conn:
+                return 'Could not connect to the DB'
+            else:
+                
+                #get the initial data of the storage order
+                p_query = """SELECT user_id, first_name, last_name, phone, pass FROM users WHERE email = '{0}';""".format(email)
+                cursor.execute(p_query)
+                conn.commit()
+                res_ = cursor.fetchone()
+                cursor.close 
+                
+                user_id_db, f_name_db, l_name_db, phone_db, passw_db = res_[0], res_[1], res_[2], res_[3], res_[4]
+
+                #what data should be changed
+                if f_name is None:
+                    f_name = f_name_db
+                if l_name is None:
+                    l_name = l_name_db
+                if phone is None:
+                    phone = phone_db
+                if passw is None:
+                    passw = passw_db
+                else:
+                    check_passw = validate_password(passw)
+                    if not check_passw['result']:
+                        return check_passw['text']
+                if new_email is None:
+                    new_email = email
+                else:
+                    check_email = validate_email(email)
+                    if not check_email['result']:
+                        return check_email['text']
+
+                #update data in the DB
+                p_query = """UPDATE users SET first_name = '{0}', last_name = '{1}', email = '{2}', phone = '{3}', pass = '{4}' 
+                                WHERE user_id = '{5}';""".format(f_name, l_name, email, phone, passw, user_id_db)
+                cursor.execute(p_query)
+                conn.commit()
+                cursor.close
+
+                result = ({'user_id': user_id_db, 'f_name_new': f_name, 'f_name_old': f_name_db, 'l_name_new': l_name_db, 
+                           'l_name_old': l_name_db, 'email_new': new_email, 'email_old': email, 'phone_new': phone,
+                           'phone_old': phone_db, 'passw_new': passw, 'passw_old': passw_db})
+
+    return jsonify(result) 
 
 
 @app.route("/new_user_vehicle", methods=['POST']) #add new user vehicle :)

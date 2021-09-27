@@ -113,7 +113,7 @@ ToDo: update the token's TTL in the redis db after each user action
 				update in the "warehouse" base availability of the occupied storage place
 
 				
-/change_storage_order [POST] - suddenly, change storage order				
+/change_storage_order [POST] - suddenly, change the data in the storage order				
 	input:
 			st_ord_id 			- required
 			email				- required
@@ -137,7 +137,7 @@ ToDo: update the token's TTL in the redis db after each user action
 		else: 
 			if the provided dates are invalid: note
 			else:
-				if optional data is None: take the data needed from DB
+				if the optional data is None: take the data needed from DB
 				if size_id is need to be changed make sure that the warehouse has an availabe shelf
 				update data
 				request updated data from DB
@@ -162,3 +162,30 @@ ToDo: update the token's TTL in the redis db after each user action
 			if the vehcile type or tire size is not specified in the DB: note 
 			else:
 				add the date in to the DB
+				
+/change_user_info [PATCH] - suddenly, change the user info				
+	input:
+			email				- required
+			token				- required
+			f_name				- optional
+			l_name				- optional
+			email				- optional
+			passw				- optional
+
+			
+	output:
+			user_id
+			f_name
+			l_name
+			email
+			phone
+			passw
+	
+	if email does not exist in the DB: return "user is not exist" and redirect to /reg
+	else: 
+		if the token does not exist in redis db: redirect to /login
+		else: 
+			if the optional data is None: take the data needed from DB
+			update data
+			request updated data from DB
+			return data				
