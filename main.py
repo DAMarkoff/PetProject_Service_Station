@@ -532,6 +532,7 @@ def change_user_info():
                 
                 user_id_db, f_name_db, l_name_db, phone_db, passw_db = res_[0], res_[1], res_[2], res_[3], res_[4]
 
+                flag_relogin = False
                 #what data should be changed
                 if f_name is None:
                     f_name = f_name_db
@@ -545,12 +546,18 @@ def change_user_info():
                     check_passw = validate_password(passw)
                     if not check_passw['result']:
                         return check_passw['text']
+                    flag_relogin = True
                 if new_email is None:
                     new_email = email
                 else:
                     check_email = validate_email(email)
                     if not check_email['result']:
                         return check_email['text']
+                    flag_relogin = True
+
+                #if the pass and/or email have been changed - the user must log in again
+                if flag_relogin:
+                    r.delete(email)
 
                 #update data in the DB
                 p_query = """UPDATE users SET first_name = '{0}', last_name = '{1}', email = '{2}', phone = '{3}', pass = '{4}' 
@@ -559,7 +566,7 @@ def change_user_info():
                 conn.commit()
                 cursor.close
 
-                result = ({'user_id': user_id_db, 'f_name_new': f_name, 'f_name_old': f_name_db, 'l_name_new': l_name_db, 
+                result = ({'user_id': user_id_db, 'f_name_new': f_name, 'f_name_old': f_name_db, 'l_name_new': l_name, 
                            'l_name_old': l_name_db, 'email_new': new_email, 'email_old': email, 'phone_new': phone,
                            'phone_old': phone_db, 'passw_new': passw, 'passw_old': passw_db})
 
