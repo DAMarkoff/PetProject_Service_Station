@@ -815,16 +815,12 @@ def delete_user_vehicle():
                     return 'The token is invalid, please log in' #redirect to /login
                 else:
 
-                    if not conn:
-                        return 'Could not connect to the DB'
-                    else:
+                    sql_query = """DELETE FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    cursor.close
 
-                        sql_query = """DELETE FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
-                        cursor.execute(sql_query)
-                        conn.commit()
-                        cursor.close
-
-                        return 'User vehicle ID ' + u_veh_id + ' has been deleted'                                                                                      
+                    return 'User vehicle ID ' + u_veh_id + ' has been deleted'                                                                                      
 
 
 @app.route("/delete_storage_order", methods=['DELETE']) #
@@ -837,24 +833,34 @@ def delete_storage_order():
     if token is None or email is None or st_ord_id is None:
         return 'The token, email and storage_order_id are required'
 
-    if not user_exist(email):
-        return 'The user does not exist. Please, register'
+    if not conn:
+        return 'Could not connect to the DB'
     else:
-        
-        if not token_exist(email, token):
-            return 'The token is invalid, please log in' #redirect to /login
+
+        sql_query = """SELECT user_id FROM storage_orders WHERE st_ord_id = '{0}'""".format(st_ord_id)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchone()
+        cursor.close
+
+        if get_user_id(email) != res_[0]:
+            return 'It is not your storage order! Somebody call the police!'
         else:
 
-            if not conn:
-                return 'Could not connect to the DB'
+            if not user_exist(email):
+                return 'The user does not exist. Please, register'
             else:
+                
+                if not token_exist(email, token):
+                    return 'The token is invalid, please log in' #redirect to /login
+                else:
 
-                sql_query = """DELETE FROM storage_orders WHERE st_ord_id = '{0}'""".format(st_ord_id)
-                cursor.execute(sql_query)
-                conn.commit()
-                cursor.close
+                    sql_query = """DELETE FROM storage_orders WHERE st_ord_id = '{0}'""".format(st_ord_id)
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    cursor.close
 
-                return 'Storage order ID', st_ord_id, 'has been deleted'  
+                    return 'Storage order ID '+  st_ord_id + ' has been deleted'  
 
 
 @app.route("/change_user_vehicle", methods=['PATCH']) #
