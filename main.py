@@ -659,7 +659,7 @@ def delete_user():
                 return 'The token is invalid, please log in' #redirect to /login
             else:
 
-                if not sure: 
+                if sure != 'True': 
                     return 'АHA! Changed your mind?'
                 else:
 
@@ -698,29 +698,34 @@ def deactivate_user():
             return 'The token is invalid, please log in' #redirect to /login
         else:
 
-            if sure != 'True':
-                return 'АHA! Changed your mind?'
+            if not user_active(email):
+                return 'User is already deactivated'
             else:
 
-                if not conn:
-                    return 'Could not connect to the DB'
+                if sure != 'True':
+                    return 'АHA! Changed your mind?'
                 else:
 
-                    sql_query = """UPDATE users SET active = 'False' WHERE email = '{0}'""".format(email)
-                    cursor.execute(sql_query)
-                    conn.commit()
-                    cursor.close
+                    if not conn:
+                        return 'Could not connect to the DB'
+                    else:
 
-                    sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
-                    cursor.execute(sql_query)
-                    conn.commit()
-                    res_ = cursor.fetchone()
-                    cursor.close
+                        sql_query = """UPDATE users SET active = 'False' WHERE email = '{0}'""".format(email)
+                        cursor.execute(sql_query)
+                        conn.commit()
+                        cursor.close
 
-                    text = 'User {{ name }} has been successfully deactivated'
-                    template = Template(text)
+                        sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
+                        cursor.execute(sql_query)
+                        conn.commit()
+                        res_ = cursor.fetchone()
+                        cursor.close
 
-                    return template.render(name = res_[0] + ' ' + res_[1])
+                        text = 'User {{ name }} has been successfully deactivated'
+                        template = Template(text)
+
+                        return template.render(name = res_[0] + ' ' + res_[1])
+
 
 @app.route("/activate_user", methods=['POST']) #actually, activating the user
 def activate_user():

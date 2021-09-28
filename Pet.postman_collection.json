@@ -6,7 +6,7 @@
 	},
 	"item": [
 		{
-			"name": "test",
+			"name": "clear users db",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -14,24 +14,19 @@
 					"mode": "formdata",
 					"formdata": [
 						{
-							"key": "name",
-							"value": "John",
-							"type": "text"
-						},
-						{
-							"key": "age",
-							"value": "30",
+							"key": "pass",
+							"value": "WAT???!!!111_NO_NO_NO_PLEASE_NO!!!111",
 							"type": "text"
 						}
 					]
 				},
 				"url": {
-					"raw": "{{url}}/home",
+					"raw": "{{url}}/cl",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
-						"home"
+						"cl"
 					]
 				}
 			},
@@ -47,22 +42,22 @@
 					"formdata": [
 						{
 							"key": "f_name",
-							"value": "Adolf",
+							"value": "test",
 							"type": "text"
 						},
 						{
 							"key": "l_name",
-							"value": "Gitler",
+							"value": "test",
 							"type": "text"
 						},
 						{
 							"key": "passw",
-							"value": "qwerty",
+							"value": "qwe1T!1a",
 							"type": "text"
 						},
 						{
 							"key": "email",
-							"value": "foma@gitler.com",
+							"value": "test@simpson.com",
 							"type": "text"
 						},
 						{
@@ -85,38 +80,38 @@
 			"response": []
 		},
 		{
-			"name": "clear users db",
+			"name": "delete_user",
 			"request": {
-				"method": "GET",
+				"method": "DELETE",
 				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "{{email}}",
+							"type": "text"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "text"
+						},
+						{
+							"key": "ARE_YOU_SURE?",
+							"value": "True",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
 				"url": {
-					"raw": "{{url}}/cl",
+					"raw": "{{url}}/delete_user",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
-						"cl"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "all users",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "23.88.52.139:5006/all",
-					"host": [
-						"23",
-						"88",
-						"52",
-						"139"
-					],
-					"port": "5006",
-					"path": [
-						"all"
+						"delete_user"
 					]
 				}
 			},
@@ -145,7 +140,7 @@
 					"formdata": [
 						{
 							"key": "email",
-							"value": "dan@dan.us",
+							"value": "max@bush.us",
 							"type": "text"
 						},
 						{
@@ -162,33 +157,6 @@
 					],
 					"path": [
 						"login"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "add users",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "file",
-							"type": "file",
-							"src": "/C:/QA/Serv/users.json"
-						}
-					]
-				},
-				"url": {
-					"raw": "{{url}}/add_users",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"add_users"
 					]
 				}
 			},
@@ -227,6 +195,69 @@
 			"response": []
 		},
 		{
+			"name": "all users",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "23.88.52.139:5006/all",
+					"host": [
+						"23",
+						"88",
+						"52",
+						"139"
+					],
+					"port": "5006",
+					"path": [
+						"all"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "new_user_vehicle",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "{{email}}",
+							"type": "text"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "text"
+						},
+						{
+							"key": "vehicle_name",
+							"value": "truck",
+							"type": "text"
+						},
+						{
+							"key": "size_name",
+							"value": "20",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/new_user_vehicle",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"new_user_vehicle"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "new_storage_order",
 			"request": {
 				"method": "POST",
@@ -246,17 +277,17 @@
 						},
 						{
 							"key": "size_name",
-							"value": "15",
+							"value": "18",
 							"type": "text"
 						},
 						{
 							"key": "start_date",
-							"value": "2021.09.25",
+							"value": "2021.10.01",
 							"type": "text"
 						},
 						{
 							"key": "stop_date",
-							"value": "2021.09.27",
+							"value": "2021.11.01",
 							"type": "text"
 						}
 					]
@@ -268,6 +299,189 @@
 					],
 					"path": [
 						"new_storage_order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "change_storage_order",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "{{email}}",
+							"type": "text"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "text"
+						},
+						{
+							"key": "st_ord_id",
+							"value": "6",
+							"type": "text"
+						},
+						{
+							"key": "size_id",
+							"value": "2",
+							"type": "text"
+						},
+						{
+							"key": "start_date",
+							"value": "2021-09-24",
+							"type": "text"
+						},
+						{
+							"key": "stop_date",
+							"value": "2021-09-29",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/change_storage_order",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"change_storage_order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "change_user_info",
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "{{email}}",
+							"type": "text"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "text"
+						},
+						{
+							"key": "f_name",
+							"value": "Dexter",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "l_name",
+							"value": "Morgan",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "new_email",
+							"value": "dexter@morgan.com",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "phone",
+							"value": "",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "passw",
+							"value": "qwe#Q2qw",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/change_user_info",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"change_user_info"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "deactivate_user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "{{email}}",
+							"type": "text"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "text"
+						},
+						{
+							"key": "ARE_YOU_SURE?",
+							"value": "111",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/deactivate_user",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"deactivate_user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "acrivate_user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "{{email}}",
+							"type": "text"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/activate_user",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"activate_user"
 					]
 				}
 			},

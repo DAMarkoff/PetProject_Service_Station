@@ -11,13 +11,27 @@ Serv: ssh user_105@23.88.52.139, password: 123
 DB: 159.69.151.133:5056, Database: user_20_db, Username: user_20, Password: 123
 DB diagram: https://drawsql.app/myowncompany/diagrams/cto#
 
+Done:
+	/login
+	/reg
+	/cl
+	/all
+	/user_info
+	/new_storage_order
+	/change_storage_order
+	/new_user_vehicle
+	/change_user_info
+	/delete_user
+	/deactivate_user
+	/activate_user
+	
 ToDo: 
 	- update the token's TTL in the redis db after each user action
 	- delete storage order
 	- delete vehicle
 	- list of available storage spaces in the warehouse
 *	- create cost_of_storage table (price list? any discout? so many questions!)
-*	- alter column cost in storage_orders table (calculate costs)
+*	- alter column cost in the storage_orders table (calculate costs)
 	- create sub_types table
 	- create subscription table
 	- create tire_service table
@@ -91,7 +105,7 @@ ToDo:
 			phone
 			passw
 	
-	if email does not exist in the DB: return "user is not exist" and redirect to /reg
+	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
 			return info
 
@@ -112,7 +126,7 @@ ToDo:
 			shelf_id
 			st_ord_id
 
-	if email does not exist in the DB: return "user is not exist" and redirect to /reg
+	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
 			if there is no available shelf of the size needed in the warehouse: note		
 				add in the "storage_order" base info about the storage order
@@ -137,7 +151,7 @@ ToDo:
 			st_ord_cost
 			shelf_id
 	
-	if email does not exist in the DB: return "user is not exist" and redirect to /reg
+	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
 			if the provided dates are invalid: note
 				if the optional data is None: take the data needed from DB
@@ -156,7 +170,7 @@ ToDo:
 			vehicle_name
 			size_name
 			
-	if email does not exist in the DB: return "user is not exist" and redirect to /reg
+	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
 			if the vehcile type or tire size is not specified in the DB: note 
 				add the date in to the DB
@@ -179,12 +193,12 @@ ToDo:
 			phone
 			passw
 	
-	if email does not exist in the DB: return "user is not exist" and redirect to /reg
+	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
 			if the optional data is None: take the data needed from DB
 				if the password and/or email have been changed - the user must log in again
 				
-/delete_user [POST] - delete the user and any data in other tables associated with the user
+/delete_user [POST] - delete the user and any data from other tables associated with the user
 	input:
 			email				- required
 			token				- required
@@ -193,6 +207,32 @@ ToDo:
 	output:
 			sad message
 			
-	if email does not exist in the DB: return "user is not exist" and redirect to /reg
+	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
+		if the token does not exist in redis db: redirect to /login
+			if the "ARE_YOU_SURE?" value is not 'True': return a funny message
+			
+/deactivate_user [POST] - guess what?
+	input:	
+			email				- required
+			token				- required
+			ARE_YOU_SURE?		- required
+	
+	output:
+			message
+			
+	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
+		if the token does not exist in redis db: redirect to /login
+			if the user has already been deactivated: return a message
+				if the "ARE_YOU_SURE?" value is not 'True': return a funny message
+				
+/activate_user [POST] - really?
+	input:	
+			email				- required
+			token				- required
+	
+	output:
+			message
+			
+	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
 			
