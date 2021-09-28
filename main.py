@@ -644,7 +644,7 @@ def new_user_vehicle():
     return {'new_vehicle_id': res_[0], 'vehicle_name': vehicle_name, 'tire_size': size_name}
 
 
-@app.route("/delete_user", metods=['DELETE']) #How dare you?
+@app.route("/delete_user", methods=['DELETE']) #How dare you?
 def delete_user():
     if request.method == 'DELETE':
         email = request.form.get('email')
