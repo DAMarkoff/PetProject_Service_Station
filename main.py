@@ -811,7 +811,7 @@ def delete_user_vehicle():
                 conn.commit()
                 cursor.close
 
-                return 'User vehicle ID', u_veh_id, 'has been deleted'
+                return 'User vehicle ID' + u_veh_id + 'has been deleted'
 
 
 @app.route("/delete_storage_order", methods=['DELETE']) #
@@ -946,6 +946,7 @@ def available_storage():
             result = []
             for i in range(len(res_)):
                  result.append({'shelf_id': res_[i][0],
+                                'size_id': res_[i][1],
                                 'size_name': size_name_by_id(res_[i][1])})
 
     return jsonify(result)
