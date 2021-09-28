@@ -963,7 +963,7 @@ def change_user_vehicle():
                             if vehicle_id_by is not None:
                                 new_vehicle_id = vehicle_id_by
                             else:
-                                return 'Unknown vehikle_name'
+                                return 'Unknown vehicle_name'
 
                         if new_size_name is None:
                             new_size_id = size_id_db

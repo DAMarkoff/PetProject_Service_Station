@@ -24,16 +24,13 @@ Done:
 	/delete_user
 	/deactivate_user
 	/activate_user
-	
-	/delete_user_vehicle - ok
-	
-	/delete_storage_order - ok
+	/delete_user_vehicle
+	/delete_storage_order
 	/change_user_vehicle
-	
-	/available_storage - ok
+	/available_storage
 	
 ToDo: 
-	- new storage order dates validate
+	- new storage order dates validate (start before now)
 	- update the token's TTL in the redis db after each user action
 
 *	- create cost_of_storage table (price list? any discout? so many questions!)
@@ -51,7 +48,7 @@ ToDo:
 	- swagger
 	
 
-/login [POST] - login user
+/login [POST]
 	input:  
 			email				- required
 			pass				- required
@@ -123,7 +120,7 @@ ToDo:
 			return info
 
 	
-/new_storage_order [POST] - create new storage order
+/new_storage_order [POST]
 	input:
 			token				- required
 			email				- required
@@ -146,7 +143,7 @@ ToDo:
 				update in the "warehouse" base availability of the occupied storage place
 
 				
-/change_storage_order [POST] - suddenly, change the data in the storage order				
+/change_storage_order [POST]				
 	input:
 			st_ord_id 			- required
 			email				- required
@@ -171,7 +168,7 @@ ToDo:
 				if size_id is need to be changed make sure that the warehouse has an availabe shelf
 
 				
-/new_user_vehicle [POST] - add new user vehicle
+/new_user_vehicle [POST]
 	input:
 			email				-required
 			token				-required
@@ -188,7 +185,7 @@ ToDo:
 			if the vehcile type or tire size is not specified in the DB: note 
 				add the date in to the DB
 				
-/change_user_info [PATCH] - suddenly, change the user info				
+/change_user_info [PATCH]				
 	input:
 			email				- required
 			token				- required
@@ -208,8 +205,8 @@ ToDo:
 	
 	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
-			if all of the optional data is None: nothing needs to be changed
-				if one of the optional data is None: take the data needed from DB
+			if all optional data is None OR the new data is equal to the DB data: nothing needs to be changed
+				if some optional data is None: take the data needed from DB
 					if the password and/or email have been changed - the user must log in again
 					
 /delete_user [POST] - delete the user and any data from other tables associated with the user
@@ -225,7 +222,7 @@ ToDo:
 		if the token does not exist in redis db: redirect to /login
 			if the "ARE_YOU_SURE?" value is not 'True': return a funny message
 			
-/deactivate_user [POST] - guess what?
+/deactivate_user [POST]
 	input:	
 			email				- required
 			token				- required
@@ -239,7 +236,7 @@ ToDo:
 			if the user has already been deactivated: return a message
 				if the "ARE_YOU_SURE?" value is not 'True': return a funny message
 				
-/activate_user [POST] - really?
+/activate_user [POST]
 	input:	
 			email				- required
 			token				- required
@@ -250,7 +247,7 @@ ToDo:
 	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
 			
-/delete_user_vehicle [DELETE] - ?
+/delete_user_vehicle [DELETE]
 	input:
 			email				- required
 			token				- required
@@ -263,7 +260,7 @@ ToDo:
 		if the token does not exist in redis db: redirect to /login
 			if it is not user's vehicle: Call the police!!! :)
 
-/delete_storage_order [DELETE] - ?		
+/delete_storage_order [DELETE]	
 	input:
 			email				- required
 			token				- required
@@ -276,7 +273,7 @@ ToDo:
 		if the token does not exist in redis db: redirect to /login
 			if it is not user's storage order: Call the police!!! :)
 		
-/change_user_vehicle [PATCH] - !!! )
+/change_user_vehicle [PATCH]
 	input:
 			email				- required
 			token				- required
@@ -294,7 +291,7 @@ ToDo:
 	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
 			if it is not user's vehicle: Call the police!!! :)
-				if all of the optional data is None: nothing needs to be changed
-					if one of the optional data is None: take the data needed from DB
+				if all optional data is None OR the new data is equal to the DB data: nothing needs to be changed
+					if some optional data is None: take the data needed from DB
 
 /available_storage [GET] - show available free storage places in the warehouse
