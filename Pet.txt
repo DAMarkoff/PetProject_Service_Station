@@ -25,16 +25,28 @@ Done:
 	/deactivate_user
 	/activate_user
 	
+	/delete_user_vehicle
+	/delete_storage_order
+	/change_user_vehicle
+	/available_storage
+	
 ToDo: 
+	- size_id_by_name if None
+	- def veh id or name by name or id
 	- update the token's TTL in the redis db after each user action
-	- delete storage order
-	- delete vehicle
-	- list of available storage spaces in the warehouse
+
 *	- create cost_of_storage table (price list? any discout? so many questions!)
 *	- alter column cost in the storage_orders table (calculate costs)
-	- create sub_types table
-	- create subscription table
-	- create tire_service table
+	- DB create sub_types table
+	- DB create subscription table
+	- DB create tire_service_order table
+	- DB create list_of_works table
+	- create_tire_service_order
+	- change_tire_service_order
+	- delete_tire_service_order
+	- create_subscription
+	- change_subscription
+	- delete_subscription
 	- swagger
 	
 
@@ -195,9 +207,10 @@ ToDo:
 	
 	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
-			if the optional data is None: take the data needed from DB
-				if the password and/or email have been changed - the user must log in again
-				
+			if all of the optional data is None: nothing needs to be changed
+				if one of the optional data is None: take the data needed from DB
+					if the password and/or email have been changed - the user must log in again
+					
 /delete_user [POST] - delete the user and any data from other tables associated with the user
 	input:
 			email				- required
@@ -236,3 +249,48 @@ ToDo:
 	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
 			
+/delete_user_vehicle [DELETE] - ?
+	input:
+			email				- required
+			token				- required
+			user_vehicle_id		- required
+	
+	output:
+			message
+
+	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
+		if the token does not exist in redis db: redirect to /login
+
+/delete_storage_order [DELETE] - ?		
+	input:
+			email				- required
+			token				- required
+			storage_order_id	- required
+	
+	output:
+			message
+
+	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
+		if the token does not exist in redis db: redirect to /login
+		
+/change_user_vehicle [PATCH] - !!! )
+	input:
+			email				- required
+			token				- required
+			user_vehicle_id		- required
+			new_vehicle_name	- optional
+			new_size_name		- optional
+			
+	output:
+			u_veh_id
+			old_vehicle_name
+			new_vehicle_name
+			old_size_name
+			new_size_name
+			
+	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
+		if the token does not exist in redis db: redirect to /login
+			if all of the optional data is None: nothing needs to be changed
+				if one of the optional data is None: take the data needed from DB
+
+/available_storage [GET] - show available free storage places in the warehouse

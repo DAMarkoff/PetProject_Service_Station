@@ -1,5 +1,5 @@
 from os import curdir
-from flask import Flask, request, jsonify
+from flask import Flask, json, request, jsonify
 from jinja2 import Template
 import psycopg2
 import uuid
@@ -13,16 +13,17 @@ conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', hos
 cursor = conn.cursor()
 
 def user_exist(email):
-    if conn:
-
-    #get user_id from DB on email
+    if not conn:
+        return 'Could not connect to the DB'
+    else:
+        #get user_id from DB on email
         sql_query = "SELECT user_id FROM users WHERE email = '{0}'".format(email)
         cursor.execute(sql_query)
         conn.commit()
         usr_id_  = cursor.fetchone()
         cursor.close        
 
-    #if user_id does not exist
+        #if user_id does not exist
         if usr_id_ is None:
             return False
     return True
@@ -45,8 +46,9 @@ def token_exist(email, token):
     return False
 
 def size_id_by_name(size_name):
-    if conn:
-
+    if not conn:
+        return 'Could not connect to the DB'
+    else:
         sql_query = "SELECT size_id FROM sizes WHERE size_name = '{0}'".format(size_name)
         cursor.execute(sql_query)
         conn.commit()
@@ -54,7 +56,7 @@ def size_id_by_name(size_name):
         cursor.close
 
         if size_id_ is None:
-            return 'Unknown'
+            return None
         return size_id_[0]   
 
 def vehicle_id_by_name(vehicle_name):
@@ -137,6 +139,21 @@ def user_active(email):
             return True
         return False
 
+def size_name_by_id(size_id):
+    if not conn:
+        return 'Could not connect to the DB'
+    else:
+        sql_query = """SELECT size_name FROM sizes WHERE size_id = '{}'""".format(size_id)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchone()
+        cursor.close
+
+        if res_ is None:
+            return None
+        return res_[0]
+
+
 @app.route("/reg", methods=['POST']) #reg new user
 def reg():
     if request.method == 'POST':
@@ -208,7 +225,9 @@ def cl():
 @app.route("/all", methods=['GET']) #get a list of all users
 def all():
 
-    if conn:
+    if not conn:
+        return 'Could not connect to the DB'
+    else:
         sql_query = "SELECT user_id, first_name, last_name, phone, email, pass, active FROM users"
         cursor.execute(sql_query)
         conn.commit()
@@ -540,57 +559,61 @@ def change_user_info():
         if not token_exist(email, token):
             return "The token is invalid, please log in" #redirect to /login
         else:        
-
-            if not conn:
-                return 'Could not connect to the DB'
+            
+            if f_name is None and l_name is None and phone is None and new_email is None and passw is None:
+                return 'Ok. Nothing needs to be changed :)'
             else:
-                
-                #get the initial data of the storage order
-                sql_query = """SELECT user_id, first_name, last_name, phone, pass FROM users WHERE email = '{0}';""".format(email)
-                cursor.execute(sql_query)
-                conn.commit()
-                res_ = cursor.fetchone()
-                cursor.close 
-                
-                user_id_db, f_name_db, l_name_db, phone_db, passw_db = res_[0], res_[1], res_[2], res_[3], res_[4]
 
-                flag_relogin = False
-                #what data should be changed
-                if f_name is None:
-                    f_name = f_name_db
-                if l_name is None:
-                    l_name = l_name_db
-                if phone is None:
-                    phone = phone_db
-                if passw is None:
-                    passw = passw_db
+                if not conn:
+                    return 'Could not connect to the DB'
                 else:
-                    check_passw = validate_password(passw)
-                    if not check_passw['result']:
-                        return check_passw['text']
-                    flag_relogin = True
-                if new_email is None:
-                    new_email = email
-                else:
-                    check_email = validate_email(email)
-                    if not check_email['result']:
-                        return check_email['text']
-                    flag_relogin = True
+                    
+                    #get the initial data of the storage order
+                    sql_query = """SELECT user_id, first_name, last_name, phone, pass FROM users WHERE email = '{0}';""".format(email)
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    res_ = cursor.fetchone()
+                    cursor.close 
+                    
+                    user_id_db, f_name_db, l_name_db, phone_db, passw_db = res_[0], res_[1], res_[2], res_[3], res_[4]
 
-                #if the pass and/or email have been changed - the user must log in again
-                if flag_relogin:
-                    r.delete(email)
+                    flag_relogin = False
+                    #what data should be changed
+                    if f_name is None:
+                        f_name = f_name_db
+                    if l_name is None:
+                        l_name = l_name_db
+                    if phone is None:
+                        phone = phone_db
+                    if passw is None:
+                        passw = passw_db
+                    else:
+                        check_passw = validate_password(passw)
+                        if not check_passw['result']:
+                            return check_passw['text']
+                        flag_relogin = True
+                    if new_email is None:
+                        new_email = email
+                    else:
+                        check_email = validate_email(email)
+                        if not check_email['result']:
+                            return check_email['text']
+                        flag_relogin = True
 
-                #update data in the DB
-                sql_query = """UPDATE users SET first_name = '{0}', last_name = '{1}', email = '{2}', phone = '{3}', pass = '{4}' 
-                                WHERE user_id = '{5}';""".format(f_name, l_name, new_email, phone, passw, user_id_db)
-                cursor.execute(sql_query)
-                conn.commit()
-                cursor.close
+                    #if the pass and/or email have been changed - the user must log in again
+                    if flag_relogin:
+                        r.delete(email)
 
-                result = ({'user_id': user_id_db, 'f_name_new': f_name, 'f_name_old': f_name_db, 'l_name_new': l_name, 
-                           'l_name_old': l_name_db, 'email_new': new_email, 'email_old': email, 'phone_new': phone,
-                           'phone_old': phone_db, 'passw_new': passw, 'passw_old': passw_db})
+                    #update data in the DB
+                    sql_query = """UPDATE users SET first_name = '{0}', last_name = '{1}', email = '{2}', phone = '{3}', pass = '{4}' 
+                                    WHERE user_id = '{5}';""".format(f_name, l_name, new_email, phone, passw, user_id_db)
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    cursor.close
+
+                    result = ({'user_id': user_id_db, 'f_name_new': f_name, 'f_name_old': f_name_db, 'l_name_new': l_name, 
+                            'l_name_old': l_name_db, 'email_new': new_email, 'email_old': email, 'phone_new': phone,
+                            'phone_old': phone_db, 'passw_new': passw, 'passw_old': passw_db})
 
     return jsonify(result) 
 
@@ -760,6 +783,172 @@ def activate_user():
 
                 return template.render(name = res_[0] + ' ' + res_[1])                    
 
+
+@app.route("/delete_user_vehicle", methods=['DELETE']) #
+def delete_user_vehicle():
+    if request.method == 'DELETE':
+        email = request.form.get('email')
+        token = request.form.get('token')
+        u_veh_id = request.form.get('user_vehicle_id')
+
+    if token is None or email is None or u_veh_id is None:
+        return 'The token, email and user_vehicle_id are required'
+
+    if not user_exist(email):
+        return 'The user does not exist. Please, register'
+    else:
+        
+        if not token_exist(email, token):
+            return 'The token is invalid, please log in' #redirect to /login
+        else:
+
+            if not conn:
+                return 'Could not connect to the DB'
+            else:
+
+                sql_query = """DELETE FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
+                cursor.execute(sql_query)
+                conn.commit()
+                cursor.close
+
+                return 'User vehicle ID', u_veh_id, 'has been deleted'
+
+
+@app.route("/delete_storage_order", methods=['DELETE']) #
+def delete_storage_order():
+    if request.method == 'DELETE':
+        email = request.form.get('email')
+        token = request.form.get('token')
+        st_ord_id = request.form.get('storage_order_id')
+
+    if token is None or email is None or st_ord_id is None:
+        return 'The token, email and storage_order_id are required'
+
+    if not user_exist(email):
+        return 'The user does not exist. Please, register'
+    else:
+        
+        if not token_exist(email, token):
+            return 'The token is invalid, please log in' #redirect to /login
+        else:
+
+            if not conn:
+                return 'Could not connect to the DB'
+            else:
+
+                sql_query = """DELETE FROM storage_orders WHERE st_ord_id = '{0}'""".format(st_ord_id)
+                cursor.execute(sql_query)
+                conn.commit()
+                cursor.close
+
+                return 'Storage order ID', st_ord_id, 'has been deleted'  
+
+
+@app.route("/change_user_vehicle", methods=['PATCH']) #
+def change_user_vehicle():
+    if request.method == 'PATCH':
+        email = request.form.get('email')
+        token = request.form.get('token')
+        u_veh_id = request.form.get('user_vehicle_id')
+        new_vehicle_name = request.form.get('new_vehicle_name')
+        new_size_name = request.form.get('new_size_name')
+
+    if token is None or email is None or u_veh_id is None:
+        return 'The token, email and user_vehicle_id are required'
+
+    if not user_exist(email):
+        return 'The user does not exist. Please, register'
+    else:
+
+        if not token_exist(email, token):
+            return 'The token is invalid, please log in' #redirect to /login
+        else:
+
+            if new_vehicle_name is None and new_size_name is None:
+                return 'Ok. Nothing needs to be changed :)'
+            else:
+
+                if not conn:
+                    return 'Could not connect to the DB'
+                else:
+
+                    sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    res_ = cursor.fetchone()
+                    cursor.close
+
+                    vehicle_id_db, size_id_db = res_[1], res_[2]        
+
+                    new_vehicle_id, new_size_id = 0, 0
+
+                    if new_vehicle_name is None:
+                        new_vehicle_id = vehicle_id_db
+                    else:
+
+                        #keep the old vehicle name
+                        sql_query = """SELECT vehicle_name FROM vehicle WHERE vehicle_id = '{}'""".format(vehicle_id_db)
+                        cursor.execute(sql_query)
+                        conn.commit()
+                        res_ = cursor.fetchone()
+                        cursor.close
+
+                        old_vehicle_name = res_[0]                    
+
+                        sql_query = """SELECT vehicle_id FROM vehicle WHERE vehicle_name = '{}'""".format(new_vehicle_name)
+                        cursor.execute(sql_query)
+                        conn.commit()
+                        res_ = cursor.fetchone()
+                        cursor.close
+
+                        new_vehicle_id = res_[0]
+
+                    if new_size_name is None:
+                        new_size_id = size_id_db
+                    else:
+
+                        size_name_by = size_name_by_id(size_id_db)
+                        if size_name_by is not None:
+                            old_size_name = size_name_by
+                        else:
+                            return 'Unknown size_id'
+
+                        size_id_by = size_id_by_name(new_size_name)
+                        if size_id_by is not None:
+                            new_size_id = size_id_by
+                        else:
+                            return 'Unknown size_name'
+
+                    sql_query = """UPDATE user_vehicle SET vehicle_id = '{0}', size_id = '{1}' WHERE u_veh_id = '{2}'""".format(new_vehicle_id, new_size_id, u_veh_id)
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    cursor.close
+
+                    result = {'vehicle_id': u_veh_id, 'old_vehicle_name': old_vehicle_name, 'new_vehicle_name': new_vehicle_name,
+                                'old_size_name': old_size_name, 'new_size_name': new_size_name}
+
+    return jsonify(result)
+
+
+@app.route("/available_storage", methods=['GET']) #show available free storage places in the warehouse
+def available_storage():
+    if not conn:
+        return
+    else:
+
+        sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE available = 'True'"""
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchall()
+        cursor.close
+
+        if res_ is not None:
+            result = []
+            for i in range(len(res_)):
+                 result.append({'shelf_id': res_[i][0],
+                                'size_name': size_name_by_id(res_[i][1])})
+
+    return jsonify(result)
 
 if __name__ == '__main__':
     app.run()
