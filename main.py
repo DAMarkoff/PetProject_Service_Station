@@ -943,7 +943,7 @@ def change_user_vehicle():
                 user_id_db, vehicle_id_db, size_id_db = res_[0], res_[1], res_[2]   
 
                 old_vehicle_name = vehicle_name_by_id(vehicle_id_db)
-                old_size_name = size_name_by_id(size_id_db)
+                old_size_name = str(size_name_by_id(size_id_db))
 
                 if user_id_db != get_user_id(email):
                     return 'It is not your vehicle! Somebody call the police!'
