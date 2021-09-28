@@ -248,7 +248,7 @@ def login():
         #if user exists
         else: 
 
-            sql_query = "SELECT pass, user_id, first_name, last_name, active FROM users WHERE email = '{0}'".format(email)
+            sql_query = "SELECT pass, user_id, first_name, last_name FROM users WHERE email = '{0}'".format(email)
             cursor.execute(sql_query)
             conn.commit()
             res  = cursor.fetchone()
@@ -625,8 +625,9 @@ def new_user_vehicle():
             return 'The token is invalid, please log in' #redirect to /login    
         else:
 
-            if conn:
-
+            if not conn:
+                return 'Could not connect to the DB'
+            else:
                 sql_query = """INSERT INTO user_vehicle (user_id, vehicle_id, size_id) VALUES ('{0}', '{1}', '{2}');""".format(user_id, vehicle_id, size_id)
                 cursor.execute(sql_query)
                 conn.commit()
@@ -637,9 +638,6 @@ def new_user_vehicle():
                 conn.commit()
                 res_ = cursor.fetchone()
                 cursor.close
-
-            else: 
-                return 'Could not connect to the DB'
 
     return {'new_vehicle_id': res_[0], 'vehicle_name': vehicle_name, 'tire_size': size_name}
 
@@ -652,16 +650,16 @@ def delete_user():
         sure = request.form.get('ARE_YOU_SURE?')
 
         if not user_exist(email):
-            return
+            return 'The user does not exist. Please, register'
         else:
             if not token_exist(email):
-                return
+                return 'The token is invalid, please log in' #redirect to /login
             else:
 
                 if sure: 
 
                     if not conn:
-                        return
+                        return 'Could not connect to the DB'
                     else:
 
                         sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
