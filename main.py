@@ -652,7 +652,7 @@ def delete_user():
         if not user_exist(email):
             return 'The user does not exist. Please, register'
         else:
-            if not token_exist(email):
+            if not token_exist(token):
                 return 'The token is invalid, please log in' #redirect to /login
             else:
 
