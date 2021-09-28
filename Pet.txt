@@ -13,8 +13,6 @@ DB diagram: https://drawsql.app/myowncompany/diagrams/cto#
 
 ToDo: 
 	- update the token's TTL in the redis db after each user action
-	- delete user
-	- deactivate user
 	- delete storage order
 	- delete vehicle
 	- list of available storage spaces in the warehouse
@@ -185,3 +183,16 @@ ToDo:
 		if the token does not exist in redis db: redirect to /login
 			if the optional data is None: take the data needed from DB
 				if the password and/or email have been changed - the user must log in again
+				
+/delete_user [POST] - delete the user and any data in other tables associated with the user
+	input:
+			email				- required
+			token				- required
+			ARE_YOU_SURE?		- required
+			
+	output:
+			sad message
+			
+	if email does not exist in the DB: return "user is not exist" and redirect to /reg
+		if the token does not exist in redis db: redirect to /login
+			

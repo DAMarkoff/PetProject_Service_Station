@@ -698,7 +698,7 @@ def deactivate_user():
             return 'The token is invalid, please log in' #redirect to /login
         else:
 
-            if not sure:
+            if sure != 'True':
                 return 'АHA! Changed your mind?'
             else:
 
