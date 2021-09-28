@@ -80,9 +80,9 @@
 			"response": []
 		},
 		{
-			"name": "delete_user",
+			"name": "deactivate_user",
 			"request": {
-				"method": "DELETE",
+				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "formdata",
@@ -99,19 +99,50 @@
 						},
 						{
 							"key": "ARE_YOU_SURE?",
-							"value": "True",
-							"type": "text",
-							"disabled": true
+							"value": "111",
+							"type": "text"
 						}
 					]
 				},
 				"url": {
-					"raw": "{{url}}/delete_user",
+					"raw": "{{url}}/deactivate_user",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
-						"delete_user"
+						"deactivate_user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "activate_user",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "{{email}}",
+							"type": "text"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/activate_user",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"activate_user"
 					]
 				}
 			},
@@ -189,27 +220,6 @@
 					],
 					"path": [
 						"user_info"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "all users",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "23.88.52.139:5006/all",
-					"host": [
-						"23",
-						"88",
-						"52",
-						"139"
-					],
-					"port": "5006",
-					"path": [
-						"all"
 					]
 				}
 			},
@@ -419,9 +429,131 @@
 			"response": []
 		},
 		{
-			"name": "deactivate_user",
+			"name": "change_user_vehicle",
 			"request": {
-				"method": "POST",
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "{{email}}",
+							"type": "text"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "text"
+						},
+						{
+							"key": "user_vehicle_id",
+							"value": "3",
+							"type": "text"
+						},
+						{
+							"key": "new_vehicle_name",
+							"value": "truck",
+							"type": "text"
+						},
+						{
+							"key": "new_size_name",
+							"value": "20",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/change_user_vehicle",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"change_user_vehicle"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "available_storage",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/available_storage",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"available_storage"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "all users",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "23.88.52.139:5006/all",
+					"host": [
+						"23",
+						"88",
+						"52",
+						"139"
+					],
+					"port": "5006",
+					"path": [
+						"all"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete_user_vehicle",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "{{email}}",
+							"type": "text"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "text"
+						},
+						{
+							"key": "user_vehicle_id",
+							"value": "6",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/delete_user_vehicle",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"delete_user_vehicle"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete_user",
+			"request": {
+				"method": "DELETE",
 				"header": [],
 				"body": {
 					"mode": "formdata",
@@ -438,27 +570,28 @@
 						},
 						{
 							"key": "ARE_YOU_SURE?",
-							"value": "111",
-							"type": "text"
+							"value": "True",
+							"type": "text",
+							"disabled": true
 						}
 					]
 				},
 				"url": {
-					"raw": "{{url}}/deactivate_user",
+					"raw": "{{url}}/delete_user",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
-						"deactivate_user"
+						"delete_user"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "acrivate_user",
+			"name": "delete_storage_order",
 			"request": {
-				"method": "POST",
+				"method": "DELETE",
 				"header": [],
 				"body": {
 					"mode": "formdata",
@@ -472,16 +605,21 @@
 							"key": "token",
 							"value": "{{token}}",
 							"type": "text"
+						},
+						{
+							"key": "storage_order_id",
+							"value": "7",
+							"type": "text"
 						}
 					]
 				},
 				"url": {
-					"raw": "{{url}}/activate_user",
+					"raw": "{{url}}/delete_storage_order",
 					"host": [
 						"{{url}}"
 					],
 					"path": [
-						"activate_user"
+						"delete_storage_order"
 					]
 				}
 			},
