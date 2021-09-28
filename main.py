@@ -794,24 +794,37 @@ def delete_user_vehicle():
     if token is None or email is None or u_veh_id is None:
         return 'The token, email and user_vehicle_id are required'
 
-    if not user_exist(email):
-        return 'The user does not exist. Please, register'
+    if not conn:
+        return 'Could not connect to the DB'
     else:
-        
-        if not token_exist(email, token):
-            return 'The token is invalid, please log in' #redirect to /login
+
+        sql_query = """SELECT user_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchone()
+        cursor.close
+
+        if get_user_id(email) != res_[0]:
+            return 'It is not your vehicle! Somebody call the police!'
         else:
-
-            if not conn:
-                return 'Could not connect to the DB'
+            if not user_exist(email):
+                return 'The user does not exist. Please, register'
             else:
+                
+                if not token_exist(email, token):
+                    return 'The token is invalid, please log in' #redirect to /login
+                else:
 
-                sql_query = """DELETE FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
-                cursor.execute(sql_query)
-                conn.commit()
-                cursor.close
+                    if not conn:
+                        return 'Could not connect to the DB'
+                    else:
 
-                return 'User vehicle ID' + u_veh_id + 'has been deleted'
+                        sql_query = """DELETE FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
+                        cursor.execute(sql_query)
+                        conn.commit()
+                        cursor.close
+
+                        return 'User vehicle ID ' + u_veh_id + ' has been deleted'                                                                                      
 
 
 @app.route("/delete_storage_order", methods=['DELETE']) #
