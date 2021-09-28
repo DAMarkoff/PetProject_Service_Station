@@ -16,8 +16,8 @@ def user_exist(email):
     if conn:
 
     #get user_id from DB on email
-        p_query = "SELECT user_id FROM users WHERE email = '{0}'".format(email)
-        cursor.execute(p_query)
+        sql_query = "SELECT user_id FROM users WHERE email = '{0}'".format(email)
+        cursor.execute(sql_query)
         conn.commit()
         usr_id_  = cursor.fetchone()
         cursor.close        
@@ -31,8 +31,8 @@ def get_user_id(email):
     if conn:
 
     #get user_id from DB on email
-        p_query = "SELECT user_id FROM users WHERE email = '{0}'".format(email)
-        cursor.execute(p_query)
+        sql_query = "SELECT user_id FROM users WHERE email = '{0}'".format(email)
+        cursor.execute(sql_query)
         conn.commit()
         usr_id_  = cursor.fetchone()
         cursor.close        
@@ -47,8 +47,8 @@ def token_exist(email, token):
 def size_id_by_name(size_name):
     if conn:
 
-        p_query = "SELECT size_id FROM sizes WHERE size_name = '{0}'".format(size_name)
-        cursor.execute(p_query)
+        sql_query = "SELECT size_id FROM sizes WHERE size_name = '{0}'".format(size_name)
+        cursor.execute(sql_query)
         conn.commit()
         size_id_  = cursor.fetchone()
         cursor.close
@@ -60,8 +60,8 @@ def size_id_by_name(size_name):
 def vehicle_id_by_name(vehicle_name):
     if conn:
 
-        p_query = "SELECT vehicle_id FROM vehicle WHERE vehicle_name = '{0}'".format(vehicle_name)
-        cursor.execute(p_query)
+        sql_query = "SELECT vehicle_id FROM vehicle WHERE vehicle_name = '{0}'".format(vehicle_name)
+        cursor.execute(sql_query)
         conn.commit()
         vehicle_id_  = cursor.fetchone()
         cursor.close
@@ -73,8 +73,8 @@ def vehicle_id_by_name(vehicle_name):
 def shelf_avail(size_name):
     if conn:
 
-        p_query = "SELECT shelf_id FROM warehouse WHERE size_id = '{0}' AND available = 'True'".format(size_id_by_name(size_name))
-        cursor.execute(p_query)
+        sql_query = "SELECT shelf_id FROM warehouse WHERE size_id = '{0}' AND available = 'True'".format(size_id_by_name(size_name))
+        cursor.execute(sql_query)
         conn.commit()
         avail  = cursor.fetchone()
         cursor.close
@@ -86,8 +86,8 @@ def shelf_avail(size_name):
 def shelf_id_by_size(size_name):
     if conn:
 
-        p_query = "SELECT MIN(shelf_id) FROM warehouse WHERE size_id = '{0}' AND available = 'True'".format(size_id_by_name(size_name))
-        cursor.execute(p_query)
+        sql_query = "SELECT MIN(shelf_id) FROM warehouse WHERE size_id = '{0}' AND available = 'True'".format(size_id_by_name(size_name))
+        cursor.execute(sql_query)
         conn.commit()
         shelf_id_ = cursor.fetchone()
         cursor.close
@@ -124,6 +124,18 @@ def validate_email(email):
         return_val['text'] = 'Please provide a valid email address'
     return return_val
 
+def user_active(email):
+    if conn:
+
+        sql_query = """SELECT active FROM users WHERE email = '{0}'""".format(email)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchone()
+        cursor.close
+
+        if res_[0]:
+            return True
+        return False
 
 @app.route("/reg", methods=['POST']) #reg new user
 def reg():
@@ -150,14 +162,19 @@ def reg():
     if user_exist(email):
             return "the user with this email already exists"
     else:   
-        if conn: 
-            p_query = """INSERT INTO users (first_name, last_name, pass, phone, email) VALUES ('{0}', '{1}', '{2}', '{3}', '{4}')""".format(f_name, l_name, passw, phone, email)
-            cursor.execute(p_query)
+
+        active = True
+        if not conn:
+            return 'Sorry, no connection with the DB'
+        else: 
+            sql_query = """INSERT INTO users (first_name, last_name, pass, phone, email,active) 
+                            VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', {5})""".format(f_name, l_name, passw, phone, email, active)
+            cursor.execute(sql_query)
             conn.commit()
             cursor.close
 
-            p_query = "SELECT user_id, first_name, last_name, email, phone, pass FROM users WHERE email = '{0}'".format(email)
-            cursor.execute(p_query)
+            sql_query = "SELECT user_id, first_name, last_name, email, phone, pass, active FROM users WHERE email = '{0}'".format(email)
+            cursor.execute(sql_query)
             res  = cursor.fetchone()
             conn.commit()
             cursor.close
@@ -167,9 +184,8 @@ def reg():
                     "l_name": res[2],
                     "email": res[3],
                     "phone": res[4],
-                    "passw": res[5]})        
-        else: 
-            return 'Sorry, no connection with the DB'
+                    "passw": res[5],
+                    "active": res[6]})        
 
     return jsonify(result)
 
@@ -181,8 +197,8 @@ def cl():
     
     if passw == 'He_He_Boy!':
         if conn:
-            p_query = "DELETE FROM users"
-            cursor.execute(p_query)
+            sql_query = "DELETE FROM users"
+            cursor.execute(sql_query)
             conn.commit()
             cursor.close
 
@@ -193,8 +209,8 @@ def cl():
 def all():
 
     if conn:
-        p_query = "SELECT user_id, first_name, last_name, phone, email, pass FROM users"
-        cursor.execute(p_query)
+        sql_query = "SELECT user_id, first_name, last_name, phone, email, pass FROM users"
+        cursor.execute(sql_query)
         conn.commit()
         res  = cursor.fetchall()
         cursor.close
@@ -230,29 +246,33 @@ def login():
             return "The user does not exist. Please, register"
 
         #if user exists
-        else:      
-            p_query = "SELECT pass, user_id, first_name, last_name FROM users WHERE email = '{0}'".format(email)
-            cursor.execute(p_query)
+        else: 
+
+            sql_query = "SELECT pass, user_id, first_name, last_name, active FROM users WHERE email = '{0}'".format(email)
+            cursor.execute(sql_query)
             conn.commit()
             res  = cursor.fetchone()
             cursor.close
             
-            token = ""
-            if passw == res[0]: #если пароль верен
-                if r.exists(email) == 0: #если токена нет в redis db
-                    token = str(uuid.uuid4()) #генерация токена
-                    r.set(email, token, ex=600) #запись токена в redis bd, срок - 600 сек.
-                else:
-                    token = r.get(email) #возврат токена
-                    r.set(email, token, ex=600) #пролонгация токена, срок - 600 сек.
-                
-                #генерация Hello message (For fun :)
-                text = 'Hello {{ name }}!'
-                template = Template(text)
-            
-                return jsonify({"result":template.render(name=res[2]+" "+res[3]), "token": token, "email": email, "user_id": res[1]})                           
+            if not user_active(email):
+                return 'User is deactivated'
             else:
-                return 'you shall not pass :) password is invalid' #неверный пароль. перелогиньтесь, товарищ майор ;)
+                token = ""
+                if passw == res[0]: #если пароль верен
+                    if r.exists(email) == 0: #если токена нет в redis db
+                        token = str(uuid.uuid4()) #генерация токена
+                        r.set(email, token, ex=600) #запись токена в redis bd, срок - 600 сек.
+                    else:
+                        token = r.get(email) #возврат токена
+                        r.set(email, token, ex=600) #пролонгация токена, срок - 600 сек.
+                    
+                    #генерация Hello message (For fun :)
+                    text = 'Hello {{ name }}!'
+                    template = Template(text)
+                
+                    return jsonify({"result":template.render(name=res[2]+" "+res[3]), "token": token, "email": email, "user_id": res[1]})                           
+                else:
+                    return 'you shall not pass :) password is invalid' #неверный пароль. перелогиньтесь, товарищ майор ;)
 
 
 @app.route("/user_info", methods=['POST']) #get info about the logged user
@@ -275,8 +295,8 @@ def user_info():
             if conn:
 
                 #collecting the user's personal data from the users db
-                p_query = "SELECT user_id, first_name, last_name, email, phone, pass FROM users WHERE email = '{0}'".format(email)
-                cursor.execute(p_query)
+                sql_query = "SELECT user_id, first_name, last_name, email, phone, pass FROM users WHERE email = '{0}'".format(email)
+                cursor.execute(sql_query)
                 conn.commit()
                 res  = cursor.fetchone()
                 cursor.close
@@ -290,8 +310,8 @@ def user_info():
                 
 
                 #collecting the user's storage orders data from the storage_orders db
-                p_query = "SELECT * FROM storage_orders WHERE user_id = '{0}'".format(get_user_id(email))
-                cursor.execute(p_query)
+                sql_query = "SELECT * FROM storage_orders WHERE user_id = '{0}'".format(get_user_id(email))
+                cursor.execute(sql_query)
                 conn.commit()
                 res_  = cursor.fetchall()
                 cursor.close
@@ -310,11 +330,11 @@ def user_info():
                 
                 
                 #collecting data about the user's vehicles from the user_vehicle, vehicle and sizes db's
-                p_query = """SELECT u_veh_id, vehicle_name, size_name FROM user_vehicle 
+                sql_query = """SELECT u_veh_id, vehicle_name, size_name FROM user_vehicle 
                             JOIN vehicle USING (vehicle_id)
                             JOIN sizes USING (size_id) 
                             WHERE user_id = '{0}'""".format(get_user_id(email))
-                cursor.execute(p_query)
+                cursor.execute(sql_query)
                 conn.commit()
                 res_  = cursor.fetchall()
                 cursor.close
@@ -364,15 +384,15 @@ def new_st_ord():
                 if conn:
 
                     #create storage order
-                    p_query = """INSERT INTO storage_orders (user_id, start_date, stop_date, size_id, shelf_id, st_ord_cost) 
+                    sql_query = """INSERT INTO storage_orders (user_id, start_date, stop_date, size_id, shelf_id, st_ord_cost) 
                                 VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}');""".format(get_user_id(email), start_date, stop_date, size_id_by_name(size_name), shelf_id, 1000)
-                    cursor.execute(p_query)
+                    cursor.execute(sql_query)
                     conn.commit()
                     cursor.close
 
                     #set shelf_id as not available
-                    p_query = """UPDATE warehouse SET available = False WHERE shelf_id = '{0}';""".format(shelf_id)
-                    cursor.execute(p_query)
+                    sql_query = """UPDATE warehouse SET available = False WHERE shelf_id = '{0}';""".format(shelf_id)
+                    cursor.execute(sql_query)
                     conn.commit()
                     cursor.close
 
@@ -414,8 +434,8 @@ def change_storage_order():
                 return 'Could not connect to the DB'
             else:
                 #get the initial data of the storage order
-                p_query = """SELECT start_date, stop_date, size_id, st_ord_cost, shelf_id, user_id FROM storage_orders WHERE st_ord_id = '{0}';""".format(st_ord_id)
-                cursor.execute(p_query)
+                sql_query = """SELECT start_date, stop_date, size_id, st_ord_cost, shelf_id, user_id FROM storage_orders WHERE st_ord_id = '{0}';""".format(st_ord_id)
+                cursor.execute(sql_query)
                 conn.commit()
                 res_ = cursor.fetchone()
                 cursor.close
@@ -454,8 +474,8 @@ def change_storage_order():
                     else:
                         #if the tire size data needs to be changed
                         if int(size_id) != size_id_db:
-                            p_query = """SELECT MIN(shelf_id) FROM warehouse WHERE available = 'True' AND size_id = '{0}';""".format(size_id)
-                            cursor.execute(p_query)
+                            sql_query = """SELECT MIN(shelf_id) FROM warehouse WHERE available = 'True' AND size_id = '{0}';""".format(size_id)
+                            cursor.execute(sql_query)
                             conn.commit()
                             shelf_avail = cursor.fetchone()
                             cursor.close
@@ -465,13 +485,13 @@ def change_storage_order():
                                 shelf_id = shelf_avail[0]
 
                                 #update changed storage places
-                                p_query = """UPDATE warehouse SET available = 'True' WHERE shelf_id = '{0}';""".format(shelf_id_db)
-                                cursor.execute(p_query)
+                                sql_query = """UPDATE warehouse SET available = 'True' WHERE shelf_id = '{0}';""".format(shelf_id_db)
+                                cursor.execute(sql_query)
                                 conn.commit()
                                 cursor.close
 
-                                p_query = """UPDATE warehouse SET available = 'False' WHERE shelf_id = '{0}';""".format(shelf_id)
-                                cursor.execute(p_query)
+                                sql_query = """UPDATE warehouse SET available = 'False' WHERE shelf_id = '{0}';""".format(shelf_id)
+                                cursor.execute(sql_query)
                                 conn.commit()
                                 cursor.close
 
@@ -483,9 +503,9 @@ def change_storage_order():
 
                     #update data in the DB
 
-                    p_query = """UPDATE storage_orders SET start_date = '{0}', stop_date = '{1}', size_id = '{2}', st_ord_cost = '{3}', shelf_id = '{4}' 
+                    sql_query = """UPDATE storage_orders SET start_date = '{0}', stop_date = '{1}', size_id = '{2}', st_ord_cost = '{3}', shelf_id = '{4}' 
                                     WHERE st_ord_id = '{5}';""".format(start_date, stop_date, size_id, st_ord_cost, shelf_id, st_ord_id)
-                    cursor.execute(p_query)
+                    cursor.execute(sql_query)
                     conn.commit()
                     cursor.close
 
@@ -524,8 +544,8 @@ def change_user_info():
             else:
                 
                 #get the initial data of the storage order
-                p_query = """SELECT user_id, first_name, last_name, phone, pass FROM users WHERE email = '{0}';""".format(email)
-                cursor.execute(p_query)
+                sql_query = """SELECT user_id, first_name, last_name, phone, pass FROM users WHERE email = '{0}';""".format(email)
+                cursor.execute(sql_query)
                 conn.commit()
                 res_ = cursor.fetchone()
                 cursor.close 
@@ -560,9 +580,9 @@ def change_user_info():
                     r.delete(email)
 
                 #update data in the DB
-                p_query = """UPDATE users SET first_name = '{0}', last_name = '{1}', email = '{2}', phone = '{3}', pass = '{4}' 
+                sql_query = """UPDATE users SET first_name = '{0}', last_name = '{1}', email = '{2}', phone = '{3}', pass = '{4}' 
                                 WHERE user_id = '{5}';""".format(f_name, l_name, new_email, phone, passw, user_id_db)
-                cursor.execute(p_query)
+                cursor.execute(sql_query)
                 conn.commit()
                 cursor.close
 
@@ -607,13 +627,13 @@ def new_user_vehicle():
 
             if conn:
 
-                p_query = """INSERT INTO user_vehicle (user_id, vehicle_id, size_id) VALUES ('{0}', '{1}', '{2}');""".format(user_id, vehicle_id, size_id)
-                cursor.execute(p_query)
+                sql_query = """INSERT INTO user_vehicle (user_id, vehicle_id, size_id) VALUES ('{0}', '{1}', '{2}');""".format(user_id, vehicle_id, size_id)
+                cursor.execute(sql_query)
                 conn.commit()
                 cursor.close
 
-                p_query = """SELECT MAX(u_veh_id) FROM user_vehicle WHERE user_id = '{0}'""".format(user_id)
-                cursor.execute(p_query)
+                sql_query = """SELECT MAX(u_veh_id) FROM user_vehicle WHERE user_id = '{0}'""".format(user_id)
+                cursor.execute(sql_query)
                 conn.commit()
                 res_ = cursor.fetchone()
                 cursor.close
@@ -622,6 +642,47 @@ def new_user_vehicle():
                 return 'Could not connect to the DB'
 
     return {'new_vehicle_id': res_[0], 'vehicle_name': vehicle_name, 'tire_size': size_name}
+
+
+@app.route("/delete_user", metods=['DELETE']) #How dare you?
+def delete_user():
+    if request.method == 'DELETE':
+        email = request.form.get('email')
+        token = request.form.get('token')
+        sure = request.form.get('ARE_YOU_SURE?')
+
+        if not user_exist(email):
+            return
+        else:
+            if not token_exist(email):
+                return
+            else:
+
+                if sure: 
+
+                    if not conn:
+                        return
+                    else:
+
+                        sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
+                        cursor.execute(sql_query)
+                        conn.commit()
+                        res_ = cursor.fetchone()
+                        cursor.close
+                        
+                        sql_query = """DELETE FROM users WHERE email = '{0}'""".format(email)
+                        cursor.execute(sql_query)
+                        conn.commit()
+                        cursor.close
+
+                        text = 'R.I.P {{ name }}, i will miss you :('
+                        template = Template(text)
+
+                        return template.render(name = res_[0] + ' ' + res_[1])
+
+
+
+
 
 
 if __name__ == '__main__':

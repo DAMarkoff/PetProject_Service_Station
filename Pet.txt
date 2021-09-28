@@ -11,7 +11,20 @@ Serv: ssh user_105@23.88.52.139, password: 123
 DB: 159.69.151.133:5056, Database: user_20_db, Username: user_20, Password: 123
 DB diagram: https://drawsql.app/myowncompany/diagrams/cto#
 
-ToDo: update the token's TTL in the redis db after each user action
+ToDo: 
+	- update the token's TTL in the redis db after each user action
+	- delete user
+	- deactivate user
+	- delete storage order
+	- delete vehicle
+	- list of available storage spaces in the warehouse
+*	- create cost_of_storage table (price list? any discout? so many questions!)
+*	- alter column cost in storage_orders table (calculate costs)
+	- create sub_types table
+	- create subscription table
+	- create tire_service table
+	- swagger
+	
 
 /login [POST] - login user
 	input:  
