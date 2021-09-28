@@ -153,6 +153,33 @@ def size_name_by_id(size_id):
             return None
         return res_[0]
 
+def vehicle_name_by_id(vehicle_id):
+    if not conn:
+        return 'Could not connect to the DB'
+    else:
+        sql_query = """SELECT vehicle_name FROM vehicle WHERE vehicle_id = '{}'""".format(vehicle_id)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchone()
+        cursor.close
+
+        if res_ is None:
+            return None
+        return res_[0]
+
+def vehicle_id_by_name(vehicle_name):
+    if not conn:
+        return 'Could not connect to the DB'
+    else:
+        sql_query = """SELECT vehicle_id FROM vehicle WHERE vehicle_name = '{}'""".format(vehicle_name)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchone()
+        cursor.close
+
+        if res_ is None:
+            return None
+        return res_[0]
 
 @app.route("/reg", methods=['POST']) #reg new user
 def reg():
@@ -903,68 +930,58 @@ def change_user_vehicle():
             return 'The token is invalid, please log in' #redirect to /login
         else:
 
-            if new_vehicle_name is None and new_size_name is None:
-                return 'Ok. Nothing needs to be changed :)'
-            else:
+            if not conn:
+                return 'Could not connect to the DB'
+            else:        
 
-                if not conn:
-                    return 'Could not connect to the DB'
+                sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
+                cursor.execute(sql_query)
+                conn.commit()
+                res_ = cursor.fetchone()
+                cursor.close
+
+                user_id_db, vehicle_id_db, size_id_db = res_[0], res_[1], res_[2]   
+
+                old_vehicle_name = vehicle_name_by_id(vehicle_id_db)
+                old_size_name = size_name_by_id(size_id_db)
+
+                if user_id_db != get_user_id(email):
+                    return 'It is not your vehicle! Somebody call the police!'
                 else:
 
-                    sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
-                    cursor.execute(sql_query)
-                    conn.commit()
-                    res_ = cursor.fetchone()
-                    cursor.close
+                    if (new_vehicle_name is None and new_size_name is None) or (new_vehicle_name == old_vehicle_name and new_size_name == old_size_name):
+                        return 'Ok. Nothing needs to be changed :)'
+                    else:    
 
-                    vehicle_id_db, size_id_db = res_[1], res_[2]        
+                        new_vehicle_id, new_size_id = 0, 0
 
-                    new_vehicle_id, new_size_id = 0, 0
+                        if new_vehicle_name is None:
+                            new_vehicle_id = vehicle_id_db
+                        else:                 
 
-                    if new_vehicle_name is None:
-                        new_vehicle_id = vehicle_id_db
-                    else:
+                            vehicle_id_by = vehicle_id_by_name(new_vehicle_name)
+                            if vehicle_id_by is not None:
+                                new_vehicle_id = vehicle_id_by
+                            else:
+                                return 'Unknown vehikle_name'
 
-                        #keep the old vehicle name
-                        sql_query = """SELECT vehicle_name FROM vehicle WHERE vehicle_id = '{}'""".format(vehicle_id_db)
+                        if new_size_name is None:
+                            new_size_id = size_id_db
+                        else:
+
+                            size_id_by = size_id_by_name(new_size_name)
+                            if size_id_by is not None:
+                                new_size_id = size_id_by
+                            else:
+                                return 'Unknown size_name'
+
+                        sql_query = """UPDATE user_vehicle SET vehicle_id = '{0}', size_id = '{1}' WHERE u_veh_id = '{2}'""".format(new_vehicle_id, new_size_id, u_veh_id)
                         cursor.execute(sql_query)
                         conn.commit()
-                        res_ = cursor.fetchone()
                         cursor.close
 
-                        old_vehicle_name = res_[0]                    
-
-                        sql_query = """SELECT vehicle_id FROM vehicle WHERE vehicle_name = '{}'""".format(new_vehicle_name)
-                        cursor.execute(sql_query)
-                        conn.commit()
-                        res_ = cursor.fetchone()
-                        cursor.close
-
-                        new_vehicle_id = res_[0]
-
-                    if new_size_name is None:
-                        new_size_id = size_id_db
-                    else:
-
-                        size_name_by = size_name_by_id(size_id_db)
-                        if size_name_by is not None:
-                            old_size_name = size_name_by
-                        else:
-                            return 'Unknown size_id'
-
-                        size_id_by = size_id_by_name(new_size_name)
-                        if size_id_by is not None:
-                            new_size_id = size_id_by
-                        else:
-                            return 'Unknown size_name'
-
-                    sql_query = """UPDATE user_vehicle SET vehicle_id = '{0}', size_id = '{1}' WHERE u_veh_id = '{2}'""".format(new_vehicle_id, new_size_id, u_veh_id)
-                    cursor.execute(sql_query)
-                    conn.commit()
-                    cursor.close
-
-                    result = {'vehicle_id': u_veh_id, 'old_vehicle_name': old_vehicle_name, 'new_vehicle_name': new_vehicle_name,
-                                'old_size_name': old_size_name, 'new_size_name': new_size_name}
+                        result = {'vehicle_id': u_veh_id, 'old_vehicle_name': old_vehicle_name, 'new_vehicle_name': new_vehicle_name,
+                                    'old_size_name': old_size_name, 'new_size_name': new_size_name}
 
     return jsonify(result)
 

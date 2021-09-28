@@ -27,15 +27,13 @@ Done:
 	
 	/delete_user_vehicle - ok
 	
-	/delete_storage_order
+	/delete_storage_order - ok
 	/change_user_vehicle
 	
 	/available_storage - ok
 	
 ToDo: 
 	- new storage order dates validate
-	- size_id_by_name if None
-	- def veh id or name by name or id
 	- update the token's TTL in the redis db after each user action
 
 *	- create cost_of_storage table (price list? any discout? so many questions!)
@@ -276,6 +274,7 @@ ToDo:
 
 	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
+			if it is not user's storage order: Call the police!!! :)
 		
 /change_user_vehicle [PATCH] - !!! )
 	input:
@@ -294,7 +293,8 @@ ToDo:
 			
 	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
-			if all of the optional data is None: nothing needs to be changed
-				if one of the optional data is None: take the data needed from DB
+			if it is not user's vehicle: Call the police!!! :)
+				if all of the optional data is None: nothing needs to be changed
+					if one of the optional data is None: take the data needed from DB
 
 /available_storage [GET] - show available free storage places in the warehouse
