@@ -848,12 +848,15 @@ def delete_storage_order():
         return 'Could not connect to the DB'
     else:
 
-        sql_query = """SELECT user_id FROM storage_orders WHERE st_ord_id = '{0}'""".format(st_ord_id)
+        sql_query = """SELECT user_id, shelf_id FROM storage_orders WHERE st_ord_id = '{0}'""".format(st_ord_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
         cursor.close
 
+        shelf_id = res_[1]
+
+        #Is it your storage order?
         if get_user_id(email) != res_[0]:
             return 'It is not your storage order! Somebody call the police!'
         else:
@@ -867,6 +870,12 @@ def delete_storage_order():
                 else:
 
                     sql_query = """DELETE FROM storage_orders WHERE st_ord_id = '{0}'""".format(st_ord_id)
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    cursor.close
+
+                    #set the shelf_id as available
+                    sql_query = """UPDATE warehouse SET available = True WHERE shelf_id = '{0}';""".format(shelf_id)
                     cursor.execute(sql_query)
                     conn.commit()
                     cursor.close
