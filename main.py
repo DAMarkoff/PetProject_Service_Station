@@ -209,7 +209,7 @@ def cl():
 def all():
 
     if conn:
-        sql_query = "SELECT user_id, first_name, last_name, phone, email, pass FROM users"
+        sql_query = "SELECT user_id, first_name, last_name, phone, email, pass, active FROM users"
         cursor.execute(sql_query)
         conn.commit()
         res  = cursor.fetchall()
@@ -223,7 +223,8 @@ def all():
                             "l_name": res[i][2],
                             "phone": res[i][3],
                             "email": res[i][4],
-                            "passw": res[i][5]})
+                            "passw": res[i][5],
+                            "active": res[i][6]})
         else:
             return 'There are no users in the DB'
         
@@ -239,24 +240,25 @@ def login():
     if passw is None or email is None:
         return 'The pass and email data are required'         
 
-    if conn:
 
-        #if user does not exist
-        if not user_exist(email):
-            return "The user does not exist. Please, register"
+    #if user does not exist
+    if not user_exist(email):
+        return "The user does not exist. Please, register"
+    else: 
 
-        #if user exists
-        else: 
+        if not user_active(email):
+            return 'User is deactivated'
+        else:
 
-            sql_query = "SELECT pass, user_id, first_name, last_name FROM users WHERE email = '{0}'".format(email)
-            cursor.execute(sql_query)
-            conn.commit()
-            res  = cursor.fetchone()
-            cursor.close
-            
-            if not user_active(email):
-                return 'User is deactivated'
+            if not conn:
+                return 'Could not connect to the DB'
             else:
+                sql_query = "SELECT pass, user_id, first_name, last_name FROM users WHERE email = '{0}'".format(email)
+                cursor.execute(sql_query)
+                conn.commit()
+                res  = cursor.fetchone()
+                cursor.close
+                
                 token = ""
                 if passw == res[0]: #если пароль верен
                     if r.exists(email) == 0: #если токена нет в redis db
@@ -652,11 +654,14 @@ def delete_user():
         if not user_exist(email):
             return 'The user does not exist. Please, register'
         else:
+
             if not token_exist(email, token):
                 return 'The token is invalid, please log in' #redirect to /login
             else:
 
-                if sure: 
+                if not sure: 
+                    return 'АHA! Changed your mind?'
+                else:
 
                     if not conn:
                         return 'Could not connect to the DB'
@@ -679,8 +684,76 @@ def delete_user():
                         return template.render(name = res_[0] + ' ' + res_[1])
 
 
+@app.route("/deactivate_user", methods=['POST']) #actually, deactivating the user
+def deactivate_user():
+    email = request.form.get('email')
+    token = request.form.get('token')
+    sure = request.form.get('ARE_YOU_SURE?')
 
+    if not user_exist(email):
+        return 'The user does not exist. Please, register'
+    else:
 
+        if not token_exist(email, token):
+            return 'The token is invalid, please log in' #redirect to /login
+        else:
+
+            if not sure:
+                return 'АHA! Changed your mind?'
+            else:
+
+                if not conn:
+                    return 'Could not connect to the DB'
+                else:
+
+                    sql_query = """UPDATE users SET active = 'False' WHERE email = '{0}'""".format(email)
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    cursor.close
+
+                    sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    res_ = cursor.fetchone()
+                    cursor.close
+
+                    text = 'User {{ name }} has been successfully deactivated'
+                    template = Template(text)
+
+                    return template.render(name = res_[0] + ' ' + res_[1])
+
+@app.route("/activate_user", methods=['POST']) #actually, activating the user
+def activate_user():
+    email = request.form.get('email')
+    token = request.form.get('token')
+
+    if not user_exist(email):
+        return 'The user does not exist. Please, register'
+    else:
+
+        if not token_exist(email, token):
+            return 'The token is invalid, please log in' #redirect to /login
+        else:
+
+            if not conn:
+                return 'Could not connect to the DB'
+            else:
+
+                sql_query = """UPDATE users SET active = 'True' WHERE email = '{0}'""".format(email)
+                cursor.execute(sql_query)
+                conn.commit()
+                cursor.close
+
+                sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
+                cursor.execute(sql_query)
+                conn.commit()
+                res_ = cursor.fetchone()
+                cursor.close
+
+                text = 'User {{ name }} has been successfully activated'
+                template = Template(text)
+
+                return template.render(name = res_[0] + ' ' + res_[1])                    
 
 
 if __name__ == '__main__':
