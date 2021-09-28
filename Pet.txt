@@ -33,7 +33,7 @@ Done:
 	/available_storage - ok
 	
 ToDo: 
-	- delete storage order if it is not yours order?
+	- new storage order dates validate
 	- size_id_by_name if None
 	- def veh id or name by name or id
 	- update the token's TTL in the redis db after each user action

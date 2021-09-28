@@ -393,39 +393,50 @@ def new_st_ord():
     if not user_exist(email):
             return "The user does not exist. Please, register"
     else:    
+
         #if token exists in redis db
-        if token_exist(email, token):
-
-
+        if not token_exist(email, token):
+            return "The token is invalid, please log in" #redirect to /login
+        else:
 
             #is there the necessary free storage space
-            if shelf_avail(size_name):
+            if not shelf_avail(size_name):
+                return "Sorry, we do not have the storage you need"
+            else:
+
                 shelf_id = shelf_id_by_size(size_name)
                 
-                if conn:
+                if not conn:
+                    return 'Sorry, no connection with the DB'
+                else:
+
+                    size_id_by = size_id_by_name(size_name)
+                    if size_id_by is None:
+                        return 'Unknown size_name'
 
                     #create storage order
                     sql_query = """INSERT INTO storage_orders (user_id, start_date, stop_date, size_id, shelf_id, st_ord_cost) 
-                                VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}');""".format(get_user_id(email), start_date, stop_date, size_id_by_name(size_name), shelf_id, 1000)
+                                VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}');""".format(get_user_id(email), start_date, stop_date, size_id_by, shelf_id, 1000)
                     cursor.execute(sql_query)
                     conn.commit()
                     cursor.close
 
-                    #set shelf_id as not available
+                    #get the new storage order id
+                    sql_query = """SELECT st_ord_id FROM storage_orders WHERE shelf_id = '{0}';""".format(shelf_id)
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    res_ = cursor.fetchone()
+                    cursor.close
+
+                    new_st_ord_id = res_[0]
+
+                    #set the shelf_id as not available
                     sql_query = """UPDATE warehouse SET available = False WHERE shelf_id = '{0}';""".format(shelf_id)
                     cursor.execute(sql_query)
                     conn.commit()
                     cursor.close
 
-                else: 
-                    return 'Sorry, no connection with the DB'
-
-            else:
-                return "Sorry, we do not have the storage you need"
-        else:
-            return "The token is invalid, please log in" #redirect to /login
-
-    return jsonify({'shelf_id': shelf_id})
+    return jsonify({'shelf_id': shelf_id, 'storage order id': new_st_ord_id})
 
 
 @app.route("/change_storage_order", methods=['PATCH']) #change the data in the storage order
