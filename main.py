@@ -1089,5 +1089,52 @@ def create_tire_service_order():
                     return jsonify(result)
 
 
+@app.route("/delete_tire_service_order", methods=['DELETE'])
+def delete_tire_service_order():
+    if request.method == 'DELETE':
+        email = request.form.get('email')
+        token = request.form.get('token')
+        serv_order_id = request.form.get('service_order_id')
+
+    if token is None or email is None or serv_order_id is None:
+        return 'The token, email, service_order_id are required'
+
+    if not user_exist(email):
+        return 'The user does not exist. Please, register'
+    else:
+
+        if not token_exist(email, token):
+            return 'The token is invalid, please log in' #redirect to /login
+        else:
+
+            if not conn:
+                return
+            else:
+
+                sql_query = """SELECT user_id, u_veh_id, worker_id FROM tire_service_order 
+                                WHERE serv_order_id = '{0}';""".format(serv_order_id)
+                cursor.execute(sql_query)
+                conn.commit()
+                res_ = cursor.fetchone()
+                cursor.close
+
+                user_id, u_veh_id, worker_id = res_[0], res_[1], res_[2]
+
+                if get_user_id(email) != user_id:
+                    return 'It is not your tire service order!'
+                else:
+
+                    sql_query = """DELETE FROM tire_service_order WHERE serv_ord_id = '{0}'""".format(serv_order_id)
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    cursor.close
+
+                    sql_query = """UPDATE staff SET available = True WHERE worker_id = '{0}'""".format(worker_id)
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    cursor.close
+
+                    return 'Tire service order ID ' + serv_order_id + ' has been deleted'
+
 if __name__ == '__main__':
     app.run()
