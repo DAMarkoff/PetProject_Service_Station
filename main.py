@@ -1151,8 +1151,6 @@ def add_task_to_list_of_works():
 
     if numbers_of_task is None:
         numbers_of_task = 1
-    else:
-        numbers_of_task = int(numbers_of_task)
 
     if not user_exist(email):
         return 'The user does not exist. Please, register'
@@ -1188,7 +1186,7 @@ def add_task_to_list_of_works():
                     else:
                         task_id = res_[0]
 
-                    for _ in range(numbers_of_task):
+                    for _ in range(int(numbers_of_task)):
 
                         sql_query = """INSERT INTO list_of_works (serv_order_id, task_id)
                                         VALUES ('{0}', '{1}');""".format(serv_order_id, task_id)
