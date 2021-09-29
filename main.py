@@ -1144,13 +1144,15 @@ def add_task_to_list_of_works():
         token = request.form.get('token')
         serv_order_id = request.form.get('service_order_id')
         task_name = request.form.get('task_name')
-        numbers_of_task = request.form.get('numbers_of_task')
+        numbers_of_task = request.form.get('numbers_of_tasks')
 
     if token is None or email is None or serv_order_id is None or task_name is None:
         return 'The token, email, service_order_id and task_name are required'
 
     if numbers_of_task is None:
         numbers_of_task = 1
+    else:
+        numbers_of_task = int(numbers_of_task)
 
     if not user_exist(email):
         return 'The user does not exist. Please, register'
