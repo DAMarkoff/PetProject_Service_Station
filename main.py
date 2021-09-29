@@ -1051,11 +1051,12 @@ def create_tire_service_order():
                     cursor.execute(sql_query)
                     conn.commit()
                     res_ = cursor.fetchall()
-                    cursor.close
                     print(len(res_))
 
+                    if res_ is None:
+                        return 'Sorry, all workers are busy'
+
                     rand_id = random.randint(0, len(res_) - 1)
-                    print(len(res_))
                     worker_id, worker_first_name, worker_last_name, worker_email, worker_phone = res_[rand_id][0], res_[rand_id][1], res_[rand_id][2], res_[rand_id][3], res_[rand_id][4]
 
                     sql_query = """INSERT INTO tire_service_order (user_id, serv_order_date, u_veh_id, worker_id)
