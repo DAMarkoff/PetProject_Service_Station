@@ -1196,7 +1196,7 @@ def add_task_to_list_of_works():
                         cursor.execute(sql_query)
                         conn.commit()
 
-                    if numbers_of_task == 1:
+                    if int(numbers_of_task) == 1:
                         result = 'The ' + task_name + ' task is successfully added to your tire_service_order ID ' + serv_order_id
                     else:
                         result = 'tasks for ' + task_name + ' in the amount of ' + numbers_of_task + \
