@@ -28,8 +28,8 @@ Done:
 	/delete_storage_order
 	/change_user_vehicle
 	/available_storage
-	
 	/create_tire_service_order
+	/delete_tire_service_order`
 	
 ToDo: 
 	- schedule (for workers)
@@ -39,10 +39,8 @@ ToDo:
 
 !	- create cost_of_storage table (price list? any discout? so many questions!)
 !	- alter column cost in the storage_orders table (calculate costs)
-	- create_tire_service_order
 	- change_tire_service_order
-	- delete_tire_service_order
-	- create_list_of_works
+	- add_task_to_list_of_works
 	- change_list_of_works
 	- delete_list_of_works
 	- create_subscription
@@ -232,7 +230,7 @@ ToDo:
 			ARE_YOU_SURE?		- required
 	
 	output:
-			message
+			confirmaion message
 			
 	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
@@ -245,7 +243,7 @@ ToDo:
 			token				- required
 	
 	output:
-			message
+			confirmaion message
 			
 	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
@@ -257,7 +255,7 @@ ToDo:
 			user_vehicle_id		- required
 	
 	output:
-			message
+			confirmaion message
 
 	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
@@ -270,7 +268,7 @@ ToDo:
 			storage_order_id	- required
 	
 	output:
-			message
+			confirmaion message
 
 	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
@@ -320,3 +318,33 @@ ToDo:
 			if it is not user's vehicle: :)
 				the date is not before today
 					
+/delete_tire_service_order [DELETE}
+	input:
+			email				- required
+			token				- required
+			service_order_id	- required
+			
+	output:
+			confirmaion message
+			
+	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
+		if the token does not exist in redis db: redirect to /login
+			if it is not user's order: :)
+				the worker assigned to the order to delete must be marked as available
+				
+/create_list_of_works
+	input:
+			email				- required
+			token				- required
+			service_order_id	- required
+			
+/add_task_to_list_of_works	[POST]
+	input:
+			email				- required
+			token				- required
+			service_order_id	- required
+			task_name			- required
+			numbers_of_tasks	- optional
+			
+	output:
+			confirmaion message

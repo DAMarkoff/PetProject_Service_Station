@@ -874,29 +874,29 @@ def delete_storage_order():
     if token is None or email is None or st_ord_id is None:
         return 'The token, email and storage_order_id are required'
 
-    if not conn:
-        return 'Could not connect to the DB'
+    if not user_exist(email):
+        return 'The user does not exist. Please, register'
     else:
 
-        sql_query = """SELECT user_id, shelf_id FROM storage_orders WHERE st_ord_id = '{0}'""".format(st_ord_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-        cursor.close
-
-        shelf_id = res_[1]
-
-        #Is it your storage order?
-        if get_user_id(email) != res_[0]:
-            return 'It is not your storage order! Somebody call the police!'
+        if not token_exist(email, token):
+            return 'The token is invalid, please log in'  # redirect to /login
         else:
 
-            if not user_exist(email):
-                return 'The user does not exist. Please, register'
+            if not conn:
+                return 'Could not connect to the DB'
             else:
-                
-                if not token_exist(email, token):
-                    return 'The token is invalid, please log in' #redirect to /login
+
+                sql_query = """SELECT user_id, shelf_id FROM storage_orders WHERE st_ord_id = '{0}'""".format(st_ord_id)
+                cursor.execute(sql_query)
+                conn.commit()
+                res_ = cursor.fetchone()
+                cursor.close
+
+                shelf_id = res_[1]
+
+                #Is it your storage order?
+                if get_user_id(email) != res_[0]:
+                    return 'It is not your storage order! Somebody call the police!'
                 else:
 
                     sql_query = """DELETE FROM storage_orders WHERE st_ord_id = '{0}'""".format(st_ord_id)
@@ -910,7 +910,7 @@ def delete_storage_order():
                     conn.commit()
                     cursor.close
 
-                    return 'Storage order ID '+  st_ord_id + ' has been deleted'  
+                    return 'Storage order ID '+  st_ord_id + ' has been deleted'
 
 
 @app.route("/change_user_vehicle", methods=['PATCH']) #
@@ -992,7 +992,7 @@ def change_user_vehicle():
 @app.route("/available_storage", methods=['GET']) #show available free storage places in the warehouse
 def available_storage():
     if not conn:
-        return
+        return 'Could not connect to the DB'
     else:
 
         sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE available = 'True'"""
@@ -1108,7 +1108,7 @@ def delete_tire_service_order():
         else:
 
             if not conn:
-                return
+                return 'Could not connect to the DB'
             else:
 
                 sql_query = """SELECT user_id, u_veh_id, worker_id FROM tire_service_order 
@@ -1134,7 +1134,71 @@ def delete_tire_service_order():
                     conn.commit()
                     cursor.close
 
-                    return 'Tire service order ID ' + serv_order_id + ' has been deleted'
+    return 'Tire service order ID ' + serv_order_id + ' has been deleted'
+
+
+@app.route("/add_task_to_list_of_works", methods=['POST'])
+def add_task_to_list_of_works():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        token = request.form.get('token')
+        serv_order_id = request.form.get('service_order_id')
+        task_name = request.form.get('task_name')
+        numbers_of_task = request.form.get('numbers_of_task')
+
+    if token is None or email is None or serv_order_id is None or task_name is None:
+        return 'The token, email, service_order_id and task_name are required'
+
+    if numbers_of_task is None:
+        numbers_of_task = 1
+
+    if not user_exist(email):
+        return 'The user does not exist. Please, register'
+    else:
+
+        if not token_exist(email, token):
+            return 'The token is invalid, please log in' #redirect to /login
+        else:
+
+            if not conn:
+                return 'Could not connect to the DB'
+            else:
+
+                sql_query = """SELECT user_id FROM tire_service_order 
+                                WHERE serv_order_id = '{0}';""".format(serv_order_id)
+                cursor.execute(sql_query)
+                conn.commit()
+                res_ = cursor.fetchone()
+                cursor.close
+
+                if get_user_id(email) != res_[0]:
+                    return 'It is not your tire service order!'
+                else:
+
+                    sql_query = """SELECT task_id FROM tasks WHERE task_name = '{0}';""".format(task_name)
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    res_ = cursor.fetchone()
+                    cursor.close
+
+                    if res_ is None:
+                        return 'Sorry, we do not offer this service'
+                    else:
+                        task_id = res_[0]
+
+                    for _ in range(numbers_of_task):
+
+                        sql_query = """INSERT INTO list_of_works (serv_order_id, task_id)
+                                        VALUES ('{0}', '{1}');""".format(serv_order_id, task_id)
+                        cursor.execute(sql_query)
+                        conn.commit()
+
+                    if numbers_of_task == 1:
+                        result = 'The ' + task_name + ' task is successfully added to your tire_service_order ID ' + serv_order_id
+                    else:
+                        result = task_name + 'tasks in quantity of ' + numbers_of_task + ' are successfully added to your tire_service_order ID ' + serv_order_id
+
+    return jsonify(result)
 
 if __name__ == '__main__':
     app.run()
