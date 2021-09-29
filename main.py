@@ -1124,7 +1124,7 @@ def delete_tire_service_order():
                     return 'It is not your tire service order!'
                 else:
 
-                    sql_query = """DELETE FROM tire_service_order WHERE serv_ord_id = '{0}'""".format(serv_order_id)
+                    sql_query = """DELETE FROM tire_service_order WHERE serv_order_id = '{0}'""".format(serv_order_id)
                     cursor.execute(sql_query)
                     conn.commit()
                     cursor.close
