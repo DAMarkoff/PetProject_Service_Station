@@ -1013,7 +1013,7 @@ def available_storage():
 
 @app.route("/create_tire_service_order", methods=['POST'])
 def create_tire_service_order():
-    if request.method = 'POST':
+    if request.method == 'POST':
         email = request.form.get('email')
         token = request.form.get('token')
         order_date = request.form.get('order_date')
