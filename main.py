@@ -1,4 +1,4 @@
-from os import curdir
+#from os import curdir
 from flask import Flask, json, request, jsonify
 from jinja2 import Template
 import psycopg2
@@ -58,19 +58,6 @@ def size_id_by_name(size_name):
         if size_id_ is None:
             return None
         return size_id_[0]   
-
-def vehicle_id_by_name(vehicle_name):
-    if conn:
-
-        sql_query = "SELECT vehicle_id FROM vehicle WHERE vehicle_name = '{0}'".format(vehicle_name)
-        cursor.execute(sql_query)
-        conn.commit()
-        vehicle_id_  = cursor.fetchone()
-        cursor.close
-
-        if vehicle_id_ is None:
-            return 'Unknown'
-        return vehicle_id_[0]             
 
 def shelf_avail(size_name):
     if conn:
@@ -172,6 +159,20 @@ def vehicle_id_by_name(vehicle_name):
         return 'Could not connect to the DB'
     else:
         sql_query = """SELECT vehicle_id FROM vehicle WHERE vehicle_name = '{}'""".format(vehicle_name)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchone()
+        cursor.close
+
+        if res_ is None:
+            return None
+        return res_[0]
+
+def vehicle_one_by_var(select, where, what):
+    if not conn:
+        return 'Could not connect to the DB'
+    else:
+        sql_query = """SELECT '{0}' FROM vehicle WHERE '{1}' = '{2}'""".format(select, where, what)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
@@ -1006,6 +1007,52 @@ def available_storage():
                                 'size_name': size_name_by_id(res_[i][1])})
 
     return jsonify(result)
+
+
+@app.route("/create_tire_service_order", methods=['POST'])
+def create_tire_service_order():
+    if request.method = 'POST':
+        email = request.form.get('email')
+        token = request.form.get('token')
+        order_date = request.form.get('order_date')
+        size_name = request.form.get('size_name')
+        u_veh_id = request.form.get('user_vehicle_id')
+
+    if token is None or email is None or order_date is None or size_name is None or u_veh_id is None:
+        return 'The token, email and user_vehicle_id are required'
+
+    if not user_exist(email):
+        return 'The user does not exist. Please, register'
+    else:
+
+        if not token_exist(email, token):
+            return 'The token is invalid, please log in' #redirect to /login
+        else:
+
+            if not conn:
+                return
+            else:
+
+                sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE u_veh_id = '{0};""".format(u_veh_id)
+                cursor.execute(sql_query)
+                conn.commit()
+                res_ = cursor.fetchone()
+                cursor.close
+
+                user_id, vehicle_id, size_id = res_[0], res_[1], res_[2]
+
+                if get_user_id(email) != user_id:
+                    return 'It is not your vehicle!'
+                else:
+
+
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     app.run()
