@@ -1149,10 +1149,10 @@ def add_task_to_list_of_works():
     if token is None or email is None or serv_order_id is None or task_name is None:
         return 'The token, email, service_order_id and task_name are required'
 
-    if not numbers_of_task.isdigit():
-        return 'NUMBERS!'
-
-    if numbers_of_task is None:
+    if numbers_of_task is not None:
+        if not numbers_of_task.isdigit():
+            return 'NUMBERS!'
+    else:
         numbers_of_task = 1
 
     if not user_exist(email):
