@@ -1020,7 +1020,7 @@ def create_tire_service_order():
         u_veh_id = request.form.get('user_vehicle_id')
 
     if token is None or email is None or order_date is None or u_veh_id is None:
-        return 'The token, email and user_vehicle_id are required'
+        return 'The token, email, order_date and user_vehicle_id are required'
 
     if not user_exist(email):
         return 'The user does not exist. Please, register'
@@ -1034,7 +1034,7 @@ def create_tire_service_order():
                 return
             else:
 
-                sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE u_veh_id = '{0};""".format(u_veh_id)
+                sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE u_veh_id = '{0}';""".format(u_veh_id)
                 cursor.execute(sql_query)
                 conn.commit()
                 res_ = cursor.fetchone()
