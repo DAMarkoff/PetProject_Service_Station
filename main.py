@@ -1,4 +1,6 @@
 #from os import curdir
+import random
+
 from flask import Flask, json, request, jsonify
 from jinja2 import Template
 import psycopg2
@@ -1015,10 +1017,9 @@ def create_tire_service_order():
         email = request.form.get('email')
         token = request.form.get('token')
         order_date = request.form.get('order_date')
-        size_name = request.form.get('size_name')
         u_veh_id = request.form.get('user_vehicle_id')
 
-    if token is None or email is None or order_date is None or size_name is None or u_veh_id is None:
+    if token is None or email is None or order_date is None or u_veh_id is None:
         return 'The token, email and user_vehicle_id are required'
 
     if not user_exist(email):
@@ -1045,9 +1046,42 @@ def create_tire_service_order():
                     return 'It is not your vehicle!'
                 else:
 
+                    sql_query = """SELECT worker_id, first_name, last_name, email, phone FROM
+                                    staff WHERE position_id = 1 AND available = True"""
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    res_ = cursor.fetchall()
+                    cursor.close
 
+                    rand_id = random.randint(1, len(res_) + 1)
+                    worker_id, worker_first_name, worker_last_name, worker_email, worker_phone = res_[rand_id][0], res_[rand_id][1], res_[rand_id][2], res_[rand_id][3], res_[rand_id][4]
 
+                    sql_query = """INSERT INTO tire_service_order (user_id, serv_order_date, u_veh_id, worker_id
+                                    VALUES ('{0}', '{1}', '{2}', '{3}'""".format(user_id, order_date, u_veh_id, worker_id)
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    cursor.close
 
+                    sql_query = """UPDATE staff SET available = False WHERE worker_id = '{0}'""".format(worker_id)
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    cursor.close
+
+                    sql_query = """SELECT serv_order_id FROM tire_service_order WHERE user_id = '{0}' 
+                                    AND serv_order_date = '{1}' AND u_veh_id = '{2}' 
+                                    AND  worker_id = '{3}'""".format(user_id, order_date, u_veh_id, worker_id)
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    res_ = cursor.fetchone()
+                    cursor.close
+
+                    serv_order_id = res_[0]
+
+                    result = {'service_order_id': serv_order_id, 'date': order_date, 'worker_id': worker_id,
+                              'worker_first_name': worker_first_name, 'worker_last_name': worker_last_name,
+                              'worker_phone': worker_phone, 'worker_email': worker_email}
+
+                    return jsonify(result)
 
 
 

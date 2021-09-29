@@ -302,12 +302,12 @@ ToDo:
 	input:
 			email				- required
 			token				- required
-			date				- required
-			u_veh_id			- required
+			order_date			- required
+			user_vehicle_id_id	- required
 
 	
 	output:
-			serv_order_id
+			service_order_id
 			date
 			worker_id
 			worker_first_name
