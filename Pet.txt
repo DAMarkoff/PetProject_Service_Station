@@ -353,5 +353,5 @@ ToDo:
 	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
 			if it is not user's order: :)
-				if numbers_of_tasks is none: than = 1
+				if numbers_of_tasks is none or not isdigit: return warning message
 					

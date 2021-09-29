@@ -343,7 +343,9 @@ def user_info():
             return "The token is invalid, please log in" #redirect to /login
         else:
 
-            if conn:
+            if not conn:
+                return 'Sorry, no connection with the DB'
+            else:
 
                 #collecting the user's personal data from the users db
                 sql_query = "SELECT user_id, first_name, last_name, email, phone, pass FROM users WHERE email = '{0}'".format(email)
@@ -401,10 +403,10 @@ def user_info():
                                             'tire size': res_[i][2]
                                             })
 
-                return jsonify({'user info': result_users}, {'storage orders info:': result_order}, {"user's vehicle": result_vehicle})
 
-            else: 
-                return 'Sorry, no connection with the DB'
+
+    return jsonify({'user info': result_users}, {'storage orders info:': result_order}, {"user's vehicle": result_vehicle})
+
             
 
 @app.route("/new_storage_order", methods=['POST']) #create new storage order
