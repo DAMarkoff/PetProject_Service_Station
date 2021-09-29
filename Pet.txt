@@ -29,7 +29,8 @@ Done:
 	/change_user_vehicle
 	/available_storage
 	/create_tire_service_order
-	/delete_tire_service_order`
+	/delete_tire_service_order
+	/add_task_to_list_of_works
 	
 ToDo: 
 	- schedule (for workers)
@@ -348,3 +349,9 @@ ToDo:
 			
 	output:
 			confirmaion message
+	
+	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
+		if the token does not exist in redis db: redirect to /login
+			if it is not user's order: :)
+				if numbers_of_tasks is none: than = 1
+					

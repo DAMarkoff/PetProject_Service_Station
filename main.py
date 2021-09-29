@@ -1149,6 +1149,9 @@ def add_task_to_list_of_works():
     if token is None or email is None or serv_order_id is None or task_name is None:
         return 'The token, email, service_order_id and task_name are required'
 
+    if not numbers_of_task.isdigit():
+        return 'NUMBERS!'
+
     if numbers_of_task is None:
         numbers_of_task = 1
 
@@ -1196,7 +1199,8 @@ def add_task_to_list_of_works():
                     if numbers_of_task == 1:
                         result = 'The ' + task_name + ' task is successfully added to your tire_service_order ID ' + serv_order_id
                     else:
-                        result = task_name + 'tasks in quantity of ' + numbers_of_task + ' are successfully added to your tire_service_order ID ' + serv_order_id
+                        result = 'tasks for ' + task_name + ' in the amount of ' + numbers_of_task + \
+                                 ' have been successfully added to your tire_service_order ID ' + serv_order_id
 
     return jsonify(result)
 
