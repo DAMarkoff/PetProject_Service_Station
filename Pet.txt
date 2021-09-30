@@ -33,6 +33,8 @@ Done:
 	/add_task_to_list_of_works
 	
 ToDo: 
+	- activate/deavtivate users from admin
+	- add to the /user_info tire_order datas 
 	- schedule (for workers)
 	- add to create_tire_service_order how to choose a worker
 	- new storage order dates validate (start before today)
