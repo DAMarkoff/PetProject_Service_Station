@@ -402,6 +402,13 @@ def user_info():
                                        'vehicle_type': res_[i][1],
                                        'tire size': res_[i][2]})
 
+        sql_query = "SELECT * FROM storage_orders WHERE user_id = '{0}'".format(get_user_id(email))
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchall()
+        # cursor.close()
+
+
         return jsonify({'user info': result_users}, {'storage orders info:': result_order},
                        {"user's vehicle": result_vehicle})
 

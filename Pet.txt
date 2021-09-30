@@ -33,6 +33,7 @@ Done:
 	/add_task_to_list_of_works
 	
 ToDo: 
+!!!	- line 1025 insert into tire_service_order manager_id instead of worker_id 
 	- activate/deavtivate users from admin
 	- add to the /user_info tire_order datas 
 	- schedule (for workers)
@@ -50,7 +51,14 @@ ToDo:
 	- change_subscription
 	- delete_subscription
 	- swagger
+
+DrawSQL DB:
+	table Payment (payment_id, user_id, card_number, exp_date, owner_name, cvv_cvc)
 	
+DISCLAIMER:
+user_authorization checks that: 	
+	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
+		if the token does not exist in redis db: redirect to /login
 
 /login [POST]
 	input:  
@@ -119,8 +127,7 @@ ToDo:
 			phone
 			passw
 	
-	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
-		if the token does not exist in redis db: redirect to /login
+	user_authorization
 			return info
 
 	
@@ -140,8 +147,7 @@ ToDo:
 			shelf_id
 			st_ord_id
 
-	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
-		if the token does not exist in redis db: redirect to /login
+	user_authorization
 			if there is no available shelf of the size needed in the warehouse: note		
 				add in the "storage_order" base info about the storage order
 				update in the "warehouse" base availability of the occupied storage place
@@ -165,8 +171,7 @@ ToDo:
 			st_ord_cost
 			shelf_id
 	
-	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
-		if the token does not exist in redis db: redirect to /login
+	user_authorization
 			if the provided dates are invalid: note
 				if the optional data is None: take the data needed from DB
 				if size_id is need to be changed make sure that the warehouse has an availabe shelf
@@ -184,8 +189,7 @@ ToDo:
 			vehicle_name
 			size_name
 			
-	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
-		if the token does not exist in redis db: redirect to /login
+	user_authorization
 			if the vehcile type or tire size is not specified in the DB: note 
 				add the date in to the DB
 				
@@ -207,8 +211,7 @@ ToDo:
 			phone
 			passw
 	
-	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
-		if the token does not exist in redis db: redirect to /login
+	user_authorization
 			if all optional data is None OR the new data is equal to the DB data: nothing needs to be changed
 				if some optional data is None: take the data needed from DB
 					if the password and/or email have been changed - the user must log in again
@@ -222,8 +225,7 @@ ToDo:
 	output:
 			sad message
 			
-	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
-		if the token does not exist in redis db: redirect to /login
+	user_authorization
 			if the "ARE_YOU_SURE?" value is not 'True': return a funny message
 			
 /deactivate_user [POST]
@@ -235,8 +237,7 @@ ToDo:
 	output:
 			confirmaion message
 			
-	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
-		if the token does not exist in redis db: redirect to /login
+	user_authorization
 			if the user has already been deactivated: return a message
 				if the "ARE_YOU_SURE?" value is not 'True': return a funny message
 				
@@ -248,8 +249,7 @@ ToDo:
 	output:
 			confirmaion message
 			
-	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
-		if the token does not exist in redis db: redirect to /login
+	user_authorization
 			
 /delete_user_vehicle [DELETE]
 	input:
@@ -260,8 +260,7 @@ ToDo:
 	output:
 			confirmaion message
 
-	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
-		if the token does not exist in redis db: redirect to /login
+	user_authorization
 			if it is not user's vehicle: Call the police!!! :)
 
 /delete_storage_order [DELETE]	
@@ -273,8 +272,7 @@ ToDo:
 	output:
 			confirmaion message
 
-	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
-		if the token does not exist in redis db: redirect to /login
+	user_authorization
 			if it is not user's storage order: :)
 		
 /change_user_vehicle [PATCH]
@@ -292,8 +290,7 @@ ToDo:
 			old_size_name
 			new_size_name
 			
-	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
-		if the token does not exist in redis db: redirect to /login
+	user_authorization
 			if it is not user's vehicle: Call the police!!! :)
 				if all optional data is None OR the new data is equal to the DB data: nothing needs to be changed
 					if some optional data is None: take the data needed from DB
@@ -316,8 +313,8 @@ ToDo:
 			worker_last_name
 			worker_phone
 			worker_email
-	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
-		if the token does not exist in redis db: redirect to /login
+			
+	user_authorization
 			if it is not user's vehicle: :)
 				the date is not before today
 					
@@ -330,8 +327,7 @@ ToDo:
 	output:
 			confirmaion message
 			
-	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
-		if the token does not exist in redis db: redirect to /login
+	user_authorization
 			if it is not user's order: :)
 				the worker assigned to the order to delete must be marked as available
 				
@@ -352,8 +348,7 @@ ToDo:
 	output:
 			confirmaion message
 	
-	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
-		if the token does not exist in redis db: redirect to /login
+	user_authorization
 			if it is not user's order: :)
 				if numbers_of_tasks is none or not isdigit: return warning message
 					
