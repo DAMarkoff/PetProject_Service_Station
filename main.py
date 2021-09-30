@@ -19,7 +19,7 @@ def user_exist(email):
         cursor.execute(sql_query)
         conn.commit()
         usr_id_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         if usr_id_ is None:
             return False
@@ -32,7 +32,7 @@ def get_user_id(email):
         cursor.execute(sql_query)
         conn.commit()
         usr_id_ = cursor.fetchone()
-        cursor.close()        
+        # cursor.close()        
 
         return usr_id_[0]
 
@@ -49,7 +49,7 @@ def size_id_by_name(size_name):
         cursor.execute(sql_query)
         conn.commit()
         size_id_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         if size_id_ is None:
             return None
@@ -63,7 +63,7 @@ def shelf_avail(size_name):
         cursor.execute(sql_query)
         conn.commit()
         avail = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         if avail is not None:
             return True
@@ -77,7 +77,7 @@ def shelf_id_by_size(size_name):
         cursor.execute(sql_query)
         conn.commit()
         shelf_id_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         return shelf_id_[0]
 
@@ -120,7 +120,7 @@ def user_active(email):
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         if res_[0]:
             return True
@@ -133,7 +133,7 @@ def size_name_by_id(size_id):
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         if res_ is None:
             return None
@@ -146,7 +146,7 @@ def vehicle_name_by_id(vehicle_id):
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         if res_ is None:
             return None
@@ -159,7 +159,7 @@ def vehicle_id_by_name(vehicle_name):
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         if res_ is None:
             return None
@@ -172,7 +172,7 @@ def vehicle_one_by_var(select, where, what):
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         if res_ is None:
             return None
@@ -225,14 +225,14 @@ def reg():
                     '{1}', '{2}', '{3}', '{4}', {5})""".format(f_name, l_name, passw, phone, email, active)
         cursor.execute(sql_query)
         conn.commit()
-        cursor.close()
+        # cursor.close()
 
         sql_query = """SELECT user_id, first_name, last_name, email, phone, pass, active 
                         FROM users WHERE email = '{0}'""".format(email)
         cursor.execute(sql_query)
         res = cursor.fetchone()
         conn.commit()
-        cursor.close()
+        # cursor.close()
 
         result = ({"ID": res[0],
                    "f_name": res[1],
@@ -255,7 +255,7 @@ def cl():
                 sql_query = "DELETE FROM users"
                 cursor.execute(sql_query)
                 conn.commit()
-                cursor.close()
+                # cursor.close()
 
                 return 'All users have been deleted'
         else:
@@ -272,7 +272,7 @@ def show_all_users():
     cursor.execute(sql_query)
     conn.commit()
     res = cursor.fetchall()
-    cursor.close()
+    # cursor.close()
 
     if res is not None:
         result = []
@@ -311,7 +311,7 @@ def login():
         cursor.execute(sql_query)
         conn.commit()
         res = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         #    token = ""
         if passw == res[0]:  # если пароль верен
@@ -354,7 +354,7 @@ def user_info():
         cursor.execute(sql_query)
         conn.commit()
         res = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         result_users = ({"ID": res[0],
                          "f_name": res[1],
@@ -368,7 +368,7 @@ def user_info():
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchall()
-        cursor.close()
+        # cursor.close()
 
         if res_ is None:
             result_order = 'There are no orders for storage from the user'
@@ -389,7 +389,7 @@ def user_info():
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchall()
-        cursor.close()
+        # cursor.close()
 
         empty_result = []
         if res_ == empty_result:
@@ -441,14 +441,14 @@ def new_st_ord():
                     format(get_user_id(email), start_date, stop_date, size_id_by, shelf_id, 1000)
         cursor.execute(sql_query)
         conn.commit()
-        cursor.close()
+        # cursor.close()
 
         # get the new storage order id
         sql_query = """SELECT st_ord_id FROM storage_orders WHERE shelf_id = '{0}';""".format(shelf_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         new_st_ord_id = res_[0]
 
@@ -456,7 +456,7 @@ def new_st_ord():
         sql_query = """UPDATE warehouse SET available = False WHERE shelf_id = '{0}';""".format(shelf_id)
         cursor.execute(sql_query)
         conn.commit()
-        cursor.close()
+        # cursor.close()
 
         return jsonify({'shelf_id': shelf_id, 'storage order id': new_st_ord_id})
 
@@ -488,7 +488,7 @@ def change_storage_order():
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         start_date_db, stop_date_db, size_id_db, st_ord_cost_db, shelf_id_db, user_id_db, shelf_id = \
             res_[0], res_[1], res_[2], res_[3], res_[4], res_[5], 0
@@ -529,7 +529,7 @@ def change_storage_order():
                 cursor.execute(sql_query)
                 conn.commit()
                 shelf_avail_ = cursor.fetchone()
-                cursor.close()
+                # cursor.close()
 
                 # if there is available storage
                 if shelf_avail is not None:
@@ -540,13 +540,13 @@ def change_storage_order():
                                     WHERE shelf_id = '{0}';""".format(shelf_id_db)
                     cursor.execute(sql_query)
                     conn.commit()
-                    cursor.close()
+                    # cursor.close()
 
                     sql_query = """UPDATE warehouse SET available = 'False' 
                                     WHERE shelf_id = '{0}';""".format(shelf_id)
                     cursor.execute(sql_query)
                     conn.commit()
-                    cursor.close()
+                    # cursor.close()
 
                 else:
                     return 'Sorry, we do not have the storage you need'
@@ -561,7 +561,7 @@ def change_storage_order():
                     format(start_date, stop_date, size_id, st_ord_cost, shelf_id, st_ord_id)
         cursor.execute(sql_query)
         conn.commit()
-        cursor.close()
+        # cursor.close()
 
         result = ({'storage_order': st_ord_id, 'start_date': start_date, 'stop_date': stop_date,
                    'size_id_new': size_id, 'size_id_old': size_id_db, 'storage_order_cost': st_ord_cost,
@@ -600,7 +600,7 @@ def change_user_info():
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         user_id_db, f_name_db, l_name_db, phone_db, passw_db = res_[0], res_[1], res_[2], res_[3], res_[4]
 
@@ -636,7 +636,7 @@ def change_user_info():
                     pass = '{4}' WHERE user_id = '{5}';""".format(f_name, l_name, new_email, phone, passw, user_id_db)
         cursor.execute(sql_query)
         conn.commit()
-        cursor.close()
+        # cursor.close()
 
         result = ({'user_id': user_id_db, 'f_name_new': f_name, 'f_name_old': f_name_db, 'l_name_new': l_name,
                    'l_name_old': l_name_db, 'email_new': new_email, 'email_old': email, 'phone_new': phone,
@@ -678,13 +678,13 @@ def new_user_vehicle():
                         VALUES ('{0}', '{1}', '{2}');""".format(user_id, vehicle_id, size_id)
         cursor.execute(sql_query)
         conn.commit()
-        cursor.close()
+        # cursor.close()
 
         sql_query = """SELECT MAX(u_veh_id) FROM user_vehicle WHERE user_id = '{0}'""".format(user_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         return {'new_vehicle_id': res_[0], 'vehicle_name': vehicle_name, 'tire_size': size_name}
 
@@ -713,12 +713,12 @@ def delete_user():
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         sql_query = """DELETE FROM users WHERE email = '{0}'""".format(email)
         cursor.execute(sql_query)
         conn.commit()
-        cursor.close()
+        # cursor.close()
 
         text = 'R.I.P {{ name }}, i will miss you :('
         template = Template(text)
@@ -751,13 +751,13 @@ def deactivate_user():
     sql_query = """UPDATE users SET active = 'False' WHERE email = '{0}'""".format(email)
     cursor.execute(sql_query)
     conn.commit()
-    cursor.close()
+    # cursor.close()
 
     sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
     cursor.execute(sql_query)
     conn.commit()
     res_ = cursor.fetchone()
-    cursor.close()
+    # cursor.close()
 
     text = 'User {{ name }} has been successfully deactivated'
     template = Template(text)
@@ -783,13 +783,13 @@ def activate_user():
     sql_query = """UPDATE users SET active = 'True' WHERE email = '{0}'""".format(email)
     cursor.execute(sql_query)
     conn.commit()
-    cursor.close()
+    # cursor.close()
 
     sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
     cursor.execute(sql_query)
     conn.commit()
     res_ = cursor.fetchone()
-    cursor.close()
+    # cursor.close()
 
     text = 'User {{ name }} has been successfully activated'
     template = Template(text)
@@ -818,7 +818,7 @@ def delete_user_vehicle():
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         if get_user_id(email) != res_[0]:
             return 'It is not your vehicle! Somebody call the police!'
@@ -827,7 +827,7 @@ def delete_user_vehicle():
             sql_query = """DELETE FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
             cursor.execute(sql_query)
             conn.commit()
-            cursor.close()
+            # cursor.close()
 
             return 'User vehicle ID ' + u_veh_id + ' has been deleted'
 
@@ -853,7 +853,7 @@ def delete_storage_order():
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         shelf_id = res_[1]
 
@@ -863,13 +863,13 @@ def delete_storage_order():
         sql_query = """DELETE FROM storage_orders WHERE st_ord_id = '{0}'""".format(st_ord_id)
         cursor.execute(sql_query)
         conn.commit()
-        cursor.close()
+        # cursor.close()
 
         # set the shelf_id as available
         sql_query = """UPDATE warehouse SET available = True WHERE shelf_id = '{0}';""".format(shelf_id)
         cursor.execute(sql_query)
         conn.commit()
-        cursor.close()
+        # cursor.close()
 
         return 'Storage order ID ' + st_ord_id + ' has been deleted'
 
@@ -897,7 +897,7 @@ def change_user_vehicle():
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         user_id_db, vehicle_id_db, size_id_db = res_[0], res_[1], res_[2]
 
@@ -937,7 +937,7 @@ def change_user_vehicle():
                         WHERE u_veh_id = '{2}'""".format(new_vehicle_id, new_size_id, u_veh_id)
         cursor.execute(sql_query)
         conn.commit()
-        cursor.close()
+        # cursor.close()
 
         result = {'vehicle_id': u_veh_id, 'old_vehicle_name': old_vehicle_name,
                   'new_vehicle_name': new_vehicle_name, 'old_size_name': old_size_name,
@@ -955,7 +955,7 @@ def available_storage():
     cursor.execute(sql_query)
     conn.commit()
     res_ = cursor.fetchall()
-    cursor.close()
+    # cursor.close()
 
     if res_ is not None:
         result = []
@@ -993,7 +993,7 @@ def create_tire_service_order():
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         user_id, vehicle_id, size_id = res_[0], res_[1], res_[2]
 
@@ -1005,7 +1005,7 @@ def create_tire_service_order():
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchall()
-        cursor.close()
+        # cursor.close()
 
         if len(res_) == 0:
             return 'Sorry, all workers are busy'
@@ -1019,12 +1019,12 @@ def create_tire_service_order():
                         VALUES ('{0}', '{1}', '{2}', '{3}')""".format(user_id, order_date, u_veh_id, worker_id)
         cursor.execute(sql_query)
         conn.commit()
-        cursor.close()
+        # cursor.close()
 
         sql_query = """UPDATE staff SET available = False WHERE worker_id = '{0}'""".format(worker_id)
         cursor.execute(sql_query)
         conn.commit()
-        cursor.close()
+        # cursor.close()
 
         sql_query = """SELECT serv_order_id FROM tire_service_order WHERE user_id = '{0}' 
                         AND serv_order_date = '{1}' AND u_veh_id = '{2}' 
@@ -1032,7 +1032,7 @@ def create_tire_service_order():
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         serv_order_id = res_[0]
 
@@ -1065,7 +1065,7 @@ def delete_tire_service_order():
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         user_id, u_veh_id, worker_id = res_[0], res_[1], res_[2]
 
@@ -1075,12 +1075,12 @@ def delete_tire_service_order():
         sql_query = """DELETE FROM tire_service_order WHERE serv_order_id = '{0}'""".format(serv_order_id)
         cursor.execute(sql_query)
         conn.commit()
-        cursor.close()
+        # cursor.close()
 
         sql_query = """UPDATE staff SET available = True WHERE worker_id = '{0}'""".format(worker_id)
         cursor.execute(sql_query)
         conn.commit()
-        cursor.close()
+        # cursor.close()
 
         return 'Tire service order ID ' + serv_order_id + ' has been deleted'
 
@@ -1111,7 +1111,7 @@ def add_task_to_list_of_works():
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         if get_user_id(email) != res_[0]:
             return 'It is not your tire service order!'
@@ -1120,7 +1120,7 @@ def add_task_to_list_of_works():
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        cursor.close()
+        # cursor.close()
 
         if res_ is None:
             return 'Sorry, we do not offer this service'
