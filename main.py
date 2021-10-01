@@ -467,9 +467,6 @@ def user_info():
         cursor.execute(sql_query)
         conn.commit()
 
-
-
-
         sql_query = """SELECT DISTINCT serv_order_id, serv_order_date, manager_id, u_veh_id FROM temp"""
         cursor.execute(sql_query)
         conn.commit()
@@ -481,14 +478,9 @@ def user_info():
         else:
             result_tire_service_order = []
             for i in range(len(res_)):
-
                 serv_order_id = res_[i][0]
-                sql_query = """SELECT SUM(task_cost) FROM temp 
-                                                WHERE serv_order_id = '{0}'""".format(serv_order_id)
-                cursor.execute(sql_query)
-                conn.commit()
-                res_2 = cursor.fetchone()
-                tire_service_order_cost = res_2[0]
+
+
 
                 sql_query = """SELECT task_name, worker_id, task_cost FROM temp 
                                 WHERE serv_order_id = '{0}'""".format(serv_order_id)
@@ -497,9 +489,17 @@ def user_info():
                 res_1 = cursor.fetchall()
 
                 empty_result = []
-                if res_1 == empty_result:
+                if res_1 is None:
                     result_tire_service_order_tasks = 'You do not have any tasks in your tire service order.'
                 else:
+
+                    sql_query = """SELECT SUM(task_cost) FROM temp 
+                                                                    WHERE serv_order_id = '{0}'""".format(serv_order_id)
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    res_2 = cursor.fetchone()
+                    tire_service_order_cost = res_2[0]
+
                     result_tire_service_order_tasks = []
                     for j in range(len(res_1)):
                         result_tire_service_order_tasks.append({
