@@ -349,7 +349,7 @@ def login():
                 r.set(email, token, ex=600)  # пролонгация токена, срок - 600 сек.
 
             # генерация Hello message (For fun :)
-            text = 'Hello, {{ name }}!'
+            text1 = 'Hello, {{ name }}!'
             template = Template(text)
 
             result = {
