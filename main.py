@@ -503,7 +503,7 @@ def user_info():
                 result_tire_service_order.append({
                     'serv_order_id': serv_order_id,
                     'serv_order_date': res_[i][1],
-                    'manager_id': res_[i][2]
+                    'manager_id': res_[i][2],
                     'tasks': result_tire_service_order_tasks
                 })
 
