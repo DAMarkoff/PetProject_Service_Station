@@ -506,7 +506,7 @@ def user_info():
                     result_tire_service_order_tasks = 'You do not have any tasks in your tire service order.'
                 else:
                     result_tire_service_order_tasks = []
-                    for j in range(len(res_1)):
+                    for j in range(len(res_task)):
                         result_tire_service_order_tasks.append({
                             'task_name': res_task[j][0],
                             'worker_id': res_task[j][1],
