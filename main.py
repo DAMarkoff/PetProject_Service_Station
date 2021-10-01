@@ -200,6 +200,7 @@ def bad_request(e):
 def wrong_method(e):
     return jsonify(error=str(e)), 405
 
+
 @app.route("/reg", methods=['POST'])  # reg new user
 def reg():
     if request.method == 'POST':
@@ -255,6 +256,7 @@ def reg():
     else:
         abort(405)
 
+
 @app.route("/cl", methods=['POST'])  # clear users DB
 def cl():
     if request.method == 'POST':
@@ -274,6 +276,7 @@ def cl():
             return 'Check your password!'
     else:
         abort(405)
+
 
 @app.route("/all", methods=['GET'])  # get a list of all users
 def show_all_users():
@@ -351,6 +354,7 @@ def login():
     else:
         abort(405)
 
+
 @app.route("/user_info", methods=['POST'])  # get all info about the logged user
 def user_info():
     if request.method == 'POST':
@@ -376,12 +380,12 @@ def user_info():
         # cursor.close()
 
         result_users = ({
-                        "ID": res[0],
-                        "f_name": res[1],
-                        "l_name": res[2],
-                        "email": res[3],
-                        "phone": res[4],
-                        "password": res[5]
+                            "ID": res[0],
+                            "f_name": res[1],
+                            "l_name": res[2],
+                            "email": res[3],
+                            "phone": res[4],
+                            "password": res[5]
         })
 
         # collecting the user's storage orders data from the storage_orders db
@@ -442,6 +446,7 @@ def user_info():
     else:
         abort(405)
 
+
 @app.route("/new_storage_order", methods=['POST'])
 def new_st_ord():
     if request.method == 'POST':
@@ -497,6 +502,7 @@ def new_st_ord():
         return jsonify({'shelf_id': shelf_id, 'storage order id': new_st_ord_id})
     else:
         abort(405)
+
 
 @app.route("/change_storage_order", methods=['PATCH'])
 def change_storage_order():
@@ -615,6 +621,7 @@ def change_storage_order():
     else:
         abort(405)
 
+
 @app.route("/change_user_info", methods=['PATCH'])
 def change_user_info():
     if request.method == 'PATCH':
@@ -634,7 +641,7 @@ def change_user_info():
             abort(400, description=user_auth['text'])
 
         if f_name is None and l_name is None and phone is None and new_email is None and password is None:
-            abort(400, description= 'Ok. Nothing needs to be changed :)')
+            abort(400, description='Ok. Nothing needs to be changed :)')
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -701,6 +708,7 @@ def change_user_info():
     else:
         abort(405)
 
+
 @app.route("/new_user_vehicle", methods=['POST'])
 def new_user_vehicle():
     if request.method == 'POST':
@@ -751,6 +759,7 @@ def new_user_vehicle():
     else:
         abort(405)
 
+
 @app.route("/delete_user", methods=['DELETE'])  # How dare you?
 def delete_user():
     if request.method == 'DELETE':
@@ -790,6 +799,7 @@ def delete_user():
         return jsonify(result)
     else:
         abort(405)
+
 
 @app.route("/deactivate_user", methods=['POST'])
 def deactivate_user():
@@ -906,6 +916,7 @@ def delete_user_vehicle():
     else:
         abort(405)
 
+
 @app.route("/delete_storage_order", methods=['DELETE'])
 def delete_storage_order():
     if request.method == 'DELETE':
@@ -951,6 +962,7 @@ def delete_storage_order():
         return jsonify(result)
     else:
         abort(405)
+
 
 @app.route("/change_user_vehicle", methods=['PATCH'])
 def change_user_vehicle():
@@ -1026,6 +1038,7 @@ def change_user_vehicle():
         return jsonify(result)
     else:
         abort(405)
+
 
 @app.route("/available_storage", methods=['GET'])  # shows available free storage places in the warehouse
 def available_storage():
@@ -1143,6 +1156,7 @@ def create_tire_service_order():
     else:
         abort(405)
 
+
 @app.route("/delete_tire_service_order", methods=['DELETE'])
 def delete_tire_service_order():
     if request.method == 'DELETE':
@@ -1198,6 +1212,7 @@ def delete_tire_service_order():
         return jsonify(result)
     else:
         abort(405)
+
 
 @app.route("/add_task_to_list_of_works", methods=['POST'])
 def add_task_to_list_of_works():
@@ -1262,6 +1277,7 @@ def add_task_to_list_of_works():
         return jsonify(result)
     else:
         abort(405)
+
 
 if __name__ == '__main__':
     app.run()
