@@ -1079,24 +1079,34 @@ def delete_tire_service_order():
         if not conn:
             return 'Sorry, there is no connection to the database'
 
-        sql_query = """SELECT user_id, u_veh_id, worker_id FROM tire_service_order 
+        sql_query = """SELECT user_id, u_veh_id, manager_id FROM tire_service_order 
                         WHERE serv_order_id = '{0}';""".format(serv_order_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
         # cursor.close()
 
-        user_id, u_veh_id, worker_id = res_[0], res_[1], res_[2]
+        user_id, u_veh_id, manager_id = res_[0], res_[1], res_[2]
 
         if get_user_id(email) != user_id:
             return 'It is not your tire service order!'
 
-        sql_query = """DELETE FROM tire_service_order WHERE serv_order_id = '{0}'""".format(serv_order_id)
+        sql_query = """SELECT worker_id, COUNT(manager_id) FROM staff AS s JOIN tire_service_order AS tso
+                    ON tso.manager_id = s.worker_id WHERE worker_id = '{0}' group by worker_id""".format(manager_id)
         cursor.execute(sql_query)
         conn.commit()
+        res_ = cursor.fetchall()
         # cursor.close()
 
-        sql_query = """UPDATE staff SET available = True WHERE worker_id = '{0}'""".format(worker_id)
+        manager_id, manager_load = res_[0], res_[1]
+
+        if manager_load == 5:
+            sql_query = """UPDATE staff SET available = True WHERE worker_id = '{0}'""".format(manager_id)
+            cursor.execute(sql_query)
+            conn.commit()
+            # cursor.close()
+
+        sql_query = """DELETE FROM tire_service_order WHERE serv_order_id = '{0}'""".format(serv_order_id)
         cursor.execute(sql_query)
         conn.commit()
         # cursor.close()
