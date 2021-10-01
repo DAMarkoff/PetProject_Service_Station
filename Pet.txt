@@ -33,6 +33,9 @@ Done:
 	/add_task_to_list_of_works
 	
 ToDo: 
+	- status code 400 when it is not user's order or vehicle
+	- simple return under DB connection error
+	- status code 400 on an unauthorized user
 	- the user cannot create two tire_service_orders for the same vehicle on the same date and time
 	- add to the /user_info tire_order datas 
 	- schedule (for workers)

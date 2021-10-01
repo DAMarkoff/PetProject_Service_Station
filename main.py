@@ -452,15 +452,15 @@ def new_st_ord():
         size_name = request.form.get('size_name')
 
         if token is None or email is None or start_date is None or stop_date is None or size_name is None:
-            return 'The token, email, start_date, stop_date and size_name data are required'
+            abort(400, description='The token, email, start_date, stop_date and size_name data are required')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            return user_auth['text']
+            abort(400, description=user_auth['text'])
 
         # is there the necessary free storage space
         if not shelf_avail(size_name):
-            return "Sorry, we do not have the storage you need"
+            abort(400, description="Sorry, we do not have the storage you need")
 
         shelf_id = shelf_id_by_size(size_name)
 
@@ -469,7 +469,7 @@ def new_st_ord():
 
         size_id_by = size_id_by_name(size_name)
         if size_id_by is None:
-            return 'Unknown size_name'
+            abort(400, description='Unknown size_name')
 
         # create storage order
         sql_query = """INSERT INTO storage_orders (user_id, start_date, stop_date, size_id, shelf_id, 
@@ -495,7 +495,8 @@ def new_st_ord():
         # cursor.close()
 
         return jsonify({'shelf_id': shelf_id, 'storage order id': new_st_ord_id})
-
+    else:
+        abort(405)
 
 @app.route("/change_storage_order", methods=['PATCH'])
 def change_storage_order():
@@ -509,11 +510,11 @@ def change_storage_order():
         size_id = request.form.get('size_id')
 
         if token is None or email is None or st_ord_id is None:
-            return 'The token, email, st_ord_id data are required'
+            abort(400, description='The token, email, st_ord_id data are required')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            return user_auth['text']
+            abort(400, description=user_auth['text'])
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -531,23 +532,23 @@ def change_storage_order():
 
         # verify, that the storage order is created by user
         if get_user_id(email) != user_id_db:
-            return 'Ouch! This is not your storage order!'
+            abort(400, description='Ouch! This is not your storage order!')
 
         # what data should be changed
         # check dates
         if start_date is not None and stop_date is not None:
             if start_date > stop_date:
-                return 'The start date can not be greater than the stop date'
+                abort(400, description='The start date can not be greater than the stop date')
             if stop_date < start_date:
-                return 'The stop date can not be less than the start date'
+                abort(400, description='The stop date can not be less than the start date')
 
         if start_date is not None and stop_date is None:
             if datetime.datetime.strptime(start_date, '%Y-%m-%d') > datetime.datetime.strptime(str(stop_date_db), '%Y-%m-%d'):
-                return 'The start date can not be greater than the stop date'
+                abort(400, description='The start date can not be greater than the stop date')
 
         if start_date is None and stop_date is not None:
             if datetime.datetime.strptime(stop_date, '%Y-%m-%d') < datetime.datetime.strptime(str(start_date_db), '%Y-%m-%d'):
-                return 'The stop date can not be less than the start date'
+                abort(400, description='The stop date can not be less than the start date')
 
         if start_date is None:
             start_date = start_date_db
@@ -585,7 +586,7 @@ def change_storage_order():
                     # cursor.close()
 
                 else:
-                    return 'Sorry, we do not have the storage you need'
+                    abort(400, description='Sorry, we do not have the storage you need')
 
         if shelf_id == 0:
             shelf_id = shelf_id_db
@@ -599,12 +600,20 @@ def change_storage_order():
         conn.commit()
         # cursor.close()
 
-        result = ({'storage_order': st_ord_id, 'start_date': start_date, 'stop_date': stop_date,
-                   'size_id_new': size_id, 'size_id_old': size_id_db, 'storage_order_cost': st_ord_cost,
-                   'shelf_id_new': shelf_id, 'shelf_id_old': shelf_id_db})
+        result = {
+            'storage_order': st_ord_id,
+            'start_date': start_date,
+            'stop_date': stop_date,
+            'size_id_new': size_id,
+            'size_id_old': size_id_db,
+            'storage_order_cost': st_ord_cost,
+            'shelf_id_new': shelf_id,
+            'shelf_id_old': shelf_id_db
+        }
 
         return jsonify(result)
-
+    else:
+        abort(405)
 
 @app.route("/change_user_info", methods=['PATCH'])
 def change_user_info():
@@ -618,14 +627,14 @@ def change_user_info():
         password = request.form.get('password')
 
         if token is None or email is None:
-            return 'The token, email are required'
+            abort(400, description='The token, email are required')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            return user_auth['text']
+            abort(400, description=user_auth['text'])
 
         if f_name is None and l_name is None and phone is None and new_email is None and password is None:
-            return 'Ok. Nothing needs to be changed :)'
+            abort(400, description= 'Ok. Nothing needs to be changed :)')
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -653,14 +662,14 @@ def change_user_info():
         else:
             check_password = validate_password(password)
             if not check_password['result']:
-                return check_password['text']
+                abort(400, description=check_password['text'])
             flag_relogin = True
         if new_email is None:
             new_email = email
         else:
             check_email = validate_email(email)
             if not check_email['result']:
-                return check_email['text']
+                abort(400, description=check_email['text'])
             flag_relogin = True
 
         # if the pass and/or email have been changed - the user must log in again
@@ -674,12 +683,23 @@ def change_user_info():
         conn.commit()
         # cursor.close()
 
-        result = ({'user_id': user_id_db, 'f_name_new': f_name, 'f_name_old': f_name_db, 'l_name_new': l_name,
-                   'l_name_old': l_name_db, 'email_new': new_email, 'email_old': email, 'phone_new': phone,
-                   'phone_old': phone_db, 'password_new': password, 'password_old': password_db})
+        result = {
+            'user_id': user_id_db,
+            'f_name_new': f_name,
+            'f_name_old': f_name_db,
+            'l_name_new': l_name,
+            'l_name_old': l_name_db,
+            'email_new': new_email,
+            'email_old': email,
+            'phone_new': phone,
+            'phone_old': phone_db,
+            'password_new': password,
+            'password_old': password_db
+        }
 
         return jsonify(result)
-
+    else:
+        abort(405)
 
 @app.route("/new_user_vehicle", methods=['POST'])
 def new_user_vehicle():
@@ -690,7 +710,7 @@ def new_user_vehicle():
         size_name = request.form.get('size_name')
 
         if token is None or email is None or vehicle_name is None or size_name is None:
-            return 'The token, email, vehicle_name and size_name data are required'
+            abort(400, description='The token, email, vehicle_name and size_name data are required')
 
         # get needed data
         user_id = get_user_id(email)
@@ -698,14 +718,14 @@ def new_user_vehicle():
         vehicle_id = vehicle_id_by_name(vehicle_name)
 
         if size_id is None:
-            return 'Attention!!! Unknown tire size, add the tire size data to the sizes DB'
+            abort(400, description='Unknown tire size, add the tire size data to the sizes DB')
 
         if vehicle_id is None:
-            return 'Attention!!! Unknown type of the vehicle, add the vehicle type data to the sizes DB'
+            abort(400, description='Unknown type of the vehicle, add the vehicle type data to the vehicle DB')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            return user_auth['text']
+            abort(400, description=user_auth['text'])
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -722,8 +742,14 @@ def new_user_vehicle():
         res_ = cursor.fetchone()
         # cursor.close()
 
-        return {'new_vehicle_id': res_[0], 'vehicle_name': vehicle_name, 'tire_size': size_name}
-
+        result = {
+            'new_vehicle_id': res_[0],
+            'vehicle_name': vehicle_name,
+            'tire_size': size_name
+        }
+        return jsonify(result)
+    else:
+        abort(405)
 
 @app.route("/delete_user", methods=['DELETE'])  # How dare you?
 def delete_user():
@@ -733,14 +759,14 @@ def delete_user():
         sure = request.form.get('ARE_YOU_SURE?')
 
         if token is None or email is None or sure is None:
-            return 'The token, email and sure data are required'
+            abort(400, description='The token, email and sure data are required')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            return user_auth['text']
+            abort(400, description=user_auth['text'])
 
         if sure != 'True':
-            return 'АHA! Changed your mind?'
+            abort(400, description='АHA! Changed your mind?')
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -758,9 +784,12 @@ def delete_user():
 
         text = 'R.I.P {{ name }}, i will miss you :('
         template = Template(text)
-
-        return template.render(name=res_[0] + ' ' + res_[1])
-
+        result = {
+            'confirmation': template.render(name=res_[0] + ' ' + res_[1])
+        }
+        return jsonify(result)
+    else:
+        abort(405)
 
 @app.route("/deactivate_user", methods=['POST'])
 def deactivate_user():
@@ -769,17 +798,17 @@ def deactivate_user():
     sure = request.form.get('ARE_YOU_SURE?')
 
     if token is None or email is None or sure is None:
-        return 'The token, email and sure data are required'
+        abort(400, description='The token, email and sure data are required')
 
     user_auth = user_authorization(email, token)
     if not user_auth['result']:
-        return user_auth['text']
+        abort(400, description=user_auth['text'])
 
     if not user_active(email):
-        return 'User is already deactivated'
+        abort(400, description='User is already deactivated')
 
     if sure != 'True':
-        return 'АHA! Changed your mind?'
+        abort(400, description='АHA! Changed your mind?')
 
     if not conn:
         return 'Sorry, there is no connection to the database'
@@ -797,8 +826,10 @@ def deactivate_user():
 
     text = 'User {{ name }} has been successfully deactivated'
     template = Template(text)
-
-    return template.render(name=res_[0] + ' ' + res_[1])
+    result = {
+        'confirmation': template.render(name=res_[0] + ' ' + res_[1])
+    }
+    return jsonify(result)
 
 
 @app.route("/activate_user", methods=['POST'])
@@ -807,13 +838,13 @@ def activate_user():
     admin_password = request.form.get('admin_password')
 
     if admin_password is None or email is None:
-        return 'The admin_password and email are required'
+        abort(400, description='The admin_password and email are required')
 
     if not user_exist(email):
-        return 'The user is not exist'
+        abort(400, description='The user is not exist')
 
     if admin_password != 'admin':
-        return 'Wrong admin password!'
+        abort(400, description='Wrong admin password!')
 
     if not conn:
         return 'Sorry, there is no connection to the database'
@@ -831,8 +862,10 @@ def activate_user():
 
     text = 'User {{ name }} has been successfully activated'
     template = Template(text)
-
-    return template.render(name=res_[0] + ' ' + res_[1])
+    result = {
+        'confirmation': template.render(name=res_[0] + ' ' + res_[1])
+    }
+    return jsonify(result)
 
 
 @app.route("/delete_user_vehicle", methods=['DELETE'])
@@ -843,11 +876,11 @@ def delete_user_vehicle():
         u_veh_id = request.form.get('user_vehicle_id')
 
         if token is None or email is None or u_veh_id is None:
-            return 'The token, email and user_vehicle_id are required'
+            abort(400, description='The token, email and user_vehicle_id are required')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            return user_auth['text']
+            abort(400, description=user_auth['text'])
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -859,16 +892,19 @@ def delete_user_vehicle():
         # cursor.close()
 
         if get_user_id(email) != res_[0]:
-            return 'It is not your vehicle! Somebody call the police!'
+            abort(400, description='It is not your vehicle! Somebody call the police!')
         else:
 
             sql_query = """DELETE FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
             cursor.execute(sql_query)
             conn.commit()
             # cursor.close()
-
-            return 'User vehicle ID ' + u_veh_id + ' has been deleted'
-
+            result = {
+                'confirmation': 'User vehicle ID ' + u_veh_id + ' has been deleted'
+            }
+            return jsonify(result)
+    else:
+        abort(405)
 
 @app.route("/delete_storage_order", methods=['DELETE'])
 def delete_storage_order():
@@ -878,11 +914,11 @@ def delete_storage_order():
         st_ord_id = request.form.get('storage_order_id')
 
         if token is None or email is None or st_ord_id is None:
-            return 'The token, email and storage_order_id are required'
+            abort(400, description='The token, email and storage_order_id are required')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            return user_auth['text']
+            abort(400, description=user_auth['text'])
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -896,7 +932,7 @@ def delete_storage_order():
         shelf_id = res_[1]
 
         if get_user_id(email) != res_[0]:
-            return 'It is not your storage order! Somebody call the police!'
+            abort(400, description='It is not your storage order! Somebody call the police!')
 
         sql_query = """DELETE FROM storage_orders WHERE st_ord_id = '{0}'""".format(st_ord_id)
         cursor.execute(sql_query)
@@ -909,8 +945,12 @@ def delete_storage_order():
         conn.commit()
         # cursor.close()
 
-        return 'Storage order ID ' + st_ord_id + ' has been deleted'
-
+        result = {
+            'confirmation': 'Storage order ID ' + st_ord_id + ' has been deleted'
+        }
+        return jsonify(result)
+    else:
+        abort(405)
 
 @app.route("/change_user_vehicle", methods=['PATCH'])
 def change_user_vehicle():
@@ -922,11 +962,11 @@ def change_user_vehicle():
         new_size_name = request.form.get('new_size_name')
 
         if token is None or email is None or u_veh_id is None:
-            return 'The token, email and user_vehicle_id are required'
+            abort(400, description='The token, email and user_vehicle_id are required')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            return user_auth['text']
+            abort(400, description=user_auth['text'])
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -943,33 +983,31 @@ def change_user_vehicle():
         old_size_name = str(size_name_by_id(size_id_db))
 
         if user_id_db != get_user_id(email):
-            return 'It is not your vehicle! Somebody call the police!'
+            abort(400, description='It is not your vehicle! Somebody call the police!')
 
         if (new_vehicle_name is None and new_size_name is None) or \
                 (new_vehicle_name == old_vehicle_name and new_size_name == old_size_name):
-            return 'Ok. Nothing needs to be changed :)'
+            abort(400, description='Ok. Nothing needs to be changed :)')
 
         # new_vehicle_id, new_size_id = 0, 0
 
         if new_vehicle_name is None:
             new_vehicle_id = vehicle_id_db
         else:
-
             vehicle_id_by = vehicle_id_by_name(new_vehicle_name)
             if vehicle_id_by is not None:
                 new_vehicle_id = vehicle_id_by
             else:
-                return 'Unknown vehicle_name'
+                abort(400, description='Unknown vehicle_name')
 
         if new_size_name is None:
             new_size_id = size_id_db
         else:
-
             size_id_by = size_id_by_name(new_size_name)
             if size_id_by is not None:
                 new_size_id = size_id_by
             else:
-                return 'Unknown size_name'
+                abort(400, description='Unknown size_name')
 
         sql_query = """UPDATE user_vehicle SET vehicle_id = '{0}', size_id = '{1}' 
                         WHERE u_veh_id = '{2}'""".format(new_vehicle_id, new_size_id, u_veh_id)
@@ -977,12 +1015,17 @@ def change_user_vehicle():
         conn.commit()
         # cursor.close()
 
-        result = {'vehicle_id': u_veh_id, 'old_vehicle_name': old_vehicle_name,
-                  'new_vehicle_name': new_vehicle_name, 'old_size_name': old_size_name,
-                  'new_size_name': new_size_name}
+        result = {
+            'vehicle_id': u_veh_id,
+            'old_vehicle_name': old_vehicle_name,
+            'new_vehicle_name': new_vehicle_name,
+            'old_size_name': old_size_name,
+            'new_size_name': new_size_name
+        }
 
         return jsonify(result)
-
+    else:
+        abort(405)
 
 @app.route("/available_storage", methods=['GET'])  # shows available free storage places in the warehouse
 def available_storage():
@@ -998,14 +1041,18 @@ def available_storage():
     if res_ is not None:
         result = []
         for i in range(len(res_)):
-            result.append({'shelf_id': res_[i][0],
-                           'size_id': res_[i][1],
-                           'size_name': size_name_by_id(res_[i][1])})
+            result.append({
+                'shelf_id': res_[i][0],
+                'size_id': res_[i][1],
+                'size_name': size_name_by_id(res_[i][1])
+            })
 
         return jsonify(result)
     else:
-        result = 'Unfortunately, we do not have any available storage space'
-        return result
+        result = {
+            'confirmation': 'Unfortunately, we do not have any available storage space'
+        }
+        return jsonify(result)
 
 
 @app.route("/create_tire_service_order", methods=['POST'])
@@ -1017,11 +1064,11 @@ def create_tire_service_order():
         u_veh_id = request.form.get('user_vehicle_id')
 
         if token is None or email is None or order_date is None or u_veh_id is None:
-            return 'The token, email, order_date and user_vehicle_id are required'
+            abort(400, description='The token, email, order_date and user_vehicle_id are required')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            return user_auth['text']
+            abort(400, description=user_auth['text'])
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -1036,7 +1083,7 @@ def create_tire_service_order():
         user_id, vehicle_id, size_id = res_[0], res_[1], res_[2]
 
         if get_user_id(email) != user_id:
-            return 'It is not your vehicle!'
+            abort(400, description='It is not your vehicle!')
 
         sql_query = """SELECT worker_id, COUNT(manager_id) FROM staff AS s LEFT JOIN tire_service_order AS tso
                         ON tso.manager_id = s.worker_id WHERE available = True AND position_id = 2
@@ -1047,9 +1094,9 @@ def create_tire_service_order():
         # cursor.close()
 
         if len(res_) == 0:
-            return 'Sorry, all managers are busy'
-        else:
-            rand_id = random.randint(0, len(res_) - 1)
+            abort(400, description='Sorry, all managers are busy')
+
+        rand_id = random.randint(0, len(res_) - 1)
 
         manager_id, manager_load = res_[rand_id][0], res_[rand_id][1]
 
@@ -1065,9 +1112,7 @@ def create_tire_service_order():
         conn.commit()
         # cursor.close()
 
-        sql_query = """SELECT serv_order_id FROM tire_service_order WHERE user_id = '{0}' 
-                        AND serv_order_date = '{1}' AND u_veh_id = '{2}' 
-                        AND  manager_id = '{3}'""".format(user_id, order_date, u_veh_id, manager_id)
+        sql_query = """SELECT MAX(serv_order_id) FROM tire_service_order WHERE user_id = '{0}'""".format(user_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
@@ -1076,7 +1121,7 @@ def create_tire_service_order():
         serv_order_id = res_[0]
 
         sql_query = """SELECT first_name, last_name, phone, email FROM staff 
-                    WHERE worker_id = '{0}'""".format(manager_id)
+                        WHERE worker_id = '{0}'""".format(manager_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
@@ -1084,12 +1129,19 @@ def create_tire_service_order():
 
         manager_first_name, manager_last_name, manager_phone, manager_email = res_[0], res_[1], res_[2], res_[3]
 
-        result = {'service_order_id': serv_order_id, 'date': order_date, 'manager_id': manager_id,
-                  'manager_first_name': manager_first_name, 'manager_last_name': manager_last_name,
-                  'manager_phone': manager_phone, 'manager_email': manager_email}
+        result = {
+            'service_order_id': serv_order_id,
+            'date': order_date,
+            'manager_id': manager_id,
+            'manager_first_name': manager_first_name,
+            'manager_last_name': manager_last_name,
+            'manager_phone': manager_phone,
+            'manager_email': manager_email
+        }
 
         return jsonify(result)
-
+    else:
+        abort(405)
 
 @app.route("/delete_tire_service_order", methods=['DELETE'])
 def delete_tire_service_order():
@@ -1099,11 +1151,11 @@ def delete_tire_service_order():
         serv_order_id = request.form.get('service_order_id')
 
         if token is None or email is None or serv_order_id is None:
-            return 'The token, email, service_order_id are required'
+            abort(400, description='The token, email, service_order_id are required')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            return user_auth['text']
+            abort(400, description=user_auth['text'])
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -1118,7 +1170,7 @@ def delete_tire_service_order():
         user_id, u_veh_id, manager_id = res_[0], res_[1], res_[2]
 
         if get_user_id(email) != user_id:
-            return 'It is not your tire service order!'
+            abort(400, description='It is not your tire service order!')
 
         sql_query = """SELECT worker_id, COUNT(manager_id) FROM staff AS s JOIN tire_service_order AS tso
                     ON tso.manager_id = s.worker_id WHERE worker_id = '{0}' group by worker_id""".format(manager_id)
@@ -1140,8 +1192,12 @@ def delete_tire_service_order():
         conn.commit()
         # cursor.close()
 
-        return 'Tire service order ID ' + serv_order_id + ' has been deleted'
-
+        result = {
+            'confirmation': 'Tire service order ID ' + serv_order_id + ' has been deleted'
+        }
+        return jsonify(result)
+    else:
+        abort(405)
 
 @app.route("/add_task_to_list_of_works", methods=['POST'])
 def add_task_to_list_of_works():
@@ -1153,14 +1209,14 @@ def add_task_to_list_of_works():
         numbers_of_task = request.form.get('numbers_of_tasks')
 
         if token is None or email is None or serv_order_id is None or task_name is None:
-            return 'The token, email, service_order_id and task_name are required'
+            abort(400, description='The token, email, service_order_id and task_name are required')
 
         if not numbers_of_task.isdigit():
-            return 'Please, provide a numbers of tasks in digits'
+            abort(400, description='Please, provide a numbers of tasks in digits')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            return user_auth['text']
+            abort(400, description=user_auth['text'])
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -1172,7 +1228,7 @@ def add_task_to_list_of_works():
         # cursor.close()
 
         if get_user_id(email) != res_[0]:
-            return 'It is not your tire service order!'
+            abort(400, description='It is not your tire service order!')
 
         sql_query = """SELECT task_id FROM tasks WHERE task_name = '{0}';""".format(task_name)
         cursor.execute(sql_query)
@@ -1181,9 +1237,9 @@ def add_task_to_list_of_works():
         # cursor.close()
 
         if res_ is None:
-            return 'Sorry, we do not offer this service'
-        else:
-            task_id = res_[0]
+            abort(400, description='Sorry, we do not offer this service')
+
+        task_id = res_[0]
 
         for _ in range(int(numbers_of_task)):
 
@@ -1193,13 +1249,19 @@ def add_task_to_list_of_works():
             conn.commit()
 
         if int(numbers_of_task) == 1:
-            result = 'The ' + task_name + ' task is successfully added to your tire_service_order ID ' + serv_order_id
+            result = {
+                'confirmation': 'The ' + task_name + ' task is successfully added to your tire_service_order ID ' \
+                                + serv_order_id
+            }
         else:
-            result = 'tasks for ' + task_name + ' in the amount of ' + numbers_of_task + \
+            result = {
+                'confirmation': 'tasks for ' + task_name + ' in the amount of ' + numbers_of_task + \
                      ' have been successfully added to your tire_service_order ID ' + serv_order_id
+            }
 
-        return result
-
+        return jsonify(result)
+    else:
+        abort(405)
 
 if __name__ == '__main__':
     app.run()
