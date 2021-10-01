@@ -200,6 +200,7 @@ def bad_request(e):
 def wrong_method(e):
     return jsonify(error=str(e)), 405
 
+
 @app.errorhandler(403)
 def wrong_method(e):
     return jsonify(error=str(e)), 403
@@ -208,6 +209,7 @@ def wrong_method(e):
 @app.errorhandler(401)
 def wrong_method(e):
     return jsonify(error=str(e)), 401
+
 
 @app.route("/reg", methods=['POST'])  # reg new user
 def reg():
@@ -347,7 +349,7 @@ def login():
                 r.set(email, token, ex=600)  # пролонгация токена, срок - 600 сек.
 
             # генерация Hello message (For fun :)
-            text = 'Hello {{ name }}!'
+            text = 'Hello, {{ name }}!'
             template = Template(text)
 
             result = {
