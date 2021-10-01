@@ -466,17 +466,19 @@ def user_info():
                                 WHERE user_id = '{0}';""".format(user_id)
         cursor.execute(sql_query)
         conn.commit()
+        # cursor.close()
 
         sql_query = """SELECT DISTINCT serv_order_id, serv_order_date, manager_id, u_veh_id FROM temp"""
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchall()
+        # cursor.close()
 
         empty_result = []
         if res_ == empty_result:
             result_tire_service_order = 'You do not have a tire service order(s).'
         else:
-            # result_tire_service_order = []
+            result_tire_service_order = []
             for i in range(len(res_)):
                 serv_order_id = res_[i][0]
 
@@ -485,8 +487,9 @@ def user_info():
                 cursor.execute(sql_query)
                 conn.commit()
                 res_2 = cursor.fetchone()
+                # cursor.close()
 
-                if res_2 is None:
+                if res_2[0] is None:
                     tire_service_order_cost = 'Error! Sum is None!'
                 else:
                     tire_service_order_cost = res_2[0]
@@ -496,6 +499,7 @@ def user_info():
                 cursor.execute(sql_query)
                 conn.commit()
                 res_1 = cursor.fetchall()
+                # cursor.close()
 
                 empty_result = []
                 if res_1 == empty_result:
