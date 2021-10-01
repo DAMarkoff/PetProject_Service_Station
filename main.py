@@ -1020,7 +1020,7 @@ def create_tire_service_order():
         if len(res_) == 0:
             return 'Sorry, all managers are busy'
         else:
-            rand_id = random.randint(0, len(res_))
+            rand_id = random.randint(0, len(res_) - 1)
 
         manager_id, manager_load = res_[rand_id][0], res_[rand_id][1]
 
