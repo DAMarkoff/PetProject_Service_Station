@@ -221,10 +221,10 @@ def reg():
         # the email must contain @ and .
         check_email = validate_email(email)
         if not check_email['result']:
-            return check_email['text']
+            abort(400, description=check_email['text'])
 
         if user_exist(email):
-            return "the user with this email already exists"
+            abort(400, description="The user with this email already exists")
 
         active = True
         if not conn:
@@ -261,16 +261,19 @@ def cl():
         password = request.form.get('password')
     
         if password == 'He_He_Boy!':
-            if conn:
-                sql_query = "DELETE FROM users"
-                cursor.execute(sql_query)
-                conn.commit()
-                # cursor.close()
+            if not conn:
+                return 'Sorry, there is no connection to the database'
 
-                return 'All users have been deleted'
+            sql_query = "DELETE FROM users"
+            cursor.execute(sql_query)
+            conn.commit()
+            # cursor.close()
+
+            return 'All users have been deleted'
         else:
             return 'Check your password!'
-
+    else:
+        abort(405)
 
 @app.route("/all", methods=['GET'])  # get a list of all users
 def show_all_users():
@@ -306,13 +309,13 @@ def login():
         password = request.form.get('password')
 
         if password is None or email is None:
-            return 'The pass and email data are required'
+            abort(400, description='The pass and email data are required')
 
         if not user_exist(email):
-            return "The user does not exist. Please, register"
+            abort(400, description="The user does not exist. Please, register")
 
         if not user_active(email):
-            return 'User is deactivated'
+            abort(400, description='User is deactivated')
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -336,11 +339,17 @@ def login():
             text = 'Hello {{ name }}!'
             template = Template(text)
 
-            return jsonify({"result": template.render(name=res[2]+" "+res[3]), "token": token,
-                            "email": email, "user_id": res[1]})
+            result = {
+                        "result": template.render(name=res[2]+" "+res[3]),
+                        "token": token,
+                        "email": email,
+                        "user_id": res[1]
+            }
+            return jsonify(result)
         else:
-            return 'you shall not pass :) password is invalid'  # неверный пароль. перелогиньтесь, товарищ майор ;)
-
+            abort(400, description='you shall not pass :) password is invalid')
+    else:
+        abort(405)
 
 @app.route("/user_info", methods=['POST'])  # get all info about the logged user
 def user_info():
@@ -349,11 +358,11 @@ def user_info():
         email = request.form.get('email')
     
         if token is None or email is None:
-            return 'The token and email data are required'
+            abort(400, description='The token and email data are required')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            return user_auth['text']
+            abort(400, description=user_auth['text'])
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -366,12 +375,14 @@ def user_info():
         res = cursor.fetchone()
         # cursor.close()
 
-        result_users = ({"ID": res[0],
-                         "f_name": res[1],
-                         "l_name": res[2],
-                         "email": res[3],
-                         "phone": res[4],
-                         "password": res[5]})
+        result_users = ({
+                        "ID": res[0],
+                        "f_name": res[1],
+                        "l_name": res[2],
+                        "email": res[3],
+                        "phone": res[4],
+                        "password": res[5]
+        })
 
         # collecting the user's storage orders data from the storage_orders db
         sql_query = "SELECT * FROM storage_orders WHERE user_id = '{0}'".format(get_user_id(email))
@@ -385,11 +396,13 @@ def user_info():
         else:
             result_order = []
             for i in range(len(res_)):  # does the user need the size_id or size_name data?
-                result_order.append({"storage_order_id": res_[i][0],
-                                     "start_date": res_[i][2],
-                                     "stop_date": res_[i][3],
-                                     "order cost": res_[i][5],
-                                     "shelf_id": res_[i][6]})
+                result_order.append({
+                                    "storage_order_id": res_[i][0],
+                                    "start_date": res_[i][2],
+                                    "stop_date": res_[i][3],
+                                    "order cost": res_[i][5],
+                                    "shelf_id": res_[i][6]
+                })
 
         # collecting data about the user's vehicles from the user_vehicle, vehicle and sizes db's
         sql_query = """SELECT u_veh_id, vehicle_name, size_name FROM user_vehicle 
@@ -408,9 +421,11 @@ def user_info():
         else:
             result_vehicle = []
             for i in range(len(res_)):
-                result_vehicle.append({'vehicle_id': res_[i][0],
-                                       'vehicle_type': res_[i][1],
-                                       'tire size': res_[i][2]})
+                result_vehicle.append({
+                                        'vehicle_id': res_[i][0],
+                                        'vehicle_type': res_[i][1],
+                                        'tire size': res_[i][2]
+                })
 
         sql_query = "SELECT * FROM storage_orders WHERE user_id = '{0}'".format(get_user_id(email))
         cursor.execute(sql_query)
@@ -418,10 +433,14 @@ def user_info():
         res_ = cursor.fetchall()
         # cursor.close()
 
-
-        return jsonify({'user info': result_users}, {'storage orders info:': result_order},
-                       {"user's vehicle": result_vehicle})
-
+        result = (
+                    {'user info': result_users},
+                    {'storage orders info:': result_order},
+                    {"user's vehicle": result_vehicle}
+        )
+        return jsonify(result)
+    else:
+        abort(405)
 
 @app.route("/new_storage_order", methods=['POST'])
 def new_st_ord():
