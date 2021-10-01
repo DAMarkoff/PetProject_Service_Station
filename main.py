@@ -470,7 +470,7 @@ def user_info():
 
 
 
-        sql_query = """SELECT DISTINCT serv_order_id, serv_order_date, manager_id FROM temp"""
+        sql_query = """SELECT DISTINCT serv_order_id, serv_order_date, manager_id, vehicle_id FROM temp"""
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchall()
@@ -483,8 +483,14 @@ def user_info():
             for i in range(len(res_)):
 
                 serv_order_id = res_[i][0]
+                sql_query = """SELECT SUM(task_cost) FROM temp 
+                                                WHERE serv_order_id = '{0}'""".format(serv_order_id)
+                cursor.execute(sql_query)
+                conn.commit()
+                res_2 = cursor.fetchone()
+                tire_service_order_cost = res_2[0]
 
-                sql_query = """SELECT task_name, worker_id FROM temp 
+                sql_query = """SELECT task_name, worker_id, task_cost FROM temp 
                                 WHERE serv_order_id = '{0}'""".format(serv_order_id)
                 cursor.execute(sql_query)
                 conn.commit()
@@ -498,13 +504,16 @@ def user_info():
                     for j in range(len(res_1)):
                         result_tire_service_order_tasks.append({
                             'task_name': res_1[j][0],
-                            'worker_id': res_1[j][1]
+                            'worker_id': res_1[j][1],
+                            'task cost': res_1[j][2]
                         })
 
                 result_tire_service_order.append({
                     'serv_order_id': serv_order_id,
                     'serv_order_date': res_[i][1],
                     'manager_id': res_[i][2],
+                    'vehicle_id': res_[i][3],
+                    'tire service order cost': tire_service_order_cost,
                     'tasks': result_tire_service_order_tasks
                 })
 
