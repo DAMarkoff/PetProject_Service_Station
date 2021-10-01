@@ -216,7 +216,7 @@ def reg():
         # min one digit, min one upper and min one lower letter, min one special char
         check_password = validate_password(password)
         if not check_password['result']:
-            return check_password['text']
+            abort(400, description=check_password['text'])
 
         # the email must contain @ and .
         check_email = validate_email(email)
