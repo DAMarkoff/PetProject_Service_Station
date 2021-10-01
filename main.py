@@ -396,8 +396,9 @@ def user_info():
                             "password": res[5]
         })
 
+        user_id = get_user_id(email)
         # collecting the user's storage orders data from the storage_orders db
-        sql_query = "SELECT * FROM storage_orders WHERE user_id = '{0}'".format(get_user_id(email))
+        sql_query = "SELECT * FROM storage_orders WHERE user_id = '{0}'".format(user_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchall()
@@ -421,7 +422,7 @@ def user_info():
         sql_query = """SELECT u_veh_id, vehicle_name, size_name FROM user_vehicle 
                     JOIN vehicle USING (vehicle_id)
                     JOIN sizes USING (size_id) 
-                    WHERE user_id = '{0}'""".format(get_user_id(email))
+                    WHERE user_id = '{0}'""".format(user_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchall()
@@ -462,7 +463,7 @@ def user_info():
                                 LEFT JOIN staff AS s USING (worker_id)
                                 LEFT JOIN positions AS p USING (position_id)
                                 LEFT JOIN staff AS st ON st.worker_id = tso.manager_id
-                                WHERE user_id = 2;"""
+                                WHERE user_id = '{0}';""".format(user_id)
         cursor.execute(sql_query)
         conn.commit()
 
