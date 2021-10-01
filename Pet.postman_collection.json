@@ -14,7 +14,7 @@
 					"mode": "formdata",
 					"formdata": [
 						{
-							"key": "pass",
+							"key": "password",
 							"value": "WAT???!!!111_NO_NO_NO_PLEASE_NO!!!111",
 							"type": "text"
 						}
@@ -51,18 +51,18 @@
 							"type": "text"
 						},
 						{
-							"key": "passw",
-							"value": "qwe1T!1a",
+							"key": "password",
+							"value": "qwe1T!1",
 							"type": "text"
 						},
 						{
 							"key": "email",
-							"value": "test@simpson.com",
+							"value": "test@test.ru",
 							"type": "text"
 						},
 						{
 							"key": "phone",
-							"value": "5557555581",
+							"value": "5558889977",
 							"type": "text"
 						}
 					]
@@ -99,7 +99,7 @@
 						},
 						{
 							"key": "ARE_YOU_SURE?",
-							"value": "111",
+							"value": "True",
 							"type": "text"
 						}
 					]
@@ -130,8 +130,8 @@
 							"type": "text"
 						},
 						{
-							"key": "token",
-							"value": "{{token}}",
+							"key": "admin_password",
+							"value": "admin",
 							"type": "text"
 						}
 					]
@@ -171,12 +171,12 @@
 					"formdata": [
 						{
 							"key": "email",
-							"value": "max@bush.us",
+							"value": "sergey@zverev.ru",
 							"type": "text"
 						},
 						{
-							"key": "passw",
-							"value": "qwe",
+							"key": "password",
+							"value": "qwe1T!1a",
 							"type": "text"
 						}
 					]
@@ -287,7 +287,7 @@
 						},
 						{
 							"key": "size_name",
-							"value": "18",
+							"value": "20",
 							"type": "text"
 						},
 						{
@@ -309,6 +309,95 @@
 					],
 					"path": [
 						"new_storage_order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "create_tire_service_order",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "{{email}}",
+							"type": "text"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "text"
+						},
+						{
+							"key": "order_date",
+							"value": "2021-09-30 14:00:00",
+							"type": "text"
+						},
+						{
+							"key": "user_vehicle_id",
+							"value": "8",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/create_tire_service_order",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"create_tire_service_order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "add_task_to_list_of_works",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "{{email}}",
+							"type": "text"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "text"
+						},
+						{
+							"key": "service_order_id",
+							"value": "17",
+							"type": "text"
+						},
+						{
+							"key": "task_name",
+							"value": "tire_repair",
+							"type": "text"
+						},
+						{
+							"key": "numbers_of_tasks",
+							"value": "2",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/add_task_to_list_of_works",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"add_task_to_list_of_works"
 					]
 				}
 			},
@@ -409,7 +498,7 @@
 							"disabled": true
 						},
 						{
-							"key": "passw",
+							"key": "password",
 							"value": "qwe#Q2qw",
 							"type": "text",
 							"disabled": true
@@ -453,12 +542,12 @@
 						},
 						{
 							"key": "new_vehicle_name",
-							"value": "truck",
+							"value": "bus",
 							"type": "text"
 						},
 						{
 							"key": "new_size_name",
-							"value": "20",
+							"value": "16",
 							"type": "text"
 						}
 					]
@@ -620,6 +709,43 @@
 					],
 					"path": [
 						"delete_storage_order"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete_tire_service_order",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "email",
+							"value": "{{email}}",
+							"type": "text"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "text"
+						},
+						{
+							"key": "service_order_id",
+							"value": "12",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/delete_tire_service_order",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"delete_tire_service_order"
 					]
 				}
 			},

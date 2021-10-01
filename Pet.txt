@@ -7,8 +7,6 @@ psycopg2-binary==2.9.1
 redis==3.5.3
 Werkzeug==2.0.1
 
-Serv: ssh user_105@23.88.52.139, password: 123
-DB: 159.69.151.133:5056, Database: user_20_db, Username: user_20, Password: 123
 DB diagram: https://drawsql.app/myowncompany/diagrams/cto
 
 Done:
@@ -33,10 +31,9 @@ Done:
 	/add_task_to_list_of_works
 	
 ToDo: 
-	- the user cannot delete a tire_service_order with an expired date
-	- simple return after the DB connection error
-	- the user cannot create two tire_service_orders for the same vehicle on the same date and time
-	- add to the /user_info tire_order datas 
+	- the user can delete a tire_service_order with an expired date
+*	- simple return after the DB connection error - 503
+	- the user can create two tire_service_orders for the same vehicle on the same date and time 
 	- schedule (for workers)
 	- add to list_of_works how to choose a worker 
 	- new storage order dates validate (start before today)
@@ -72,8 +69,8 @@ user_authorization checks:
 			token
 			user_id
 
-	if email does not exist in DB: note
-		if pass does not valid: note
+	if email does not exist in DB: 400 - note
+		if pass does not valid: 401 - note
 			if token exists in the redis db: set new ex time and return the token
 			else: 
 				generate new token, add to the redis db and return it
@@ -95,7 +92,7 @@ user_authorization checks:
 			phone
 			passw
 			
-	if email does not exisis in the DB: note and redirect to /reg
+	if email does not exisis in the DB: 400 - note
 	else: 
 		add new user to the DB and return info from the DB with user_id
 

@@ -202,12 +202,12 @@ def wrong_method(e):
 
 
 @app.errorhandler(403)
-def wrong_method(e):
+def forbidden(e):
     return jsonify(error=str(e)), 403
 
 
 @app.errorhandler(401)
-def wrong_method(e):
+def unauthorized(e):
     return jsonify(error=str(e)), 401
 
 
@@ -247,20 +247,20 @@ def reg():
         conn.commit()
         # cursor.close()
 
-        sql_query = """SELECT user_id, first_name, last_name, email, phone, pass, active 
-                        FROM users WHERE email = '{0}'""".format(email)
+        sql_query = """SELECT user_id FROM users WHERE email = '{0}'""".format(email)
         cursor.execute(sql_query)
         res = cursor.fetchone()
         conn.commit()
         # cursor.close()
 
-        result = ({"ID": res[0],
-                   "f_name": res[1],
-                   "l_name": res[2],
-                   "email": res[3],
-                   "phone": res[4],
-                   "password": res[5],
-                   "active": res[6]})
+        result = {
+            "ID": res[0],
+            "f_name": f_name,
+            "l_name": l_name,
+            "phone": phone,
+            "password": password,
+            "active": active
+        }
 
         return jsonify(result)
     else:
@@ -339,7 +339,6 @@ def login():
         res = cursor.fetchone()
         # cursor.close()
 
-        #    token = ""
         if password == res[0]:  # если пароль верен
             if r.exists(email) == 0:  # если токена нет в redis db
                 token = str(uuid.uuid4())  # генерация токена
@@ -360,7 +359,7 @@ def login():
             }
             return jsonify(result)
         else:
-            abort(400, description='you shall not pass :) password is invalid')
+            abort(401, description='you shall not pass :) password is invalid')
     else:
         abort(405)
 
