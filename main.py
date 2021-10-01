@@ -486,31 +486,31 @@ def user_info():
                                 WHERE serv_order_id = '{0}'""".format(serv_order_id)
                 cursor.execute(sql_query)
                 conn.commit()
-                res_2 = cursor.fetchone()
+                res_cost = cursor.fetchone()
                 # cursor.close()
 
-                if res_2[0] is None:
+                if res_cost[0] is None:
                     tire_service_order_cost = 'Error! Sum is None!'
                 else:
-                    tire_service_order_cost = res_2[0]
+                    tire_service_order_cost = res_cost[0]
 
                 sql_query = """SELECT task_name, worker_id, task_cost FROM temp 
                                 WHERE serv_order_id = '{0}'""".format(serv_order_id)
                 cursor.execute(sql_query)
                 conn.commit()
-                res_1 = cursor.fetchall()
+                res_task = cursor.fetchall()
                 # cursor.close()
 
-                empty_result = []
-                if res_1 == empty_result:
+                empty_result_1 = []
+                if res_task == empty_result_1:
                     result_tire_service_order_tasks = 'You do not have any tasks in your tire service order.'
                 else:
                     result_tire_service_order_tasks = []
                     for j in range(len(res_1)):
                         result_tire_service_order_tasks.append({
-                            'task_name': res_1[j][0],
-                            'worker_id': res_1[j][1],
-                            'task cost': res_1[j][2]
+                            'task_name': res_task[j][0],
+                            'worker_id': res_task[j][1],
+                            'task cost': res_task[j][2]
                         })
 
                 result_tire_service_order.append({
@@ -521,12 +521,6 @@ def user_info():
                     'tire service order cost': tire_service_order_cost,
                     'tasks': result_tire_service_order_tasks
                 })
-
-
-
-
-
-
 
         sql_query = """drop view temp"""
         cursor.execute(sql_query)
