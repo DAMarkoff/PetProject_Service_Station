@@ -210,7 +210,7 @@ def reg():
         email = request.form.get('email')
 
         if f_name is None or l_name is None or password is None or phone == '' or email is None:
-            abort(400, decription='The f_name, l_name, password, phone and email data are required')
+            abort(400, description='The f_name, l_name, password, phone and email data are required')
 
         # making sure that the password is strong enough 8-32 chars,
         # min one digit, min one upper and min one lower letter, min one special char
