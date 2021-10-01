@@ -1095,7 +1095,7 @@ def delete_tire_service_order():
                     ON tso.manager_id = s.worker_id WHERE worker_id = '{0}' group by worker_id""".format(manager_id)
         cursor.execute(sql_query)
         conn.commit()
-        res_ = cursor.fetchall()
+        res_ = cursor.fetchone()
         # cursor.close()
 
         manager_id, manager_load = res_[0], res_[1]
