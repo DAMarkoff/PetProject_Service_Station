@@ -441,7 +441,7 @@ def user_info():
                                         'tire size': res_[i][2]
                 })
 
-        sql_query = """CREATE VIEW temp AS
+        sql_query = """CREATE OR REPLACE VIEW temp AS
                                 SELECT 
                                     serv_order_id,
                                     user_id,
