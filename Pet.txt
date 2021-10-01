@@ -244,12 +244,12 @@ user_authorization checks that:
 /activate_user [POST]
 	input:	
 			email				- required
-			token				- required
+			admin_password		- required
 	
 	output:
 			confirmaion message
 			
-	user_authorization
+	the email must exist, admin_password is 'admin'
 			
 /delete_user_vehicle [DELETE]
 	input:

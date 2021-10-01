@@ -219,7 +219,7 @@ def reg():
 
         active = True
         if not conn:
-            return 'Sorry, there is no connection with the database'
+            return 'Sorry, there is no connection to the database'
 
         sql_query = """INSERT INTO users (first_name, last_name, pass, phone, email,active) VALUES ('{0}', 
                     '{1}', '{2}', '{3}', '{4}', {5})""".format(f_name, l_name, passw, phone, email, active)
@@ -266,7 +266,7 @@ def cl():
 def show_all_users():
 
     if not conn:
-        return 'Sorry, there is no connection with the database'
+        return 'Sorry, there is no connection to the database'
 
     sql_query = "SELECT user_id, first_name, last_name, phone, email, pass, active FROM users"
     cursor.execute(sql_query)
@@ -305,7 +305,7 @@ def login():
             return 'User is deactivated'
 
         if not conn:
-            return 'Sorry, there is no connection with the database'
+            return 'Sorry, there is no connection to the database'
 
         sql_query = "SELECT pass, user_id, first_name, last_name FROM users WHERE email = '{0}'".format(email)
         cursor.execute(sql_query)
@@ -346,7 +346,7 @@ def user_info():
             return user_auth['text']
 
         if not conn:
-            return 'Sorry, there is no connection with the database'
+            return 'Sorry, there is no connection to the database'
 
         # collecting the user's personal data from the users db
         sql_query = """SELECT user_id, first_name, last_name, email, phone, pass 
@@ -436,7 +436,7 @@ def new_st_ord():
         shelf_id = shelf_id_by_size(size_name)
 
         if not conn:
-            return 'Sorry, there is no connection with the database'
+            return 'Sorry, there is no connection to the database'
 
         size_id_by = size_id_by_name(size_name)
         if size_id_by is None:
@@ -487,7 +487,7 @@ def change_storage_order():
             return user_auth['text']
 
         if not conn:
-            return 'Sorry, there is no connection with the database'
+            return 'Sorry, there is no connection to the database'
 
         # get the initial data of the storage order
         sql_query = """SELECT start_date, stop_date, size_id, st_ord_cost, shelf_id, user_id 
@@ -599,7 +599,7 @@ def change_user_info():
             return 'Ok. Nothing needs to be changed :)'
 
         if not conn:
-            return 'Sorry, there is no connection with the database'
+            return 'Sorry, there is no connection to the database'
 
         # get the initial data of the storage order
         sql_query = """SELECT user_id, first_name, last_name, phone, pass 
@@ -679,7 +679,7 @@ def new_user_vehicle():
             return user_auth['text']
 
         if not conn:
-            return 'Sorry, there is no connection with the database'
+            return 'Sorry, there is no connection to the database'
 
         sql_query = """INSERT INTO user_vehicle (user_id, vehicle_id, size_id) 
                         VALUES ('{0}', '{1}', '{2}');""".format(user_id, vehicle_id, size_id)
@@ -714,7 +714,7 @@ def delete_user():
             return 'АHA! Changed your mind?'
 
         if not conn:
-            return 'Sorry, there is no connection with the database'
+            return 'Sorry, there is no connection to the database'
 
         sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
         cursor.execute(sql_query)
@@ -753,7 +753,7 @@ def deactivate_user():
         return 'АHA! Changed your mind?'
 
     if not conn:
-        return 'Sorry, there is no connection with the database'
+        return 'Sorry, there is no connection to the database'
 
     sql_query = """UPDATE users SET active = 'False' WHERE email = '{0}'""".format(email)
     cursor.execute(sql_query)
@@ -775,17 +775,19 @@ def deactivate_user():
 @app.route("/activate_user", methods=['POST'])
 def activate_user():
     email = request.form.get('email')
-    token = request.form.get('token')
+    admin_password = request.form.get('admin_password')
 
-    if token is None or email is None:
-        return 'The token, email and sure data are required'
+    if admin_password is None or email is None:
+        return 'The admin_password and email are required'
 
-    user_auth = user_authorization(email, token)
-    if not user_auth['result']:
-        return user_auth['text']
+    if not user_exist(email):
+        return 'The user is not exist'
+
+    if admin_password != 'admin':
+        return 'Wrong admin password!'
 
     if not conn:
-        return 'Sorry, there is no connection with the database'
+        return 'Sorry, there is no connection to the database'
 
     sql_query = """UPDATE users SET active = 'True' WHERE email = '{0}'""".format(email)
     cursor.execute(sql_query)
@@ -819,7 +821,7 @@ def delete_user_vehicle():
             return user_auth['text']
 
         if not conn:
-            return 'Sorry, there is no connection with the database'
+            return 'Sorry, there is no connection to the database'
 
         sql_query = """SELECT user_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
         cursor.execute(sql_query)
@@ -854,7 +856,7 @@ def delete_storage_order():
             return user_auth['text']
 
         if not conn:
-            return 'Sorry, there is no connection with the database'
+            return 'Sorry, there is no connection to the database'
 
         sql_query = """SELECT user_id, shelf_id FROM storage_orders WHERE st_ord_id = '{0}'""".format(st_ord_id)
         cursor.execute(sql_query)
@@ -898,7 +900,7 @@ def change_user_vehicle():
             return user_auth['text']
 
         if not conn:
-            return 'Sorry, there is no connection with the database'
+            return 'Sorry, there is no connection to the database'
 
         sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
         cursor.execute(sql_query)
@@ -956,7 +958,7 @@ def change_user_vehicle():
 @app.route("/available_storage", methods=['GET'])  # shows available free storage places in the warehouse
 def available_storage():
     if not conn:
-        return 'Sorry, there is no connection with the database'
+        return 'Sorry, there is no connection to the database'
 
     sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE available = 'True'"""
     cursor.execute(sql_query)
@@ -993,7 +995,7 @@ def create_tire_service_order():
             return user_auth['text']
 
         if not conn:
-            return 'Sorry, there is no connection with the database'
+            return 'Sorry, there is no connection to the database'
 
         sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle 
                         WHERE u_veh_id = '{0}';""".format(u_veh_id)
@@ -1007,35 +1009,36 @@ def create_tire_service_order():
         if get_user_id(email) != user_id:
             return 'It is not your vehicle!'
 
-        sql_query = """SELECT worker_id, first_name, last_name, email, phone FROM
-                        staff WHERE position_id = 1 AND available = True"""
+        sql_query = """SELECT worker_id, COUNT(manager_id) FROM staff AS s LEFT JOIN tire_service_order AS tso
+                        ON tso.manager_id = s.worker_id WHERE available = True AND position_id = 2
+                        GROUP BY worker_id HAVING COUNT(manager_id) < 5"""
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchall()
         # cursor.close()
 
         if len(res_) == 0:
-            return 'Sorry, all workers are busy'
+            return 'Sorry, all managers are busy'
         else:
             rand_id = random.randint(0, len(res_))
 
-        worker_id, worker_first_name, worker_last_name, worker_email, worker_phone = \
-            res_[rand_id][0], res_[rand_id][1], res_[rand_id][2], res_[rand_id][3], res_[rand_id][4]
+        manager_id, manager_load = res_[rand_id][0], res_[rand_id][1]
 
-        sql_query = """INSERT INTO tire_service_order (user_id, serv_order_date, u_veh_id, worker_id)
-                        VALUES ('{0}', '{1}', '{2}', '{3}')""".format(user_id, order_date, u_veh_id, worker_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        # cursor.close()
+        if manager_load == 4:
+            sql_query = """UPDATE staff SET available = False WHERE worker_id = '{0}'""".format(manager_id)
+            cursor.execute(sql_query)
+            conn.commit()
+            # cursor.close()
 
-        sql_query = """UPDATE staff SET available = False WHERE worker_id = '{0}'""".format(worker_id)
+        sql_query = """INSERT INTO tire_service_order (user_id, serv_order_date, u_veh_id, manager_id)
+                        VALUES ('{0}', '{1}', '{2}', '{3}')""".format(user_id, order_date, u_veh_id, manager_id)
         cursor.execute(sql_query)
         conn.commit()
         # cursor.close()
 
         sql_query = """SELECT serv_order_id FROM tire_service_order WHERE user_id = '{0}' 
                         AND serv_order_date = '{1}' AND u_veh_id = '{2}' 
-                        AND  worker_id = '{3}'""".format(user_id, order_date, u_veh_id, worker_id)
+                        AND  manager_id = '{3}'""".format(user_id, order_date, u_veh_id, manager_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
@@ -1043,9 +1046,18 @@ def create_tire_service_order():
 
         serv_order_id = res_[0]
 
-        result = {'service_order_id': serv_order_id, 'date': order_date, 'worker_id': worker_id,
-                  'worker_first_name': worker_first_name, 'worker_last_name': worker_last_name,
-                  'worker_phone': worker_phone, 'worker_email': worker_email}
+        sql_query = """SELECT first_name, last_name, phone, email FROM staff 
+                    WHERE worker_id = '{0}'""".format(manager_id)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchone()
+        # cursor.close()
+
+        manager_first_name, manager_last_name, manager_phone, manager_email = res_[0], res_[1], res_[2], res_[3]
+
+        result = {'service_order_id': serv_order_id, 'date': order_date, 'manager_id': manager_id,
+                  'manager_first_name': manager_first_name, 'manager_last_name': manager_last_name,
+                  'manager_phone': manager_phone, 'manager_email': manager_email}
 
         return jsonify(result)
 
@@ -1065,7 +1077,7 @@ def delete_tire_service_order():
             return user_auth['text']
 
         if not conn:
-            return 'Sorry, there is no connection with the database'
+            return 'Sorry, there is no connection to the database'
 
         sql_query = """SELECT user_id, u_veh_id, worker_id FROM tire_service_order 
                         WHERE serv_order_id = '{0}';""".format(serv_order_id)
@@ -1112,7 +1124,7 @@ def add_task_to_list_of_works():
             return user_auth['text']
 
         if not conn:
-            return 'Sorry, there is no connection with the database'
+            return 'Sorry, there is no connection to the database'
 
         sql_query = """SELECT user_id FROM tire_service_order WHERE serv_order_id = '{0}';""".format(serv_order_id)
         cursor.execute(sql_query)
