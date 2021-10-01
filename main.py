@@ -200,6 +200,14 @@ def bad_request(e):
 def wrong_method(e):
     return jsonify(error=str(e)), 405
 
+@app.errorhandler(403)
+def wrong_method(e):
+    return jsonify(error=str(e)), 403
+
+
+@app.errorhandler(401)
+def wrong_method(e):
+    return jsonify(error=str(e)), 401
 
 @app.route("/reg", methods=['POST'])  # reg new user
 def reg():
@@ -366,7 +374,7 @@ def user_info():
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            abort(400, description=user_auth['text'])
+            abort(401, description=user_auth['text'])
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -395,7 +403,8 @@ def user_info():
         res_ = cursor.fetchall()
         # cursor.close()
 
-        if res_ is None:
+        empty_result = []
+        if res_ == empty_result:
             result_order = 'There are no orders for storage from the user'
         else:
             result_order = []
@@ -431,16 +440,88 @@ def user_info():
                                         'tire size': res_[i][2]
                 })
 
-        sql_query = "SELECT * FROM storage_orders WHERE user_id = '{0}'".format(get_user_id(email))
+        sql_query = """CREATE VIEW temp AS
+                                SELECT 
+                                    serv_order_id,
+                                    user_id,
+                                    serv_order_date,
+                                    u_veh_id,
+                                    tso.manager_id,
+                                    task_id,
+                                    task_name,
+                                    task_cost,
+                                    task_duration,
+                                    t.worker_id,
+                                    p.position_id,
+                                    position_name,
+                                    s.first_name,
+                                    s.last_name
+                                FROM tire_service_order AS tso
+                                LEFT JOIN list_of_works USING (serv_order_id)
+                                LEFT JOIN tasks AS t USING (task_id)
+                                LEFT JOIN staff AS s USING (worker_id)
+                                LEFT JOIN positions AS p USING (position_id)
+                                LEFT JOIN staff AS st ON st.worker_id = tso.manager_id
+                                WHERE user_id = 2;"""
+        cursor.execute(sql_query)
+        conn.commit()
+
+
+
+
+        sql_query = """SELECT DISTINCT serv_order_id, serv_order_date, manager_id FROM temp"""
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchall()
-        # cursor.close()
+
+        empty_result = []
+        if res_ == empty_result:
+            result_tire_service_order = 'You do not have a tire service order(s).'
+        else:
+            result_tire_service_order = []
+            for i in range(len(res_)):
+
+                serv_order_id = res_[i][0]
+
+                sql_query = """SELECT task_name, worker_id FROM temp 
+                                WHERE serv_order_id = '{0}'""".format(serv_order_id)
+                cursor.execute(sql_query)
+                conn.commit()
+                res_1 = cursor.fetchall()
+
+                empty_result = []
+                if res_1 == empty_result:
+                    result_tire_service_order_tasks = 'You do not have any tasks in your tire service order.'
+                else:
+                    result_tire_service_order_tasks = []
+                    for j in range(len(res_1)):
+                        result_tire_service_order_tasks.append({
+                            'task_name': res_1[j][0],
+                            'worker_id': res_1[j][1]
+                        })
+
+                result_tire_service_order.append({
+                    'serv_order_id': serv_order_id,
+                    'serv_order_date': res_[i][1],
+                    'manager_id': res_[i][2]
+                    'tasks': result_tire_service_order_tasks
+                })
+
+
+
+
+
+
+
+        sql_query = """drop view temp"""
+        cursor.execute(sql_query)
+        conn.commit()
 
         result = (
-                    {'user info': result_users},
-                    {'storage orders info:': result_order},
-                    {"user's vehicle": result_vehicle}
+                    {"your info": result_users},
+                    {"storage orders info:": result_order},
+                    {"your vehicle(s)": result_vehicle},
+                    {"tire service order(s)": result_tire_service_order}
         )
         return jsonify(result)
     else:
@@ -461,7 +542,7 @@ def new_st_ord():
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            abort(400, description=user_auth['text'])
+            abort(401, description=user_auth['text'])
 
         # is there the necessary free storage space
         if not shelf_avail(size_name):
@@ -520,7 +601,7 @@ def change_storage_order():
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            abort(400, description=user_auth['text'])
+            abort(401, description=user_auth['text'])
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -538,7 +619,7 @@ def change_storage_order():
 
         # verify, that the storage order is created by user
         if get_user_id(email) != user_id_db:
-            abort(400, description='Ouch! This is not your storage order!')
+            abort(403, description='Ouch! This is not your storage order!')
 
         # what data should be changed
         # check dates
@@ -638,7 +719,7 @@ def change_user_info():
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            abort(400, description=user_auth['text'])
+            abort(401, description=user_auth['text'])
 
         if f_name is None and l_name is None and phone is None and new_email is None and password is None:
             abort(400, description='Ok. Nothing needs to be changed :)')
@@ -733,7 +814,7 @@ def new_user_vehicle():
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            abort(400, description=user_auth['text'])
+            abort(401, description=user_auth['text'])
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -772,7 +853,7 @@ def delete_user():
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            abort(400, description=user_auth['text'])
+            abort(401, description=user_auth['text'])
 
         if sure != 'True':
             abort(400, description='АHA! Changed your mind?')
@@ -812,7 +893,7 @@ def deactivate_user():
 
     user_auth = user_authorization(email, token)
     if not user_auth['result']:
-        abort(400, description=user_auth['text'])
+        abort(401, description=user_auth['text'])
 
     if not user_active(email):
         abort(400, description='User is already deactivated')
@@ -890,7 +971,7 @@ def delete_user_vehicle():
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            abort(400, description=user_auth['text'])
+            abort(401, description=user_auth['text'])
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -902,7 +983,7 @@ def delete_user_vehicle():
         # cursor.close()
 
         if get_user_id(email) != res_[0]:
-            abort(400, description='It is not your vehicle! Somebody call the police!')
+            abort(403, description='It is not your vehicle! Somebody call the police!')
         else:
 
             sql_query = """DELETE FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
@@ -929,7 +1010,7 @@ def delete_storage_order():
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            abort(400, description=user_auth['text'])
+            abort(401, description=user_auth['text'])
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -943,7 +1024,7 @@ def delete_storage_order():
         shelf_id = res_[1]
 
         if get_user_id(email) != res_[0]:
-            abort(400, description='It is not your storage order! Somebody call the police!')
+            abort(403, description='It is not your storage order! Somebody call the police!')
 
         sql_query = """DELETE FROM storage_orders WHERE st_ord_id = '{0}'""".format(st_ord_id)
         cursor.execute(sql_query)
@@ -978,7 +1059,7 @@ def change_user_vehicle():
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            abort(400, description=user_auth['text'])
+            abort(401, description=user_auth['text'])
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -995,7 +1076,7 @@ def change_user_vehicle():
         old_size_name = str(size_name_by_id(size_id_db))
 
         if user_id_db != get_user_id(email):
-            abort(400, description='It is not your vehicle! Somebody call the police!')
+            abort(403, description='It is not your vehicle! Somebody call the police!')
 
         if (new_vehicle_name is None and new_size_name is None) or \
                 (new_vehicle_name == old_vehicle_name and new_size_name == old_size_name):
@@ -1081,7 +1162,7 @@ def create_tire_service_order():
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            abort(400, description=user_auth['text'])
+            abort(401, description=user_auth['text'])
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -1096,7 +1177,7 @@ def create_tire_service_order():
         user_id, vehicle_id, size_id = res_[0], res_[1], res_[2]
 
         if get_user_id(email) != user_id:
-            abort(400, description='It is not your vehicle!')
+            abort(403, description='It is not your vehicle!')
 
         sql_query = """SELECT worker_id, COUNT(manager_id) FROM staff AS s LEFT JOIN tire_service_order AS tso
                         ON tso.manager_id = s.worker_id WHERE available = True AND position_id = 2
@@ -1169,7 +1250,7 @@ def delete_tire_service_order():
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            abort(400, description=user_auth['text'])
+            abort(401, description=user_auth['text'])
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -1184,7 +1265,7 @@ def delete_tire_service_order():
         user_id, u_veh_id, manager_id = res_[0], res_[1], res_[2]
 
         if get_user_id(email) != user_id:
-            abort(400, description='It is not your tire service order!')
+            abort(403, description='It is not your tire service order!')
 
         sql_query = """SELECT worker_id, COUNT(manager_id) FROM staff AS s JOIN tire_service_order AS tso
                     ON tso.manager_id = s.worker_id WHERE worker_id = '{0}' group by worker_id""".format(manager_id)
@@ -1231,7 +1312,7 @@ def add_task_to_list_of_works():
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
-            abort(400, description=user_auth['text'])
+            abort(401, description=user_auth['text'])
 
         if not conn:
             return 'Sorry, there is no connection to the database'
@@ -1243,7 +1324,7 @@ def add_task_to_list_of_works():
         # cursor.close()
 
         if get_user_id(email) != res_[0]:
-            abort(400, description='It is not your tire service order!')
+            abort(403, description='It is not your tire service order!')
 
         sql_query = """SELECT task_id FROM tasks WHERE task_name = '{0}';""".format(task_name)
         cursor.execute(sql_query)
