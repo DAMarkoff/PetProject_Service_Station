@@ -470,7 +470,7 @@ def user_info():
 
 
 
-        sql_query = """SELECT DISTINCT serv_order_id, serv_order_date, manager_id, vehicle_id FROM temp"""
+        sql_query = """SELECT DISTINCT serv_order_id, serv_order_date, manager_id, u_veh_id FROM temp"""
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchall()
