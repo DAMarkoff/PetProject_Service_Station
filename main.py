@@ -502,7 +502,7 @@ def user_info():
                 # cursor.close()
 
                 empty_result = []
-                if res_1[0] == empty_result:
+                if res_1 == empty_result:
                     result_tire_service_order_tasks = 'You do not have any tasks in your tire service order.'
                 else:
                     result_tire_service_order_tasks = []
