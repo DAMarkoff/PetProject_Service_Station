@@ -1,5 +1,5 @@
 import random
-from flask import Flask, json, request, jsonify
+from flask import Flask, json, request, jsonify, abort
 from jinja2 import Template
 import psycopg2
 import uuid
@@ -82,25 +82,25 @@ def shelf_id_by_size(size_name):
         return shelf_id_[0]
 
 
-def validate_password(passw):
+def validate_password(password):
     special_sym = ['$', '@', '#', '!', '%']
     return_val = {'result': True, 'text': ''}
-    if len(passw) < 8:
+    if len(password) < 8:
         return_val['text'] = 'The password must be at least 8 characters long'
         return_val['result'] = False
-    if len(passw) > 32:
+    if len(password) > 32:
         return_val['text'] = 'the password length should not exceed 32 chars'
         return_val['result'] = False
-    if not any(char.isdigit() for char in passw):
+    if not any(char.isdigit() for char in password):
         return_val['text'] = 'The password must contain at least one digit'
         return_val['result'] = False
-    if not any(char.isupper() for char in passw):
+    if not any(char.isupper() for char in password):
         return_val['text'] = 'The password must contain at least one uppercase letter'
         return_val['result'] = False
-    if not any(char.islower() for char in passw):
+    if not any(char.islower() for char in password):
         return_val['text'] = 'The password must contain at least one lowercase letter'
         return_val['result'] = False
-    if not any(char in special_sym for char in passw):
+    if not any(char in special_sym for char in password):
         return_val['text'] = 'The password must contain at least one of the symbols $@#!%'
         return_val['result'] = False
     return return_val
@@ -191,23 +191,32 @@ def user_authorization(email, token):
     return return_val
 
 
+@app.errorhandler(400)
+def bad_request(e):
+    return jsonify(error=str(e)), 400
+
+
+@app.errorhandler(405)
+def wrong_method(e):
+    return jsonify(error=str(e)), 405
+
 @app.route("/reg", methods=['POST'])  # reg new user
 def reg():
     if request.method == 'POST':
         f_name = request.form.get('f_name')
         l_name = request.form.get('l_name')
-        passw = request.form.get('passw')
+        password = request.form.get('password')
         phone = request.form.get('phone')
         email = request.form.get('email')
 
-        if f_name is None or l_name is None or passw is None or phone is None or email is None:
-            return 'The f_name, l_name, passw, phone and email data are required'
+        if f_name is None or l_name is None or password is None or phone == '' or email is None:
+            abort(400, decription='The f_name, l_name, password, phone and email data are required')
 
         # making sure that the password is strong enough 8-32 chars,
         # min one digit, min one upper and min one lower letter, min one special char
-        check_passw = validate_password(passw)
-        if not check_passw['result']:
-            return check_passw['text']
+        check_password = validate_password(password)
+        if not check_password['result']:
+            return check_password['text']
 
         # the email must contain @ and .
         check_email = validate_email(email)
@@ -222,7 +231,7 @@ def reg():
             return 'Sorry, there is no connection to the database'
 
         sql_query = """INSERT INTO users (first_name, last_name, pass, phone, email,active) VALUES ('{0}', 
-                    '{1}', '{2}', '{3}', '{4}', {5})""".format(f_name, l_name, passw, phone, email, active)
+                    '{1}', '{2}', '{3}', '{4}', {5})""".format(f_name, l_name, password, phone, email, active)
         cursor.execute(sql_query)
         conn.commit()
         # cursor.close()
@@ -239,18 +248,19 @@ def reg():
                    "l_name": res[2],
                    "email": res[3],
                    "phone": res[4],
-                   "passw": res[5],
+                   "password": res[5],
                    "active": res[6]})
 
         return jsonify(result)
-
+    else:
+        abort(405)
 
 @app.route("/cl", methods=['POST'])  # clear users DB
 def cl():
     if request.method == 'POST':
-        passw = request.form.get('pass')
+        password = request.form.get('password')
     
-        if passw == 'He_He_Boy!':
+        if password == 'He_He_Boy!':
             if conn:
                 sql_query = "DELETE FROM users"
                 cursor.execute(sql_query)
@@ -282,7 +292,7 @@ def show_all_users():
                            "l_name": res[i][2],
                            "phone": res[i][3],
                            "email": res[i][4],
-                           "passw": res[i][5],
+                           "password": res[i][5],
                            "active": res[i][6]})
     else:
         return 'There are no users in the DB'
@@ -293,9 +303,9 @@ def show_all_users():
 def login():
     if request.method == 'POST':
         email = request.form.get('email')
-        passw = request.form.get('passw')
+        password = request.form.get('password')
 
-        if passw is None or email is None:
+        if password is None or email is None:
             return 'The pass and email data are required'
 
         if not user_exist(email):
@@ -314,7 +324,7 @@ def login():
         # cursor.close()
 
         #    token = ""
-        if passw == res[0]:  # если пароль верен
+        if password == res[0]:  # если пароль верен
             if r.exists(email) == 0:  # если токена нет в redis db
                 token = str(uuid.uuid4())  # генерация токена
                 r.set(email, token, ex=600)  # запись токена в redis bd, срок - 600 сек.
@@ -361,7 +371,7 @@ def user_info():
                          "l_name": res[2],
                          "email": res[3],
                          "phone": res[4],
-                         "passw": res[5]})
+                         "password": res[5]})
 
         # collecting the user's storage orders data from the storage_orders db
         sql_query = "SELECT * FROM storage_orders WHERE user_id = '{0}'".format(get_user_id(email))
@@ -586,7 +596,7 @@ def change_user_info():
         l_name = request.form.get('l_name')
         phone = request.form.get('phone')
         new_email = request.form.get('new_email')
-        passw = request.form.get('passw')
+        password = request.form.get('password')
 
         if token is None or email is None:
             return 'The token, email are required'
@@ -595,7 +605,7 @@ def change_user_info():
         if not user_auth['result']:
             return user_auth['text']
 
-        if f_name is None and l_name is None and phone is None and new_email is None and passw is None:
+        if f_name is None and l_name is None and phone is None and new_email is None and password is None:
             return 'Ok. Nothing needs to be changed :)'
 
         if not conn:
@@ -609,7 +619,7 @@ def change_user_info():
         res_ = cursor.fetchone()
         # cursor.close()
 
-        user_id_db, f_name_db, l_name_db, phone_db, passw_db = res_[0], res_[1], res_[2], res_[3], res_[4]
+        user_id_db, f_name_db, l_name_db, phone_db, password_db = res_[0], res_[1], res_[2], res_[3], res_[4]
 
         flag_relogin = False
         # what data should be changed
@@ -619,12 +629,12 @@ def change_user_info():
             l_name = l_name_db
         if phone is None:
             phone = phone_db
-        if passw is None:
-            passw = passw_db
+        if password is None:
+            password = password_db
         else:
-            check_passw = validate_password(passw)
-            if not check_passw['result']:
-                return check_passw['text']
+            check_password = validate_password(password)
+            if not check_password['result']:
+                return check_password['text']
             flag_relogin = True
         if new_email is None:
             new_email = email
@@ -640,14 +650,14 @@ def change_user_info():
 
         # update data in the DB
         sql_query = """UPDATE users SET first_name = '{0}', last_name = '{1}', email = '{2}', phone = '{3}', 
-                    pass = '{4}' WHERE user_id = '{5}';""".format(f_name, l_name, new_email, phone, passw, user_id_db)
+                    pass = '{4}' WHERE user_id = '{5}';""".format(f_name, l_name, new_email, phone, password, user_id_db)
         cursor.execute(sql_query)
         conn.commit()
         # cursor.close()
 
         result = ({'user_id': user_id_db, 'f_name_new': f_name, 'f_name_old': f_name_db, 'l_name_new': l_name,
                    'l_name_old': l_name_db, 'email_new': new_email, 'email_old': email, 'phone_new': phone,
-                   'phone_old': phone_db, 'passw_new': passw, 'passw_old': passw_db})
+                   'phone_old': phone_db, 'password_new': password, 'password_old': password_db})
 
         return jsonify(result)
 
