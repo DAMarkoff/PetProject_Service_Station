@@ -110,7 +110,7 @@ def validate_email(email):
     return_val = {'result': True, 'text': ''}
     if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
         return_val['result'] = False
-        return_val['text'] = 'Please provide a valid email address'
+        return_val['text'] = 'The email must contain @ and . chars'
     return return_val
 
 
@@ -223,6 +223,9 @@ def reg():
         if f_name is None or l_name is None or password is None or phone is None or email is None:
             abort(400, description='The f_name, l_name, password, phone and email data are required')
 
+        if user_exist(email):
+            abort(400, description="The user with this email already exists")
+
         # making sure that the password is strong enough 8-32 chars,
         # min one digit, min one upper and min one lower letter, min one special char
         check_password = validate_password(password)
@@ -233,9 +236,6 @@ def reg():
         check_email = validate_email(email)
         if not check_email['result']:
             abort(400, description=check_email['text'])
-
-        if user_exist(email):
-            abort(400, description="The user with this email already exists")
 
         active = True
         if not conn:
