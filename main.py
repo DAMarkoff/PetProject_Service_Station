@@ -320,7 +320,7 @@ def show_all_users():
                     'confirmation': 'There are no users in the DB'
                 }
         else:
-            if not user_id.isdigit():
+            if not str(user_id.isdigit()):
                 abort(400, description='The user_id must contain only digits')
             sql_query = """SELECT user_id, first_name, last_name, phone, email, pass, active FROM users
                             WHERE user_id = '{0}'""".format(user_id)
