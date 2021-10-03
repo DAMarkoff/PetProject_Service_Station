@@ -291,7 +291,7 @@ def cl():
 @app.route("/all", methods=['GET'])  # get a list of all users
 def show_all_users():
     if request.method == 'GET':
-        user_id = int(request.args.get('user_id'))
+        user_id = request.args.get('user_id')
         if not conn:
             return 'Sorry, there is no connection to the database'
 
