@@ -1165,7 +1165,7 @@ def available_storage():
     if request.method != 'GET':
         abort(405)
 
-    size_id = request.args.get('size_id')
+    size_id = int(request.args.get('size_id'))
     if not conn:
         return 'Sorry, there is no connection to the database'
 
