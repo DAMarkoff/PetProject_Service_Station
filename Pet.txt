@@ -73,7 +73,7 @@ user_authorization checks:
 			password			- required
 		
 	output: 
-			Hello message
+			hello_message
 			email
 			token
 			user_id
@@ -164,7 +164,7 @@ user_authorization checks:
 				update in the "warehouse" base availability of the occupied storage place
 
 				
-/change_storage_order [POST]				
+/change_storage_order [PUT]				
 	input:
 			st_ord_id 			- required
 			email				- required
@@ -204,7 +204,7 @@ user_authorization checks:
 			if the vehcile type or tire size is not specified in the DB: note 
 				add the date in to the DB
 				
-/change_user_info [PATCH]				
+/change_user_info [PUT]				
 	input:
 			email				- required
 			token				- required
@@ -286,7 +286,7 @@ user_authorization checks:
 	user_authorization
 			if it is not user's storage order: :)
 		
-/change_user_vehicle [PATCH]
+/change_user_vehicle [PUT]
 	input:
 			email				- required
 			token				- required

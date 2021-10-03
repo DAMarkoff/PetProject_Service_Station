@@ -290,59 +290,61 @@ def cl():
 
 @app.route("/all", methods=['GET'])  # get a list of all users
 def show_all_users():
-    user_id = request.args.get('user_id')
-    if not conn:
-        return 'Sorry, there is no connection to the database'
+    if request.method == 'GET':
+        user_id = request.args.get('user_id')
+        if not conn:
+            return 'Sorry, there is no connection to the database'
 
-    result = {}
-    if user_id is None:
-        sql_query = "SELECT user_id, first_name, last_name, phone, email, pass, active FROM users"
-        cursor.execute(sql_query)
-        conn.commit()
-        res = cursor.fetchall()
-        # cursor.close()
+        result = {}
+        if user_id is None:
+            sql_query = "SELECT user_id, first_name, last_name, phone, email, pass, active FROM users"
+            cursor.execute(sql_query)
+            conn.commit()
+            res = cursor.fetchall()
+            # cursor.close()
 
-        if res is not None:
-            result = []
-            for i in range(len(res)):
+            if res is not None:
+                result = []
+                for i in range(len(res)):
+                    result.append({
+                        "ID": res[i][0],
+                        "f_name": res[i][1],
+                        "l_name": res[i][2],
+                        "phone": res[i][3],
+                        "email": res[i][4],
+                        "password": res[i][5],
+                        "active": res[i][6]
+                    })
+            else:
+                result = {
+                    'confirmation': 'There are no users in the DB'
+                }
+        else:
+            sql_query = """SELECT user_id, first_name, last_name, phone, email, pass, active FROM users
+                            WHERE user_id = '{0}'""".format(user_id)
+            cursor.execute(sql_query)
+            conn.commit()
+            res = cursor.fetchone()
+            # cursor.close()
+
+            if res is not None:
+                result = []
                 result.append({
-                    "ID": res[i][0],
-                    "f_name": res[i][1],
-                    "l_name": res[i][2],
-                    "phone": res[i][3],
-                    "email": res[i][4],
-                    "password": res[i][5],
-                    "active": res[i][6]
+                    "ID": res[0],
+                    "f_name": res[1],
+                    "l_name": res[2],
+                    "phone": res[3],
+                    "email": res[4],
+                    "password": res[5],
+                    "active": res[6]
                 })
-        else:
-            result = {
-                'confirmation': 'There are no users in the DB'
-            }
+            else:
+                result = {
+                    'confirmation': 'There is no user ID ' + user_id + ' in the DB'
+                }
+        return jsonify(result)
     else:
-        sql_query = """SELECT user_id, first_name, last_name, phone, email, pass, active FROM users
-                        WHERE user_id = '{0}'""".format(user_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        res = cursor.fetchone()
-        # cursor.close()
-
-        if res is not None:
-            result = []
-            result.append({
-                "ID": res[0],
-                "f_name": res[1],
-                "l_name": res[2],
-                "phone": res[3],
-                "email": res[4],
-                "password": res[5],
-                "active": res[6]
-            })
-        else:
-            result = {
-                'confirmation': 'There is no user ID ' + user_id + ' in the DB'
-            }
-    return jsonify(result)
-
+        error(405)
 
 @app.route("/login", methods=['POST'])
 def login():
@@ -381,7 +383,7 @@ def login():
             template = Template(text)
 
             result = {
-                        "result": template.render(name=res[2]+" "+res[3]),
+                        "hello_message": template.render(name=res[2]+" "+res[3]),
                         "token": token,
                         "email": email,
                         "user_id": res[1]
@@ -624,9 +626,9 @@ def new_st_ord():
         abort(405)
 
 
-@app.route("/change_storage_order", methods=['PATCH'])
+@app.route("/change_storage_order", methods=['PUT'])
 def change_storage_order():
-    if request.method == 'PATCH':
+    if request.method == 'PUT':
         st_ord_id = request.form.get('st_ord_id')
         token = request.form.get('token')
         email = request.form.get('email')
@@ -742,9 +744,9 @@ def change_storage_order():
         abort(405)
 
 
-@app.route("/change_user_info", methods=['PATCH'])
+@app.route("/change_user_info", methods=['PUT'])
 def change_user_info():
-    if request.method == 'PATCH':
+    if request.method == 'PUT':
         token = request.form.get('token')
         email = request.form.get('email')
         f_name = request.form.get('f_name')
@@ -1084,9 +1086,9 @@ def delete_storage_order():
         abort(405)
 
 
-@app.route("/change_user_vehicle", methods=['PATCH'])
+@app.route("/change_user_vehicle", methods=['PUT'])
 def change_user_vehicle():
-    if request.method == 'PATCH':
+    if request.method == 'PUT':
         email = request.form.get('email')
         token = request.form.get('token')
         u_veh_id = request.form.get('user_vehicle_id')
@@ -1186,7 +1188,7 @@ def available_storage():
                 })
         else:
             result = {
-                'confirmation': 'Unfortunately, we do not have any available storage space'
+                'confirmation': 'Unfortunately, we do not have available storage shelves'
             }
     else:
         sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE available = 'True'
@@ -1205,7 +1207,7 @@ def available_storage():
             })
         else:
             result = {
-                'confirmation': 'Unfortunately, we do not have available storage place'
+                'confirmation': 'Unfortunately, we do not have available storage shelf'
             }
     return jsonify(result)
 
