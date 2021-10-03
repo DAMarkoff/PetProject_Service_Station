@@ -1199,9 +1199,9 @@ def available_storage():
         if res_ is not None:
             result = []
             result.append({
-                'shelf_id': res_[i][0],
-                'size_id': res_[i][1],
-                'size_name': size_name_by_id(res_[i][1])
+                'shelf_id': res_[0],
+                'size_id': res_[1],
+                'size_name': size_name_by_id(res_[1])
             })
         else:
             result = {
