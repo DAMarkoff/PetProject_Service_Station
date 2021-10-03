@@ -1162,30 +1162,52 @@ def change_user_vehicle():
 
 @app.route("/available_storage", methods=['GET'])  # shows available free storage places in the warehouse
 def available_storage():
+    if request.method != 'GET':
+        abort(405)
+
+    size_id = request.args.get('size_id')
     if not conn:
         return 'Sorry, there is no connection to the database'
 
-    sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE available = 'True'"""
-    cursor.execute(sql_query)
-    conn.commit()
-    res_ = cursor.fetchall()
-    # cursor.close()
+    if size_id is None:
+        sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE available = 'True'"""
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchall()
+        # cursor.close()
 
-    if res_ is not None:
-        result = []
-        for i in range(len(res_)):
+        if res_ is not None:
+            result = []
+            for i in range(len(res_)):
+                result.append({
+                    'shelf_id': res_[i][0],
+                    'size_id': res_[i][1],
+                    'size_name': size_name_by_id(res_[i][1])
+                })
+        else:
+            result = {
+                'confirmation': 'Unfortunately, we do not have any available storage space'
+            }
+    else:
+        sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE available = 'True'
+                        AND size_id = '{0}'""".format(size_id)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchone()
+        # cursor.close()
+
+        if res_ is not None:
+            result = []
             result.append({
                 'shelf_id': res_[i][0],
                 'size_id': res_[i][1],
                 'size_name': size_name_by_id(res_[i][1])
             })
-
-        return jsonify(result)
-    else:
-        result = {
-            'confirmation': 'Unfortunately, we do not have any available storage space'
-        }
-        return jsonify(result)
+        else:
+            result = {
+                'confirmation': 'Unfortunately, we do not have available storage place'
+            }
+    return jsonify(result)
 
 
 @app.route("/create_tire_service_order", methods=['POST'])
