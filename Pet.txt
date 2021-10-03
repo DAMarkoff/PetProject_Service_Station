@@ -306,7 +306,16 @@ user_authorization checks:
 				if all optional data is None OR the new data is equal to the DB data: nothing needs to be changed
 					if some optional data is None: take the data needed from DB
 
-/available_storage [GET] - show available free storage places in the warehouse
+/available_storage [GET] - show free storage shelves in the warehouse
+	input:
+			size_id				- optional
+	output:
+			shelf_id
+			size_id
+			size_name
+			
+	if there is a size_id in params: shoe free shelf(s) for this size_id
+		if there is no params: show info about all free shelf(s)
 
 /create_tire_service_order [POST]
 	input:
