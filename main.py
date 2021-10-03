@@ -295,7 +295,7 @@ def show_all_users():
         return 'Sorry, there is no connection to the database'
 
     result = {}
-    if user_id != "":
+    if user_id is None:
         sql_query = "SELECT user_id, first_name, last_name, phone, email, pass, active FROM users"
         cursor.execute(sql_query)
         conn.commit()
@@ -336,7 +336,7 @@ def show_all_users():
             }
         else:
             result = {
-                'confirmation': 'There are no users in the DB'
+                'confirmation': 'There is no user ID ' + user_id + ' in the DB'
             }
     return jsonify(result)
 
