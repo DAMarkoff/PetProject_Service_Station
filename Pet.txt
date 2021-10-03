@@ -110,6 +110,8 @@ user_authorization checks:
 
 
 /all [GET] - get a list of all users
+	input:
+			user_id				- optional
 	output:
 			user_id
 			f_name			
@@ -118,7 +120,9 @@ user_authorization checks:
 			phone
 			password
 	
-	if there are no users in the DB: note
+	if there is a user_id in params: output info about this user
+		if there is no params: output info about all users
+			if there are no users in the DB: note
 
 
 /user_info [POST] - block-diagram - get info about the logged user

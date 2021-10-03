@@ -305,19 +305,21 @@ def show_all_users():
         if res is not None:
             result = []
             for i in range(len(res)):
-                result.append({"ID": res[i][0],
-                               "f_name": res[i][1],
-                               "l_name": res[i][2],
-                               "phone": res[i][3],
-                               "email": res[i][4],
-                               "password": res[i][5],
-                               "active": res[i][6]})
+                result.append({
+                    "ID": res[i][0],
+                    "f_name": res[i][1],
+                    "l_name": res[i][2],
+                    "phone": res[i][3],
+                    "email": res[i][4],
+                    "password": res[i][5],
+                    "active": res[i][6]
+                })
         else:
             result = {
                 'confirmation': 'There are no users in the DB'
             }
     else:
-        sql_query = """SELECT first_name, last_name, phone, email, pass, active FROM users
+        sql_query = """SELECT user_id, first_name, last_name, phone, email, pass, active FROM users
                         WHERE user_id = '{0}'""".format(user_id)
         cursor.execute(sql_query)
         conn.commit()
@@ -327,13 +329,13 @@ def show_all_users():
         if res is not None:
             result = []
             result.append({
-                "ID": user_id,
-                "f_name": res[0],
-                "l_name": res[1],
-                "phone": res[2],
-                "email": res[3],
-                "password": res[4],
-                "active": res[5]
+                "ID": res[0],
+                "f_name": res[1],
+                "l_name": res[2],
+                "phone": res[3],
+                "email": res[4],
+                "password": res[5],
+                "active": res[6]
             })
         else:
             result = {
