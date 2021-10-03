@@ -290,28 +290,54 @@ def cl():
 
 @app.route("/all", methods=['GET'])  # get a list of all users
 def show_all_users():
-
+    user_id = request.args.get('user_id')
     if not conn:
         return 'Sorry, there is no connection to the database'
 
-    sql_query = "SELECT user_id, first_name, last_name, phone, email, pass, active FROM users"
-    cursor.execute(sql_query)
-    conn.commit()
-    res = cursor.fetchall()
-    # cursor.close()
+    result = {}
+    if user_id != "":
+        sql_query = "SELECT user_id, first_name, last_name, phone, email, pass, active FROM users"
+        cursor.execute(sql_query)
+        conn.commit()
+        res = cursor.fetchall()
+        # cursor.close()
 
-    if res is not None:
-        result = []
-        for i in range(len(res)):
-            result.append({"ID": res[i][0],
-                           "f_name": res[i][1],
-                           "l_name": res[i][2],
-                           "phone": res[i][3],
-                           "email": res[i][4],
-                           "password": res[i][5],
-                           "active": res[i][6]})
+        if res is not None:
+            result = []
+            for i in range(len(res)):
+                result.append({"ID": res[i][0],
+                               "f_name": res[i][1],
+                               "l_name": res[i][2],
+                               "phone": res[i][3],
+                               "email": res[i][4],
+                               "password": res[i][5],
+                               "active": res[i][6]})
+        else:
+            result = {
+                'confirmation': 'There are no users in the DB'
+            }
     else:
-        return 'There are no users in the DB'
+        sql_query = """SELECT first_name, last_name, phone, email, pass, active FROM users
+                        WHERE user_id = '{0}'""".format(user_id)
+        cursor.execute(sql_query)
+        conn.commit()
+        res = cursor.fetchone()
+        # cursor.close()
+
+        if res is not None:
+            result = {
+                "ID": user_id,
+                "f_name": res[0],
+                "l_name": res[1],
+                "phone": res[2],
+                "email": res[3],
+                "password": res[4],
+                "active": res[5]
+            }
+        else:
+            result = {
+                'confirmation': 'There are no users in the DB'
+            }
     return jsonify(result)
 
 

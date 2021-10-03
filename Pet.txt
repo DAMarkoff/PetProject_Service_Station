@@ -45,6 +45,9 @@ ToDo:
 	- add to list_of_works how to choose a worker 
 	- new storage order dates validate (start before today)
 	- update the token's TTL in the redis db after each user action
+	
+	- staff: add other working professions
+	- distribution of workers by type of work
 
 	- /change_tire_service_order
 	- /add_task_to_list_of_works
