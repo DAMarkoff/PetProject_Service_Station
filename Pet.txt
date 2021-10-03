@@ -10,25 +10,32 @@ Werkzeug==2.0.1
 DB diagram: https://drawsql.app/myowncompany/diagrams/cto
 
 Done:
-	/login
-	/reg
-	/cl
-	/all
-	/user_info
-	/new_storage_order
-	/change_storage_order
-	/new_user_vehicle
-	/change_user_info
-	/delete_user
-	/deactivate_user
-	/activate_user
-	/delete_user_vehicle
-	/delete_storage_order
-	/change_user_vehicle
-	/available_storage
-	/create_tire_service_order
-	/delete_tire_service_order
-	/add_task_to_list_of_works
+	endpoints:
+		/login
+		/reg
+		/cl
+		/all
+		/user_info
+		/new_storage_order
+		/change_storage_order
+		/new_user_vehicle
+		/change_user_info
+		/delete_user
+		/deactivate_user
+		/activate_user
+		/delete_user_vehicle
+		/delete_storage_order
+		/change_user_vehicle
+		/available_storage
+		/create_tire_service_order
+		/delete_tire_service_order
+		/add_task_to_list_of_works
+		
+	block-diagram:
+*		/reg
+d		/user_info
+*		/new_storage_order
+*		/login
 	
 ToDo: 
 	- the user can delete a tire_service_order with an expired date
@@ -39,15 +46,14 @@ ToDo:
 	- new storage order dates validate (start before today)
 	- update the token's TTL in the redis db after each user action
 
-!	- create cost_of_storage table (price list? any discout? so many questions!)
-!	- alter column cost in the storage_orders table (calculate costs)
-	- change_tire_service_order
-	- add_task_to_list_of_works
-	- change_list_of_works
-	- delete_list_of_works
-	- create_subscription
-	- change_subscription
-	- delete_subscription
+	- /change_tire_service_order
+	- /add_task_to_list_of_works
+	- /change_list_of_works
+	- /delete_list_of_works
+	- /create_subscription
+	- /change_subscription
+	- /delete_subscription
+	
 	- swagger
 
 DrawSQL DB:
@@ -58,7 +64,7 @@ user_authorization checks:
 	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: redirect to /login
 
-/login [POST]
+/login [POST] - block-diagram
 	input:  
 			email				- required
 			password			- required
@@ -76,7 +82,7 @@ user_authorization checks:
 				generate new token, add to the redis db and return it
 
 
-/reg [POST] - register a new user
+/reg [POST] - block-diagram - register a new user
 	input: 
 			f_name				- required
 			l_name				- required
@@ -92,7 +98,7 @@ user_authorization checks:
 			phone
 			passw
 			
-	if email does not exisis in the DB: 400 - note
+	if email exists in the DB: 400 - note
 	else: 
 		add new user to the DB and return info from the DB with user_id
 
@@ -112,7 +118,7 @@ user_authorization checks:
 	if there are no users in the DB: note
 
 
-/user_info [POST] - get info about the logged user
+/user_info [POST] - block-diagram - get info about the logged user
 	input: 
 			email				- required
 			token				- required
@@ -129,7 +135,7 @@ user_authorization checks:
 			return info
 
 	
-/new_storage_order [POST]
+/new_storage_order - block-diagram [POST]
 	input:
 			token				- required
 			email				- required
