@@ -325,7 +325,8 @@ def show_all_users():
         # cursor.close()
 
         if res is not None:
-            result = {
+            result = []
+            result.append({
                 "ID": user_id,
                 "f_name": res[0],
                 "l_name": res[1],
@@ -333,7 +334,7 @@ def show_all_users():
                 "email": res[3],
                 "password": res[4],
                 "active": res[5]
-            }
+            })
         else:
             result = {
                 'confirmation': 'There is no user ID ' + user_id + ' in the DB'
