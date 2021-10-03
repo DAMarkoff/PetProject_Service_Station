@@ -291,7 +291,7 @@ def cl():
 @app.route("/all", methods=['GET'])  # get a list of all users
 def show_all_users():
     if request.method == 'GET':
-        user_id = request.args.get('user_id')
+        user_id = int(request.args.get('user_id'))
         if not conn:
             return 'Sorry, there is no connection to the database'
 
@@ -320,6 +320,8 @@ def show_all_users():
                     'confirmation': 'There are no users in the DB'
                 }
         else:
+            if not user_id.isdigit():
+                abort(400, description='The user_id must contain only digits')
             sql_query = """SELECT user_id, first_name, last_name, phone, email, pass, active FROM users
                             WHERE user_id = '{0}'""".format(user_id)
             cursor.execute(sql_query)
