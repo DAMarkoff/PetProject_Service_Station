@@ -41,6 +41,7 @@ d		/user_info
 		/login
 		/all
 		/available_storage
+		/reg
 	
 ToDo: 
 	- the user can delete a tire_service_order with an expired date

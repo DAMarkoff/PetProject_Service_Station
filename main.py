@@ -214,8 +214,8 @@ def unauthorized(e):
 @app.route("/reg", methods=['POST'])  # reg new user
 def reg():
     if request.method == 'POST':
-        f_name = request.form.get('f_name')
-        l_name = request.form.get('l_name')
+        f_name = request.form.get('first_name')
+        l_name = request.form.get('last_name')
         password = request.form.get('password')
         phone = request.form.get('phone')
         email = request.form.get('email')
@@ -345,6 +345,7 @@ def show_all_users():
         return jsonify(result)
     else:
         error(405)
+
 
 @app.route("/login", methods=['POST'])
 def login():
