@@ -226,85 +226,9 @@ def unauthorized(e):
     return jsonify(error=str(e)), 401
 
 
-@app.route("/reg", methods=['POST'])  # reg new user
-def reg():
-    if request.method == 'POST':
-        f_name = request.form.get('first_name')
-        l_name = request.form.get('last_name')
-        password = request.form.get('password')
-        phone = request.form.get('phone')
-        email = request.form.get('email')
-
-        if f_name is None or l_name is None or password is None or phone is None or email is None:
-            abort(400, description='The f_name, l_name, password, phone and email data are required')
-
-        if user_exist(email):
-            abort(400, description="The user with this email already exists")
-
-        # making sure that the password is strong enough 8-32 chars,
-        # min one digit, min one upper and min one lower letter, min one special char
-        check_password = validate_password(password)
-        if not check_password['result']:
-            abort(400, description=check_password['text'])
-
-        # the email must contain @ and .
-        check_email = validate_email(email)
-        if not check_email['result']:
-            abort(400, description=check_email['text'])
-
-        active = True
-        if not conn:
-            return 'Sorry, there is no connection to the database'
-
-        sql_query = """INSERT INTO users (first_name, last_name, pass, phone, email,active) VALUES ('{0}', 
-                    '{1}', '{2}', '{3}', '{4}', {5})""".format(f_name, l_name, password, phone, email, active)
-        cursor.execute(sql_query)
-        conn.commit()
-        # cursor.close()
-
-        sql_query = """SELECT user_id FROM users WHERE email = '{0}'""".format(email)
-        cursor.execute(sql_query)
-        res = cursor.fetchone()
-        conn.commit()
-        # cursor.close()
-
-        result = {
-            "ID": res[0],
-            "f_name": f_name,
-            "l_name": l_name,
-            "phone": phone,
-            "password": password,
-            "active": active
-        }
-
-        return jsonify(result)
-    else:
-        abort(405)
-
-
-@app.route("/cl", methods=['POST'])  # clear users DB
-def cl():
-    if request.method == 'POST':
-        password = request.form.get('password')
-    
-        if password == 'He_He_Boy!':
-            if not conn:
-                return 'Sorry, there is no connection to the database'
-
-            sql_query = "DELETE FROM users"
-            cursor.execute(sql_query)
-            conn.commit()
-            # cursor.close()
-
-            return 'All users have been deleted'
-        else:
-            return 'Check your password!'
-    else:
-        abort(405)
-
-
-@app.route("/all", methods=['GET'])  # get a list of all users
-def show_all_users():
+@app.route("/users", methods=['GET', 'POST', 'PUT', 'DELETE'])  # request a short data/register/change data/delete
+def users():
+    # request a short data about all/one of the users
     if request.method == 'GET':
         user_id = request.args.get('user_id')
         if not conn:
@@ -360,65 +284,190 @@ def show_all_users():
                     'confirmation': 'There is no user ID ' + user_id + ' in the DB'
                 }
         return jsonify(result)
-    else:
-        error(405)
-
-
-@app.route("/login", methods=['POST'])
-def login():
-    if request.method == 'POST':
+    # register a new user
+    elif request.method == 'POST':
+        f_name = request.form.get('first_name')
+        l_name = request.form.get('last_name')
+        password = request.form.get('password')
+        phone = request.form.get('phone')
         email = request.form.get('email')
+
+        if f_name is None or l_name is None or password is None or phone is None or email is None:
+            abort(400, description='The f_name, l_name, password, phone and email data are required')
+
+        if user_exist(email):
+            abort(400, description="The user with this email already exists")
+
+        # making sure that the password is strong enough 8-32 chars,
+        # min one digit, min one upper and min one lower letter, min one special char
+        check_password = validate_password(password)
+        if not check_password['result']:
+            abort(400, description=check_password['text'])
+
+        # the email must contain @ and .
+        check_email = validate_email(email)
+        if not check_email['result']:
+            abort(400, description=check_email['text'])
+
+        active = True
+        if not conn:
+            return 'Sorry, there is no connection to the database'
+
+        sql_query = """INSERT INTO users (first_name, last_name, pass, phone, email,active) VALUES ('{0}', 
+                    '{1}', '{2}', '{3}', '{4}', {5})""".format(f_name, l_name, password, phone, email, active)
+        cursor.execute(sql_query)
+        conn.commit()
+        # cursor.close()
+
+        sql_query = """SELECT user_id FROM users WHERE email = '{0}'""".format(email)
+        cursor.execute(sql_query)
+        res = cursor.fetchone()
+        conn.commit()
+        # cursor.close()
+
+        result = {
+            "ID": res[0],
+            "f_name": f_name,
+            "l_name": l_name,
+            "phone": phone,
+            "password": password,
+            "active": active
+        }
+
+        return jsonify(result)
+    # change a user's data
+    elif request.method == 'PUT':
+        token = request.form.get('token')
+        email = request.form.get('email')
+        f_name = request.form.get('f_name')
+        l_name = request.form.get('l_name')
+        phone = request.form.get('phone')
+        new_email = request.form.get('new_email')
         password = request.form.get('password')
 
-        if password is None or email is None:
-            abort(400, description='The pass and email data are required')
+        if token is None or email is None:
+            abort(400, description='The token, email are required')
 
-        if not user_exist(email):
-            abort(400, description="The user does not exist. Please, register")
+        user_auth = user_authorization(email, token)
+        if not user_auth['result']:
+            abort(401, description=user_auth['text'])
 
-        if not user_active(email):
-            abort(400, description='User is deactivated')
+#        if f_name is None and l_name is None and phone is None and new_email is None and password is None:
+#            abort(400, description='Ok. Nothing needs to be changed :)')
 
         if not conn:
             return 'Sorry, there is no connection to the database'
 
-        sql_query = "SELECT pass, user_id, first_name, last_name FROM users WHERE email = '{0}'".format(email)
+        # get the initial user's data
+        sql_query = """SELECT user_id, first_name, last_name, phone, pass 
+                        FROM users WHERE email = '{0}';""".format(email)
         cursor.execute(sql_query)
         conn.commit()
-        res = cursor.fetchone()
+        res_ = cursor.fetchone()
         # cursor.close()
 
-        if password == res[0]:  # если пароль верен
-            if r.exists(email) == 0:  # если токена нет в redis db
-                token = str(uuid.uuid4())  # генерация токена
-                r.set(email, token, ex=600)  # запись токена в redis bd, срок - 600 сек.
-            else:
-                token = r.get(email)  # возврат токена
-                r.set(email, token, ex=600)  # пролонгация токена, срок - 600 сек.
+        user_id_db, f_name_db, l_name_db, phone_db, password_db = res_[0], res_[1], res_[2], res_[3], res_[4]
 
-            # генерация Hello message (For fun :)
-            text = 'Hello, {{ name }}!'
-            template = Template(text)
+        if (f_name == f_name_db and l_name == l_name_db and phone == phone_db
+            and password == password_db and new_email is None) or \
+                (f_name is None and l_name is None and phone is None and new_email is None and password is None):
+            abort(400, description='Ok. Nothing needs to be changed :)')
 
-            result = {
-                        "hello_message": template.render(name=res[2]+" "+res[3]),
-                        "token": token,
-                        "email": email,
-                        "user_id": res[1]
-            }
-            return jsonify(result)
+        flag_relogin = False
+        # what data should be changed
+        if f_name is None:
+            f_name = f_name_db
+        if l_name is None:
+            l_name = l_name_db
+        if phone is None:
+            phone = phone_db
+        if password is None:
+            password = password_db
         else:
-            abort(401, description='you shall not pass :) password is invalid')
+            check_password = validate_password(password)
+            if not check_password['result']:
+                abort(400, description=check_password['text'])
+            flag_relogin = True
+        if new_email is None:
+            new_email = email
+        else:
+            check_email = validate_email(email)
+            if not check_email['result']:
+                abort(400, description=check_email['text'])
+            flag_relogin = True
+
+        # if the pass and/or email have been changed - the user must log in again
+        if flag_relogin:
+            r.delete(email)
+
+        # update the data in the users table
+        sql_query = """UPDATE users SET first_name = '{0}', last_name = '{1}', email = '{2}', phone = '{3}', 
+                    pass = '{4}' WHERE user_id = '{5}';""".format(f_name, l_name, new_email, phone, password, user_id_db)
+        cursor.execute(sql_query)
+        conn.commit()
+        # cursor.close()
+
+        result = {
+            'user_id': user_id_db,
+            'f_name_new': f_name,
+            'f_name_old': f_name_db,
+            'l_name_new': l_name,
+            'l_name_old': l_name_db,
+            'email_new': new_email,
+            'email_old': email,
+            'phone_new': phone,
+            'phone_old': phone_db,
+            'password_new': password,
+            'password_old': password_db
+        }
+
+        return jsonify(result)
+    # delete a user
+    elif request.method == 'DELETE':
+        email = request.form.get('email')
+        token = request.form.get('token')
+        sure = request.form.get('ARE_YOU_SURE?')
+
+        if token is None or email is None or sure is None:
+            abort(400, description='The token, email and sure data are required')
+
+        user_auth = user_authorization(email, token)
+        if not user_auth['result']:
+            abort(401, description=user_auth['text'])
+
+        if sure != 'True':
+            abort(400, description='АHA! Changed your mind?')
+
+        if not conn:
+            return 'Sorry, there is no connection to the database'
+
+        sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchone()
+        # cursor.close()
+
+        sql_query = """DELETE FROM users WHERE email = '{0}'""".format(email)
+        cursor.execute(sql_query)
+        conn.commit()
+        # cursor.close()
+
+        text = 'R.I.P {{ name }}, i will miss you :('
+        template = Template(text)
+        result = {
+            'confirmation': template.render(name=res_[0] + ' ' + res_[1])
+        }
+        return jsonify(result)
     else:
         abort(405)
 
 
-@app.route("/user_info", methods=['POST'])  # get all info about the logged user
+@app.route("/users/user_info", methods=['POST'])  # get all info about the logged user
 def user_info():
     if request.method == 'POST':
         token = request.form.get('token')
         email = request.form.get('email')
-    
+
         if token is None or email is None:
             abort(400, description='The token and email data are required')
 
@@ -438,12 +487,12 @@ def user_info():
         # cursor.close()
 
         result_users = ({
-                            "ID": res[0],
-                            "f_name": res[1],
-                            "l_name": res[2],
-                            "email": res[3],
-                            "phone": res[4],
-                            "password": res[5]
+            "ID": res[0],
+            "f_name": res[1],
+            "l_name": res[2],
+            "email": res[3],
+            "phone": res[4],
+            "password": res[5]
         })
 
         user_id = get_user_id(email)
@@ -461,11 +510,11 @@ def user_info():
             result_order = []
             for i in range(len(res_)):  # does the user need the size_id or size_name data?
                 result_order.append({
-                                    "storage_order_id": res_[i][0],
-                                    "start_date": res_[i][2],
-                                    "stop_date": res_[i][3],
-                                    "order cost": res_[i][5],
-                                    "shelf_id": res_[i][6]
+                    "storage_order_id": res_[i][0],
+                    "start_date": res_[i][2],
+                    "stop_date": res_[i][3],
+                    "order cost": res_[i][5],
+                    "shelf_id": res_[i][6]
                 })
 
         # collecting data about the user's vehicles from the user_vehicle, vehicle and sizes db's
@@ -486,9 +535,9 @@ def user_info():
             result_vehicle = []
             for i in range(len(res_)):
                 result_vehicle.append({
-                                        'vehicle_id': res_[i][0],
-                                        'vehicle_type': res_[i][1],
-                                        'tire size': res_[i][2]
+                    'vehicle_id': res_[i][0],
+                    'vehicle_type': res_[i][1],
+                    'tire size': res_[i][2]
                 })
 
         sql_query = """CREATE OR REPLACE VIEW temp AS
@@ -577,18 +626,356 @@ def user_info():
         conn.commit()
 
         result = (
-                    {"your info": result_users},
-                    {"storage orders info:": result_order},
-                    {"your vehicle(s)": result_vehicle},
-                    {"tire service order(s)": result_tire_service_order}
+            {"your info": result_users},
+            {"storage orders info:": result_order},
+            {"your vehicle(s)": result_vehicle},
+            {"tire service order(s)": result_tire_service_order}
         )
         return jsonify(result)
     else:
         abort(405)
 
 
-@app.route("/new_storage_order", methods=['POST'])
-def new_st_ord():
+@app.route("/users/login", methods=['POST'])
+def login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        if password is None or email is None:
+            abort(400, description='The pass and email data are required')
+
+        if not user_exist(email):
+            abort(400, description="The user does not exist. Please, register")
+
+        if not user_active(email):
+            abort(400, description='User is deactivated')
+
+        if not conn:
+            return 'Sorry, there is no connection to the database'
+
+        sql_query = "SELECT pass, user_id, first_name, last_name FROM users WHERE email = '{0}'".format(email)
+        cursor.execute(sql_query)
+        conn.commit()
+        res = cursor.fetchone()
+        # cursor.close()
+
+        if password == res[0]:  # если пароль верен
+            if r.exists(email) == 0:  # если токена нет в redis db
+                token = str(uuid.uuid4())  # генерация токена
+                r.set(email, token, ex=600)  # запись токена в redis bd, срок - 600 сек.
+            else:
+                token = r.get(email)  # возврат токена
+                r.set(email, token, ex=600)  # пролонгация токена, срок - 600 сек.
+
+            # генерация Hello message (For fun :)
+            text = 'Hello, {{ name }}!'
+            template = Template(text)
+
+            result = {
+                        "hello_message": template.render(name=res[2]+" "+res[3]),
+                        "token": token,
+                        "email": email,
+                        "user_id": res[1]
+            }
+            return jsonify(result)
+        else:
+            abort(401, description='you shall not pass :) password is invalid')
+    else:
+        abort(405)
+
+
+@app.route("/users/deactivate_user", methods=['POST'])  # mark the user as inactive (this can be done by the user itself)
+def deactivate_user():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        token = request.form.get('token')
+        sure = request.form.get('ARE_YOU_SURE?')
+
+        if token is None or email is None or sure is None:
+            abort(400, description='The token, email and sure data are required')
+
+        user_auth = user_authorization(email, token)
+        if not user_auth['result']:
+            abort(401, description=user_auth['text'])
+
+        if not user_active(email):
+            abort(400, description='User is already deactivated')
+
+        if sure != 'True':
+            abort(400, description='АHA! Changed your mind?')
+
+        if not conn:
+            return 'Sorry, there is no connection to the database'
+
+        sql_query = """UPDATE users SET active = 'False' WHERE email = '{0}'""".format(email)
+        cursor.execute(sql_query)
+        conn.commit()
+        # cursor.close()
+
+        sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchone()
+        # cursor.close()
+
+        text = 'User {{ name }} has been successfully deactivated'
+        template = Template(text)
+        result = {
+            'confirmation': template.render(name=res_[0] + ' ' + res_[1])
+        }
+
+        return jsonify(result)
+    else:
+        abort(405)
+
+
+@app.route("/users/activate_user", methods=['POST'])  # mark the user as active (this can be done only by the admin)
+def activate_user():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        admin_password = request.form.get('admin_password')
+
+        if admin_password is None or email is None:
+            abort(400, description='The admin_password and email are required')
+
+        if not user_exist(email):
+            abort(400, description='The user is not exist')
+
+        if admin_password != 'admin':
+            abort(400, description='Wrong admin password!')
+
+        if not conn:
+            return 'Sorry, there is no connection to the database'
+
+        sql_query = """UPDATE users SET active = 'True' WHERE email = '{0}'""".format(email)
+        cursor.execute(sql_query)
+        conn.commit()
+        # cursor.close()
+
+        sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchone()
+        # cursor.close()
+
+        text = 'User {{ name }} has been successfully activated'
+        template = Template(text)
+        result = {
+            'confirmation': template.render(name=res_[0] + ' ' + res_[1])
+        }
+
+        return jsonify(result)
+    else:
+        abort(405)
+
+
+@app.route("/vehicle", methods=['POST', 'PUT', 'DELETE'])  # add new/change/delete user's vehicle
+def users_vehicle():
+    if request.method == 'POST':
+        token = request.form.get('token')
+        email = request.form.get('email')
+        vehicle_name = request.form.get('vehicle_name')
+        size_name = request.form.get('size_name')
+
+        if token is None or email is None or vehicle_name is None or size_name is None:
+            abort(400, description='The token, email, vehicle_name and size_name data are required')
+
+        # get needed data
+        user_id = get_user_id(email)
+        size_id = size_id_by_name(size_name)
+        vehicle_id = vehicle_id_by_name(vehicle_name)
+
+        if size_id is None:
+            abort(400, description='Unknown tire size, add the tire size data to the sizes DB')
+
+        if vehicle_id is None:
+            abort(400, description='Unknown type of the vehicle, add the vehicle type data to the vehicle DB')
+
+        user_auth = user_authorization(email, token)
+        if not user_auth['result']:
+            abort(401, description=user_auth['text'])
+
+        if not conn:
+            return 'Sorry, there is no connection to the database'
+
+        sql_query = """INSERT INTO user_vehicle (user_id, vehicle_id, size_id) 
+                        VALUES ('{0}', '{1}', '{2}');""".format(user_id, vehicle_id, size_id)
+        cursor.execute(sql_query)
+        conn.commit()
+        # cursor.close()
+
+        sql_query = """SELECT MAX(u_veh_id) FROM user_vehicle WHERE user_id = '{0}'""".format(user_id)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchone()
+        # cursor.close()
+
+        result = {
+            'new_vehicle_id': res_[0],
+            'vehicle_name': vehicle_name,
+            'tire_size': size_name
+        }
+        return jsonify(result)
+    elif request.method == 'PUT':
+        email = request.form.get('email')
+        token = request.form.get('token')
+        u_veh_id = request.form.get('user_vehicle_id')
+        new_vehicle_name = request.form.get('new_vehicle_name')
+        new_size_name = request.form.get('new_size_name')
+
+        if token is None or email is None or u_veh_id is None:
+            abort(400, description='The token, email and user_vehicle_id are required')
+
+        user_auth = user_authorization(email, token)
+        if not user_auth['result']:
+            abort(401, description=user_auth['text'])
+
+        if not conn:
+            return 'Sorry, there is no connection to the database'
+
+        sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchone()
+        # cursor.close()
+
+        user_id_db, vehicle_id_db, size_id_db = res_[0], res_[1], res_[2]
+
+        old_vehicle_name = vehicle_name_by_id(vehicle_id_db)
+        old_size_name = str(size_name_by_id(size_id_db))
+
+        if user_id_db != get_user_id(email):
+            abort(403, description='It is not your vehicle! Somebody call the police!')
+
+        if (new_vehicle_name is None and new_size_name is None) or \
+                (new_vehicle_name == old_vehicle_name and new_size_name == old_size_name):
+            abort(400, description='Ok. Nothing needs to be changed :)')
+
+        # new_vehicle_id, new_size_id = 0, 0
+
+        if new_vehicle_name is None:
+            new_vehicle_id = vehicle_id_db
+        else:
+            vehicle_id_by = vehicle_id_by_name(new_vehicle_name)
+            if vehicle_id_by is not None:
+                new_vehicle_id = vehicle_id_by
+            else:
+                abort(400, description='Unknown vehicle_name')
+
+        if new_size_name is None:
+            new_size_id = size_id_db
+        else:
+            size_id_by = size_id_by_name(new_size_name)
+            if size_id_by is not None:
+                new_size_id = size_id_by
+            else:
+                abort(400, description='Unknown size_name')
+
+        sql_query = """UPDATE user_vehicle SET vehicle_id = '{0}', size_id = '{1}' 
+                        WHERE u_veh_id = '{2}'""".format(new_vehicle_id, new_size_id, u_veh_id)
+        cursor.execute(sql_query)
+        conn.commit()
+        # cursor.close()
+
+        result = {
+            'vehicle_id': u_veh_id,
+            'old_vehicle_name': old_vehicle_name,
+            'new_vehicle_name': new_vehicle_name,
+            'old_size_name': old_size_name,
+            'new_size_name': new_size_name
+        }
+
+        return jsonify(result)
+    elif request.method == 'DELETE':
+        email = request.form.get('email')
+        token = request.form.get('token')
+        u_veh_id = request.form.get('user_vehicle_id')
+
+        if token is None or email is None or u_veh_id is None:
+            abort(400, description='The token, email and user_vehicle_id are required')
+
+        user_auth = user_authorization(email, token)
+        if not user_auth['result']:
+            abort(401, description=user_auth['text'])
+
+        if not conn:
+            return 'Sorry, there is no connection to the database'
+
+        sql_query = """SELECT user_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchone()
+        # cursor.close()
+
+        if get_user_id(email) != res_[0]:
+            abort(403, description='It is not your vehicle! Somebody call the police!')
+        else:
+
+            sql_query = """DELETE FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
+            cursor.execute(sql_query)
+            conn.commit()
+            # cursor.close()
+            result = {
+                'confirmation': 'User vehicle ID ' + u_veh_id + ' has been deleted'
+            }
+            return jsonify(result)
+    else:
+        abort(405)
+
+
+@app.route("/warehouse", methods=['GET'])  # shows available free storage places in the warehouse
+def available_storage():
+    if request.method == 'GET':
+
+        size_id = int(request.args.get('size_id'))
+        if not conn:
+            return 'Sorry, there is no connection to the database'
+
+        if size_id is None:
+            sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE available = 'True'"""
+            cursor.execute(sql_query)
+            conn.commit()
+            res_ = cursor.fetchall()
+            # cursor.close()
+
+            if res_ is not None:
+                result = []
+                for i in range(len(res_)):
+                    result.append({
+                        'shelf_id': res_[i][0],
+                        'size_id': res_[i][1],
+                        'size_name': size_name_by_id(res_[i][1])
+                    })
+            else:
+                result = {
+                    'confirmation': 'Unfortunately, we do not have available storage shelves'
+                }
+        else:
+            sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE available = 'True'
+                            AND size_id = '{0}'""".format(size_id)
+            cursor.execute(sql_query)
+            conn.commit()
+            res_ = cursor.fetchone()
+            # cursor.close()
+
+            if res_ is not None:
+                result = []
+                result.append({
+                    'shelf_id': res_[0],
+                    'size_id': res_[1],
+                    'size_name': size_name_by_id(res_[1])
+                })
+            else:
+                result = {
+                    'confirmation': 'Unfortunately, we do not have available storage shelf'
+                }
+        return jsonify(result)
+    else:
+        abort(405)
+
+@app.route("/storage_order", methods=['POST', 'PUT', 'DELETE'])  # add new/change/delete the user's storage order
+def storage_order():
     if request.method == 'POST':
         token = request.form.get('token')
         email = request.form.get('email')
@@ -640,13 +1027,7 @@ def new_st_ord():
         # cursor.close()
 
         return jsonify({'shelf_id': shelf_id, 'storage order id': new_st_ord_id})
-    else:
-        abort(405)
-
-
-@app.route("/change_storage_order", methods=['PUT'])
-def change_storage_order():
-    if request.method == 'PUT':
+    elif request.method == 'PUT':
         st_ord_id = request.form.get('st_ord_id')
         token = request.form.get('token')
         email = request.form.get('email')
@@ -758,308 +1139,7 @@ def change_storage_order():
         }
 
         return jsonify(result)
-    else:
-        abort(405)
-
-
-@app.route("/change_user_info", methods=['PUT'])
-def change_user_info():
-    if request.method == 'PUT':
-        token = request.form.get('token')
-        email = request.form.get('email')
-        f_name = request.form.get('f_name')
-        l_name = request.form.get('l_name')
-        phone = request.form.get('phone')
-        new_email = request.form.get('new_email')
-        password = request.form.get('password')
-
-        if token is None or email is None:
-            abort(400, description='The token, email are required')
-
-        user_auth = user_authorization(email, token)
-        if not user_auth['result']:
-            abort(401, description=user_auth['text'])
-
-        if f_name is None and l_name is None and phone is None and new_email is None and password is None:
-            abort(400, description='Ok. Nothing needs to be changed :)')
-
-        if not conn:
-            return 'Sorry, there is no connection to the database'
-
-        # get the initial data of the storage order
-        sql_query = """SELECT user_id, first_name, last_name, phone, pass 
-                        FROM users WHERE email = '{0}';""".format(email)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-        # cursor.close()
-
-        user_id_db, f_name_db, l_name_db, phone_db, password_db = res_[0], res_[1], res_[2], res_[3], res_[4]
-
-        flag_relogin = False
-        # what data should be changed
-        if f_name is None:
-            f_name = f_name_db
-        if l_name is None:
-            l_name = l_name_db
-        if phone is None:
-            phone = phone_db
-        if password is None:
-            password = password_db
-        else:
-            check_password = validate_password(password)
-            if not check_password['result']:
-                abort(400, description=check_password['text'])
-            flag_relogin = True
-        if new_email is None:
-            new_email = email
-        else:
-            check_email = validate_email(email)
-            if not check_email['result']:
-                abort(400, description=check_email['text'])
-            flag_relogin = True
-
-        # if the pass and/or email have been changed - the user must log in again
-        if flag_relogin:
-            r.delete(email)
-
-        # update data in the DB
-        sql_query = """UPDATE users SET first_name = '{0}', last_name = '{1}', email = '{2}', phone = '{3}', 
-                    pass = '{4}' WHERE user_id = '{5}';""".format(f_name, l_name, new_email, phone, password, user_id_db)
-        cursor.execute(sql_query)
-        conn.commit()
-        # cursor.close()
-
-        result = {
-            'user_id': user_id_db,
-            'f_name_new': f_name,
-            'f_name_old': f_name_db,
-            'l_name_new': l_name,
-            'l_name_old': l_name_db,
-            'email_new': new_email,
-            'email_old': email,
-            'phone_new': phone,
-            'phone_old': phone_db,
-            'password_new': password,
-            'password_old': password_db
-        }
-
-        return jsonify(result)
-    else:
-        abort(405)
-
-
-@app.route("/new_user_vehicle", methods=['POST'])
-def new_user_vehicle():
-    if request.method == 'POST':
-        token = request.form.get('token')
-        email = request.form.get('email')
-        vehicle_name = request.form.get('vehicle_name')
-        size_name = request.form.get('size_name')
-
-        if token is None or email is None or vehicle_name is None or size_name is None:
-            abort(400, description='The token, email, vehicle_name and size_name data are required')
-
-        # get needed data
-        user_id = get_user_id(email)
-        size_id = size_id_by_name(size_name)
-        vehicle_id = vehicle_id_by_name(vehicle_name)
-
-        if size_id is None:
-            abort(400, description='Unknown tire size, add the tire size data to the sizes DB')
-
-        if vehicle_id is None:
-            abort(400, description='Unknown type of the vehicle, add the vehicle type data to the vehicle DB')
-
-        user_auth = user_authorization(email, token)
-        if not user_auth['result']:
-            abort(401, description=user_auth['text'])
-
-        if not conn:
-            return 'Sorry, there is no connection to the database'
-
-        sql_query = """INSERT INTO user_vehicle (user_id, vehicle_id, size_id) 
-                        VALUES ('{0}', '{1}', '{2}');""".format(user_id, vehicle_id, size_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        # cursor.close()
-
-        sql_query = """SELECT MAX(u_veh_id) FROM user_vehicle WHERE user_id = '{0}'""".format(user_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-        # cursor.close()
-
-        result = {
-            'new_vehicle_id': res_[0],
-            'vehicle_name': vehicle_name,
-            'tire_size': size_name
-        }
-        return jsonify(result)
-    else:
-        abort(405)
-
-
-@app.route("/delete_user", methods=['DELETE'])  # How dare you?
-def delete_user():
-    if request.method == 'DELETE':
-        email = request.form.get('email')
-        token = request.form.get('token')
-        sure = request.form.get('ARE_YOU_SURE?')
-
-        if token is None or email is None or sure is None:
-            abort(400, description='The token, email and sure data are required')
-
-        user_auth = user_authorization(email, token)
-        if not user_auth['result']:
-            abort(401, description=user_auth['text'])
-
-        if sure != 'True':
-            abort(400, description='АHA! Changed your mind?')
-
-        if not conn:
-            return 'Sorry, there is no connection to the database'
-
-        sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-        # cursor.close()
-
-        sql_query = """DELETE FROM users WHERE email = '{0}'""".format(email)
-        cursor.execute(sql_query)
-        conn.commit()
-        # cursor.close()
-
-        text = 'R.I.P {{ name }}, i will miss you :('
-        template = Template(text)
-        result = {
-            'confirmation': template.render(name=res_[0] + ' ' + res_[1])
-        }
-        return jsonify(result)
-    else:
-        abort(405)
-
-
-@app.route("/deactivate_user", methods=['POST'])
-def deactivate_user():
-    email = request.form.get('email')
-    token = request.form.get('token')
-    sure = request.form.get('ARE_YOU_SURE?')
-
-    if token is None or email is None or sure is None:
-        abort(400, description='The token, email and sure data are required')
-
-    user_auth = user_authorization(email, token)
-    if not user_auth['result']:
-        abort(401, description=user_auth['text'])
-
-    if not user_active(email):
-        abort(400, description='User is already deactivated')
-
-    if sure != 'True':
-        abort(400, description='АHA! Changed your mind?')
-
-    if not conn:
-        return 'Sorry, there is no connection to the database'
-
-    sql_query = """UPDATE users SET active = 'False' WHERE email = '{0}'""".format(email)
-    cursor.execute(sql_query)
-    conn.commit()
-    # cursor.close()
-
-    sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
-    cursor.execute(sql_query)
-    conn.commit()
-    res_ = cursor.fetchone()
-    # cursor.close()
-
-    text = 'User {{ name }} has been successfully deactivated'
-    template = Template(text)
-    result = {
-        'confirmation': template.render(name=res_[0] + ' ' + res_[1])
-    }
-    return jsonify(result)
-
-
-@app.route("/activate_user", methods=['POST'])
-def activate_user():
-    email = request.form.get('email')
-    admin_password = request.form.get('admin_password')
-
-    if admin_password is None or email is None:
-        abort(400, description='The admin_password and email are required')
-
-    if not user_exist(email):
-        abort(400, description='The user is not exist')
-
-    if admin_password != 'admin':
-        abort(400, description='Wrong admin password!')
-
-    if not conn:
-        return 'Sorry, there is no connection to the database'
-
-    sql_query = """UPDATE users SET active = 'True' WHERE email = '{0}'""".format(email)
-    cursor.execute(sql_query)
-    conn.commit()
-    # cursor.close()
-
-    sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
-    cursor.execute(sql_query)
-    conn.commit()
-    res_ = cursor.fetchone()
-    # cursor.close()
-
-    text = 'User {{ name }} has been successfully activated'
-    template = Template(text)
-    result = {
-        'confirmation': template.render(name=res_[0] + ' ' + res_[1])
-    }
-    return jsonify(result)
-
-
-@app.route("/delete_user_vehicle", methods=['DELETE'])
-def delete_user_vehicle():
-    if request.method == 'DELETE':
-        email = request.form.get('email')
-        token = request.form.get('token')
-        u_veh_id = request.form.get('user_vehicle_id')
-
-        if token is None or email is None or u_veh_id is None:
-            abort(400, description='The token, email and user_vehicle_id are required')
-
-        user_auth = user_authorization(email, token)
-        if not user_auth['result']:
-            abort(401, description=user_auth['text'])
-
-        if not conn:
-            return 'Sorry, there is no connection to the database'
-
-        sql_query = """SELECT user_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-        # cursor.close()
-
-        if get_user_id(email) != res_[0]:
-            abort(403, description='It is not your vehicle! Somebody call the police!')
-        else:
-
-            sql_query = """DELETE FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
-            cursor.execute(sql_query)
-            conn.commit()
-            # cursor.close()
-            result = {
-                'confirmation': 'User vehicle ID ' + u_veh_id + ' has been deleted'
-            }
-            return jsonify(result)
-    else:
-        abort(405)
-
-
-@app.route("/delete_storage_order", methods=['DELETE'])
-def delete_storage_order():
-    if request.method == 'DELETE':
+    elif request.method == 'DELETE':
         email = request.form.get('email')
         token = request.form.get('token')
         st_ord_id = request.form.get('storage_order_id')
@@ -1104,134 +1184,8 @@ def delete_storage_order():
         abort(405)
 
 
-@app.route("/change_user_vehicle", methods=['PUT'])
-def change_user_vehicle():
-    if request.method == 'PUT':
-        email = request.form.get('email')
-        token = request.form.get('token')
-        u_veh_id = request.form.get('user_vehicle_id')
-        new_vehicle_name = request.form.get('new_vehicle_name')
-        new_size_name = request.form.get('new_size_name')
-
-        if token is None or email is None or u_veh_id is None:
-            abort(400, description='The token, email and user_vehicle_id are required')
-
-        user_auth = user_authorization(email, token)
-        if not user_auth['result']:
-            abort(401, description=user_auth['text'])
-
-        if not conn:
-            return 'Sorry, there is no connection to the database'
-
-        sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-        # cursor.close()
-
-        user_id_db, vehicle_id_db, size_id_db = res_[0], res_[1], res_[2]
-
-        old_vehicle_name = vehicle_name_by_id(vehicle_id_db)
-        old_size_name = str(size_name_by_id(size_id_db))
-
-        if user_id_db != get_user_id(email):
-            abort(403, description='It is not your vehicle! Somebody call the police!')
-
-        if (new_vehicle_name is None and new_size_name is None) or \
-                (new_vehicle_name == old_vehicle_name and new_size_name == old_size_name):
-            abort(400, description='Ok. Nothing needs to be changed :)')
-
-        # new_vehicle_id, new_size_id = 0, 0
-
-        if new_vehicle_name is None:
-            new_vehicle_id = vehicle_id_db
-        else:
-            vehicle_id_by = vehicle_id_by_name(new_vehicle_name)
-            if vehicle_id_by is not None:
-                new_vehicle_id = vehicle_id_by
-            else:
-                abort(400, description='Unknown vehicle_name')
-
-        if new_size_name is None:
-            new_size_id = size_id_db
-        else:
-            size_id_by = size_id_by_name(new_size_name)
-            if size_id_by is not None:
-                new_size_id = size_id_by
-            else:
-                abort(400, description='Unknown size_name')
-
-        sql_query = """UPDATE user_vehicle SET vehicle_id = '{0}', size_id = '{1}' 
-                        WHERE u_veh_id = '{2}'""".format(new_vehicle_id, new_size_id, u_veh_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        # cursor.close()
-
-        result = {
-            'vehicle_id': u_veh_id,
-            'old_vehicle_name': old_vehicle_name,
-            'new_vehicle_name': new_vehicle_name,
-            'old_size_name': old_size_name,
-            'new_size_name': new_size_name
-        }
-
-        return jsonify(result)
-    else:
-        abort(405)
-
-
-@app.route("/available_storage", methods=['GET'])  # shows available free storage places in the warehouse
-def available_storage():
-    if request.method != 'GET':
-        abort(405)
-
-    size_id = int(request.args.get('size_id'))
-    if not conn:
-        return 'Sorry, there is no connection to the database'
-
-    if size_id is None:
-        sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE available = 'True'"""
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchall()
-        # cursor.close()
-
-        if res_ is not None:
-            result = []
-            for i in range(len(res_)):
-                result.append({
-                    'shelf_id': res_[i][0],
-                    'size_id': res_[i][1],
-                    'size_name': size_name_by_id(res_[i][1])
-                })
-        else:
-            result = {
-                'confirmation': 'Unfortunately, we do not have available storage shelves'
-            }
-    else:
-        sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE available = 'True'
-                        AND size_id = '{0}'""".format(size_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-        # cursor.close()
-
-        if res_ is not None:
-            result = []
-            result.append({
-                'shelf_id': res_[0],
-                'size_id': res_[1],
-                'size_name': size_name_by_id(res_[1])
-            })
-        else:
-            result = {
-                'confirmation': 'Unfortunately, we do not have available storage shelf'
-            }
-    return jsonify(result)
-
-
-@app.route("/create_tire_service_order", methods=['POST'])
-def create_tire_service_order():
+@app.route("/tire_service_order", methods=['POST', 'PUT', 'DELETE'])  # add new/change/delete the user's service order
+def tire_service_order():
     if request.method == 'POST':
         email = request.form.get('email')
         token = request.form.get('token')
@@ -1315,13 +1269,7 @@ def create_tire_service_order():
         }
 
         return jsonify(result)
-    else:
-        abort(405)
-
-
-@app.route("/delete_tire_service_order", methods=['DELETE'])
-def delete_tire_service_order():
-    if request.method == 'DELETE':
+    elif request.method == 'DELETE':
         email = request.form.get('email')
         token = request.form.get('token')
         serv_order_id = request.form.get('service_order_id')
@@ -1376,8 +1324,9 @@ def delete_tire_service_order():
         abort(405)
 
 
-@app.route("/add_task_to_list_of_works", methods=['POST'])
-def add_task_to_list_of_works():
+@app.route("/tire_service_order/task", methods=['POST']) # add new/change/delete a task to the user's service order
+def task():
+    # add a task to the list_of_works
     if request.method == 'POST':
         email = request.form.get('email')
         token = request.form.get('token')

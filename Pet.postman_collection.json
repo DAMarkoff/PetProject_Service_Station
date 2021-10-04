@@ -6,750 +6,765 @@
 	},
 	"item": [
 		{
-			"name": "clear users db",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "password",
-							"value": "WAT???!!!111_NO_NO_NO_PLEASE_NO!!!111",
-							"type": "text"
-						}
-					]
-				},
-				"url": {
-					"raw": "{{url}}/cl",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"cl"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "add user",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "f_name",
-							"value": "test",
-							"type": "text"
-						},
-						{
-							"key": "l_name",
-							"value": "test",
-							"type": "text"
-						},
-						{
-							"key": "password",
-							"value": "qwe1T!1",
-							"type": "text"
-						},
-						{
-							"key": "email",
-							"value": "test@test.ru",
-							"type": "text"
-						},
-						{
-							"key": "phone",
-							"value": "5558889977",
-							"type": "text"
-						}
-					]
-				},
-				"url": {
-					"raw": "{{url}}/reg",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"reg"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "deactivate_user",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "email",
-							"value": "{{email}}",
-							"type": "text"
-						},
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "text"
-						},
-						{
-							"key": "ARE_YOU_SURE?",
-							"value": "True",
-							"type": "text"
-						}
-					]
-				},
-				"url": {
-					"raw": "{{url}}/deactivate_user",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"deactivate_user"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "activate_user",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "email",
-							"value": "{{email}}",
-							"type": "text"
-						},
-						{
-							"key": "admin_password",
-							"value": "admin",
-							"type": "text"
-						}
-					]
-				},
-				"url": {
-					"raw": "{{url}}/activate_user",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"activate_user"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "login",
-			"event": [
+			"name": "Users",
+			"item": [
 				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"let jsonData = JSON.parse(responseBody)\r",
-							"pm.environment.set(\"token\", jsonData.token);\r",
-							"pm.environment.set(\"email\", jsonData.email);"
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "email",
-							"value": "sergey@zverev.ru",
-							"type": "text"
+					"name": "Register a new user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "first_name",
+									"value": "test",
+									"type": "text"
+								},
+								{
+									"key": "last_name",
+									"value": "test",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "qwe1T!1a",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "test@test1.ru",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "4449997171",
+									"type": "text"
+								}
+							]
 						},
-						{
-							"key": "password",
-							"value": "qwe1T!1a",
-							"type": "text"
+						"url": {
+							"raw": "{{url}}/users",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users"
+							]
 						}
-					]
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{url}}/login",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"login"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "user_info",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
+				{
+					"name": "Log in",
+					"event": [
 						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "text"
-						},
-						{
-							"key": "email",
-							"value": "{{email}}",
-							"type": "text"
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let jsonData = JSON.parse(responseBody)\r",
+									"pm.environment.set(\"token\", jsonData.token);\r",
+									"pm.environment.set(\"email\", jsonData.email);"
+								],
+								"type": "text/javascript"
+							}
 						}
-					]
-				},
-				"url": {
-					"raw": "{{url}}/user_info",
-					"host": [
-						"{{url}}"
 					],
-					"path": [
-						"user_info"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "new_user_vehicle",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "email",
-							"value": "{{email}}",
-							"type": "text"
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "max@bush.us",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "qwe1",
+									"type": "text"
+								}
+							]
 						},
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "text"
-						},
-						{
-							"key": "vehicle_name",
-							"value": "truck",
-							"type": "text"
-						},
-						{
-							"key": "size_name",
-							"value": "20",
-							"type": "text"
+						"url": {
+							"raw": "{{url}}/users/login",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"login"
+							]
 						}
-					]
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{url}}/new_user_vehicle",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"new_user_vehicle"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "new_storage_order",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "email",
-							"value": "{{email}}",
-							"type": "text"
+				{
+					"name": "Deactivate the user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "text"
+								},
+								{
+									"key": "ARE_YOU_SURE?",
+									"value": "True",
+									"type": "text"
+								}
+							]
 						},
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "text"
-						},
-						{
-							"key": "size_name",
-							"value": "20",
-							"type": "text"
-						},
-						{
-							"key": "start_date",
-							"value": "2021.10.01",
-							"type": "text"
-						},
-						{
-							"key": "stop_date",
-							"value": "2021.11.01",
-							"type": "text"
+						"url": {
+							"raw": "{{url}}/users/deactivate_user",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"deactivate_user"
+							]
 						}
-					]
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{url}}/new_storage_order",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"new_storage_order"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "create_tire_service_order",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "email",
-							"value": "{{email}}",
-							"type": "text"
+				{
+					"name": "Activate the user",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "admin_password",
+									"value": "admin",
+									"type": "text"
+								}
+							]
 						},
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "text"
-						},
-						{
-							"key": "order_date",
-							"value": "2021-09-30 14:00:00",
-							"type": "text"
-						},
-						{
-							"key": "user_vehicle_id",
-							"value": "8",
-							"type": "text"
+						"url": {
+							"raw": "{{url}}/users/activate_user",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"activate_user"
+							]
 						}
-					]
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{url}}/create_tire_service_order",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"create_tire_service_order"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "add_task_to_list_of_works",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "email",
-							"value": "{{email}}",
-							"type": "text"
+				{
+					"name": "User's info",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"type": "text"
+								}
+							]
 						},
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "text"
-						},
-						{
-							"key": "service_order_id",
-							"value": "17",
-							"type": "text"
-						},
-						{
-							"key": "task_name",
-							"value": "tire_repair",
-							"type": "text"
-						},
-						{
-							"key": "numbers_of_tasks",
-							"value": "2",
-							"type": "text"
+						"url": {
+							"raw": "{{url}}/users/user_info",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users",
+								"user_info"
+							]
 						}
-					]
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{url}}/add_task_to_list_of_works",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"add_task_to_list_of_works"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "change_storage_order",
-			"request": {
-				"method": "PATCH",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "email",
-							"value": "{{email}}",
-							"type": "text"
+				{
+					"name": "Change the user's info",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "text"
+								},
+								{
+									"key": "f_name",
+									"value": "Dexter",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "l_name",
+									"value": "Morgan",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "new_email",
+									"value": "dexter@morgan.com",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "phone",
+									"value": "",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "password",
+									"value": "qwe#Q2qw",
+									"type": "text",
+									"disabled": true
+								}
+							]
 						},
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "text"
-						},
-						{
-							"key": "st_ord_id",
-							"value": "6",
-							"type": "text"
-						},
-						{
-							"key": "size_id",
-							"value": "2",
-							"type": "text"
-						},
-						{
-							"key": "start_date",
-							"value": "2021-09-24",
-							"type": "text"
-						},
-						{
-							"key": "stop_date",
-							"value": "2021-09-29",
-							"type": "text"
+						"url": {
+							"raw": "{{url}}/users",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users"
+							]
 						}
-					]
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{url}}/change_storage_order",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"change_storage_order"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "change_user_info",
-			"request": {
-				"method": "PATCH",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "email",
-							"value": "{{email}}",
-							"type": "text"
+				{
+					"name": "Delete the user",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "text"
+								},
+								{
+									"key": "ARE_YOU_SURE?",
+									"value": "True",
+									"type": "text",
+									"disabled": true
+								}
+							]
 						},
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "text"
-						},
-						{
-							"key": "f_name",
-							"value": "Dexter",
-							"type": "text",
-							"disabled": true
-						},
-						{
-							"key": "l_name",
-							"value": "Morgan",
-							"type": "text",
-							"disabled": true
-						},
-						{
-							"key": "new_email",
-							"value": "dexter@morgan.com",
-							"type": "text",
-							"disabled": true
-						},
-						{
-							"key": "phone",
-							"value": "",
-							"type": "text",
-							"disabled": true
-						},
-						{
-							"key": "password",
-							"value": "qwe#Q2qw",
-							"type": "text",
-							"disabled": true
+						"url": {
+							"raw": "{{url}}/users",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"users"
+							]
 						}
-					]
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{url}}/change_user_info",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"change_user_info"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "change_user_vehicle",
-			"request": {
-				"method": "PATCH",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "email",
-							"value": "{{email}}",
-							"type": "text"
-						},
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "text"
-						},
-						{
-							"key": "user_vehicle_id",
-							"value": "3",
-							"type": "text"
-						},
-						{
-							"key": "new_vehicle_name",
-							"value": "bus",
-							"type": "text"
-						},
-						{
-							"key": "new_size_name",
-							"value": "16",
-							"type": "text"
+				{
+					"name": "Short user's info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "23.88.52.139:5006/users?user_id=213123",
+							"host": [
+								"23",
+								"88",
+								"52",
+								"139"
+							],
+							"port": "5006",
+							"path": [
+								"users"
+							],
+							"query": [
+								{
+									"key": "user_id",
+									"value": "213123"
+								}
+							]
 						}
-					]
-				},
-				"url": {
-					"raw": "{{url}}/change_user_vehicle",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"change_user_vehicle"
-					]
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "available_storage",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "{{url}}/available_storage",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"available_storage"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "all users",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "23.88.52.139:5006/all",
-					"host": [
-						"23",
-						"88",
-						"52",
-						"139"
-					],
-					"port": "5006",
-					"path": [
-						"all"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "delete_user_vehicle",
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "email",
-							"value": "{{email}}",
-							"type": "text"
+			"name": "Vehicle",
+			"item": [
+				{
+					"name": "User's new vehicle",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "text"
+								},
+								{
+									"key": "vehicle_name",
+									"value": "truck",
+									"type": "text"
+								},
+								{
+									"key": "size_name",
+									"value": "20",
+									"type": "text"
+								}
+							]
 						},
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "text"
-						},
-						{
-							"key": "user_vehicle_id",
-							"value": "6",
-							"type": "text"
+						"url": {
+							"raw": "{{url}}/vehicle",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"vehicle"
+							]
 						}
-					]
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{url}}/delete_user_vehicle",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"delete_user_vehicle"
-					]
+				{
+					"name": "Delete the  user's vehicle",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "text"
+								},
+								{
+									"key": "user_vehicle_id",
+									"value": "6",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/vehicle",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"vehicle"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change the user's vehicle",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "text"
+								},
+								{
+									"key": "user_vehicle_id",
+									"value": "3",
+									"type": "text"
+								},
+								{
+									"key": "new_vehicle_name",
+									"value": "bus",
+									"type": "text"
+								},
+								{
+									"key": "new_size_name",
+									"value": "16",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/vehicle",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"vehicle"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "delete_user",
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "email",
-							"value": "{{email}}",
-							"type": "text"
+			"name": "Storage orders",
+			"item": [
+				{
+					"name": "New storage order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "text"
+								},
+								{
+									"key": "size_name",
+									"value": "16",
+									"type": "text"
+								},
+								{
+									"key": "start_date",
+									"value": "2021.10.01",
+									"type": "text"
+								},
+								{
+									"key": "stop_date",
+									"value": "2021.11.01",
+									"type": "text"
+								}
+							]
 						},
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "text"
-						},
-						{
-							"key": "ARE_YOU_SURE?",
-							"value": "True",
-							"type": "text",
-							"disabled": true
+						"url": {
+							"raw": "{{url}}/storage_order",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"storage_order"
+							]
 						}
-					]
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{url}}/delete_user",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"delete_user"
-					]
+				{
+					"name": "Change the storage order",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "text"
+								},
+								{
+									"key": "st_ord_id",
+									"value": "6",
+									"type": "text"
+								},
+								{
+									"key": "size_id",
+									"value": "2",
+									"type": "text"
+								},
+								{
+									"key": "start_date",
+									"value": "2021-09-24",
+									"type": "text"
+								},
+								{
+									"key": "stop_date",
+									"value": "2021-09-29",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/storage_order",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"storage_order"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete the storage order",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "text"
+								},
+								{
+									"key": "storage_order_id",
+									"value": "15",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/storage_order",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"storage_order"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "delete_storage_order",
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "email",
-							"value": "{{email}}",
-							"type": "text"
+			"name": "Tire service orders",
+			"item": [
+				{
+					"name": "New tire service order",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "text"
+								},
+								{
+									"key": "order_date",
+									"value": "2021-09-30 14:00:00",
+									"type": "text"
+								},
+								{
+									"key": "user_vehicle_id",
+									"value": "8",
+									"type": "text"
+								}
+							]
 						},
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "text"
-						},
-						{
-							"key": "storage_order_id",
-							"value": "7",
-							"type": "text"
+						"url": {
+							"raw": "{{url}}/tire_service_order",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tire_service_order"
+							]
 						}
-					]
+					},
+					"response": []
 				},
-				"url": {
-					"raw": "{{url}}/delete_storage_order",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"delete_storage_order"
-					]
+				{
+					"name": "Delete the tire service order",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "text"
+								},
+								{
+									"key": "service_order_id",
+									"value": "12",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/tire_service_order",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tire_service_order"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New task to list_of_works",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "text"
+								},
+								{
+									"key": "service_order_id",
+									"value": "17",
+									"type": "text"
+								},
+								{
+									"key": "task_name",
+									"value": "tire_repair",
+									"type": "text"
+								},
+								{
+									"key": "numbers_of_tasks",
+									"value": "2",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/tire_service_order/task",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tire_service_order",
+								"task"
+							]
+						}
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		},
 		{
-			"name": "delete_tire_service_order",
-			"request": {
-				"method": "DELETE",
-				"header": [],
-				"body": {
-					"mode": "formdata",
-					"formdata": [
-						{
-							"key": "email",
-							"value": "{{email}}",
-							"type": "text"
-						},
-						{
-							"key": "token",
-							"value": "{{token}}",
-							"type": "text"
-						},
-						{
-							"key": "service_order_id",
-							"value": "12",
-							"type": "text"
+			"name": "Warehouse",
+			"item": [
+				{
+					"name": "Available storage",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{url}}/warehouse?size_id=14",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"warehouse"
+							],
+							"query": [
+								{
+									"key": "size_id",
+									"value": "14"
+								}
+							]
 						}
-					]
-				},
-				"url": {
-					"raw": "{{url}}/delete_tire_service_order",
-					"host": [
-						"{{url}}"
-					],
-					"path": [
-						"delete_tire_service_order"
-					]
+					},
+					"response": []
 				}
-			},
-			"response": []
+			]
 		}
 	]
 }
