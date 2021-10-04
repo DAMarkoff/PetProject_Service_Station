@@ -928,7 +928,7 @@ def users_vehicle():
 def available_storage():
     if request.method == 'GET':
 
-        size_id = int(request.args.get('size_id'))
+        size_id = request.args.get('size_id')
         if not conn:
             return 'Sorry, there is no connection to the database'
 
@@ -953,7 +953,7 @@ def available_storage():
                 }
         else:
             sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE available = 'True'
-                            AND size_id = '{0}'""".format(size_id)
+                            AND size_id = '{0}'""".format(int(size_id))
             cursor.execute(sql_query)
             conn.commit()
             res_ = cursor.fetchone()
