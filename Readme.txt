@@ -8,8 +8,9 @@ psycopg2-binary==2.9.1
 redis==3.5.3
 Werkzeug==2.0.1
 
-
 Server: http://23.88.52.139:5006
+
+Swagger: http://23.88.52.139:5006/swagger
 
 DB diagram: https://drawsql.app/myowncompany/diagrams/cto
 
