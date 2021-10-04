@@ -1,20 +1,20 @@
----
 openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/DAMarkoff/CTO/1.0.0
+  - description: PetProgect
+    url: http://23.88.52.139:5006
 info:
-  title: CTO
   description: CTO API
+  version: 1.0.0
+  title: CTO
   contact:
     email: dmitri.markoff@gmail.com
-  version: 1.0.0
-servers:
-- url: https://virtserver.swaggerhub.com/DAMarkoff/CTO/1.0.0
-  description: SwaggerHub API Auto Mocking
-- url: http://23.88.52.139:5006
-  description: PetProgect
 tags:
-- name: user
-  description: registration/login/activate/deactivate/delete/user_info
-- name: storage
+  - name: user
+    description: registration/login/activate/deactivate/delete/user_info
+  - name: storage
 paths:
   /all:
     get:
@@ -22,56 +22,65 @@ paths:
       - user
       summary: A JSON array of user(s) data
       description: If the user ID is not provided, returns data about all users
-      parameters:
+      parameters: 
       - name: user_id
         in: query
         required: false
-        style: form
-        explode: true
         schema:
           type: integer
       responses:
-        "200":
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/users'
-        "405":
+                 $ref: '#/components/schemas/users'
+        '405':
           description: method not allowed
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/error'
+                 $ref: '#/components/schemas/error'
   /reg:
     post:
       tags:
       - user
       summary: new user registration
       requestBody:
+        required: true
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/reg_body'
-        required: true
+              type: object
+              properties:
+                first_name:
+                  type: string
+                last_name:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                phone:
+                  type: string
       responses:
-        "200":
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/users'
-        "400":
+        '400':
           description: bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-        "405":
+        '405':
           description: method not allowed
           content:
             application/json:
@@ -81,31 +90,37 @@ paths:
     post:
       tags:
       - user
+      #summary: login
       requestBody:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/login_body'
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
       responses:
-        "200":
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/hello'
-        "400":
+        '400':
           description: bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-        "405":
+        '405':
           description: method not allowed
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-        "401":
+        '401':
           description: unauthorized
           content:
             application/json:
@@ -115,46 +130,63 @@ paths:
     post:
       tags:
       - user
+      #summary: 
       description: mark a user as inactive by the user himself
       requestBody:
         content:
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/deactivate_user_body'
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                token:
+                  type: string
+                  format: uuid
+                sure:
+                  type: boolean
+              example: 
+                email: 'email@domain.com'
+                token: '1668ea25-e487-4c41-9c20-ea7d4fd05ec1'
+                sure: 'False'
       responses:
-        "200":
+        '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/inline_response_200'
-              example: User {first_name last_name} has been successfully deactivated
-        "400":
+                type: object
+                properties:
+                  confirmation:
+                    type: string
+              example: 'User {first_name last_name} has been successfully deactivated'
+        '400':
           description: bad request
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-        "405":
+        '405':
           description: method not allowed
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-        "401":
+        '401':
           description: unauthorized
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/error'                  
   /available_storage:
     get:
       tags:
-      - storage
+        - storage
       summary: summary here
       description: descrition here
       responses:
-        "200":
+        '200':
           description: Successful operation
           content:
             application/json:
@@ -162,7 +194,7 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/storage_places'
-        "405":
+        '405':
           description: method not allowed
           content:
             application/json:
@@ -174,7 +206,7 @@ components:
       type: object
       properties:
         ID:
-          type: integer
+          type: integer   
         active:
           type: boolean
         email:
@@ -208,46 +240,6 @@ components:
         token:
           type: string
     error:
-      type: object
-      properties:
-        confirmation:
-          type: string
-    reg_body:
-      type: object
-      properties:
-        first_name:
-          type: string
-        last_name:
-          type: string
-        email:
-          type: string
-        password:
-          type: string
-        phone:
-          type: string
-    login_body:
-      type: object
-      properties:
-        email:
-          type: string
-        password:
-          type: string
-    deactivate_user_body:
-      type: object
-      properties:
-        email:
-          type: string
-          format: email
-        token:
-          type: string
-          format: uuid
-        sure:
-          type: boolean
-      example:
-        email: email@domain.com
-        token: 1668ea25-e487-4c41-9c20-ea7d4fd05ec1
-        sure: "False"
-    inline_response_200:
       type: object
       properties:
         confirmation:
