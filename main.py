@@ -226,15 +226,20 @@ def unauthorized(e):
     return jsonify(error=str(e)), 401
 
 
+@app.errorhandler(503)
+def unauthorized(e):
+    return jsonify(error=str(e)), 503
+
+
 @app.route("/users", methods=['GET', 'POST', 'PUT', 'DELETE'])  # request a short data/register/change data/delete
 def users():
     # request a short data about all/one of the users
     if request.method == 'GET':
         user_id = request.args.get('user_id')
         if not conn:
-            return 'Sorry, there is no connection to the database'
+            abort(503, description='There is no connection to the database')
 
-        result = {}
+        #result = {}
         if user_id is None:
             sql_query = "SELECT user_id, first_name, last_name, phone, email, pass, active FROM users"
             cursor.execute(sql_query)
@@ -311,7 +316,7 @@ def users():
 
         active = True
         if not conn:
-            return 'Sorry, there is no connection to the database'
+            abort(503, description='There is no connection to the database')
 
         sql_query = """INSERT INTO users (first_name, last_name, pass, phone, email,active) VALUES ('{0}', 
                     '{1}', '{2}', '{3}', '{4}', {5})""".format(f_name, l_name, password, phone, email, active)
@@ -356,7 +361,7 @@ def users():
 #            abort(400, description='Ok. Nothing needs to be changed :)')
 
         if not conn:
-            return 'Sorry, there is no connection to the database'
+            abort(503, description='There is no connection to the database')
 
         # get the initial user's data
         sql_query = """SELECT user_id, first_name, last_name, phone, pass 
@@ -439,7 +444,7 @@ def users():
             abort(400, description='АHA! Changed your mind?')
 
         if not conn:
-            return 'Sorry, there is no connection to the database'
+            abort(503, description='There is no connection to the database')
 
         sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
         cursor.execute(sql_query)
@@ -476,7 +481,7 @@ def user_info():
             abort(401, description=user_auth['text'])
 
         if not conn:
-            return 'Sorry, there is no connection to the database'
+            abort(503, description='There is no connection to the database')
 
         # collecting the user's personal data from the users db
         sql_query = """SELECT user_id, first_name, last_name, email, phone, pass 
@@ -652,7 +657,7 @@ def login():
             abort(400, description='User is deactivated')
 
         if not conn:
-            return 'Sorry, there is no connection to the database'
+            abort(503, description='There is no connection to the database')
 
         sql_query = "SELECT pass, user_id, first_name, last_name FROM users WHERE email = '{0}'".format(email)
         cursor.execute(sql_query)
@@ -706,7 +711,7 @@ def deactivate_user():
             abort(400, description='АHA! Changed your mind?')
 
         if not conn:
-            return 'Sorry, there is no connection to the database'
+            abort(503, description='There is no connection to the database')
 
         sql_query = """UPDATE users SET active = 'False' WHERE email = '{0}'""".format(email)
         cursor.execute(sql_query)
@@ -746,7 +751,7 @@ def activate_user():
             abort(400, description='Wrong admin password!')
 
         if not conn:
-            return 'Sorry, there is no connection to the database'
+            abort(503, description='There is no connection to the database')
 
         sql_query = """UPDATE users SET active = 'True' WHERE email = '{0}'""".format(email)
         cursor.execute(sql_query)
@@ -797,7 +802,7 @@ def users_vehicle():
             abort(401, description=user_auth['text'])
 
         if not conn:
-            return 'Sorry, there is no connection to the database'
+            abort(503, description='There is no connection to the database')
 
         sql_query = """INSERT INTO user_vehicle (user_id, vehicle_id, size_id) 
                         VALUES ('{0}', '{1}', '{2}');""".format(user_id, vehicle_id, size_id)
@@ -832,7 +837,7 @@ def users_vehicle():
             abort(401, description=user_auth['text'])
 
         if not conn:
-            return 'Sorry, there is no connection to the database'
+            abort(503, description='There is no connection to the database')
 
         sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
         cursor.execute(sql_query)
@@ -900,7 +905,7 @@ def users_vehicle():
             abort(401, description=user_auth['text'])
 
         if not conn:
-            return 'Sorry, there is no connection to the database'
+            abort(503, description='There is no connection to the database')
 
         sql_query = """SELECT user_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
         cursor.execute(sql_query)
@@ -930,7 +935,7 @@ def available_storage():
 
         size_id = request.args.get('size_id')
         if not conn:
-            return 'Sorry, there is no connection to the database'
+            abort(503, description='There is no connection to the database')
 
         if size_id is None:
             sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE available = 'True'"""
@@ -997,7 +1002,7 @@ def storage_order():
         shelf_id = shelf_id_by_size(size_name)
 
         if not conn:
-            return 'Sorry, there is no connection to the database'
+            abort(503, description='There is no connection to the database')
 
         size_id_by = size_id_by_name(size_name)
         if size_id_by is None:
@@ -1044,7 +1049,7 @@ def storage_order():
             abort(401, description=user_auth['text'])
 
         if not conn:
-            return 'Sorry, there is no connection to the database'
+            abort(503, description='There is no connection to the database')
 
         # get the initial data of the storage order
         sql_query = """SELECT start_date, stop_date, size_id, st_ord_cost, shelf_id, user_id 
@@ -1152,7 +1157,7 @@ def storage_order():
             abort(401, description=user_auth['text'])
 
         if not conn:
-            return 'Sorry, there is no connection to the database'
+            abort(503, description='There is no connection to the database')
 
         sql_query = """SELECT user_id, shelf_id FROM storage_orders WHERE st_ord_id = '{0}'""".format(st_ord_id)
         cursor.execute(sql_query)
@@ -1200,7 +1205,7 @@ def tire_service_order():
             abort(401, description=user_auth['text'])
 
         if not conn:
-            return 'Sorry, there is no connection to the database'
+            abort(503, description='There is no connection to the database')
 
         sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle 
                         WHERE u_veh_id = '{0}';""".format(u_veh_id)
@@ -1282,7 +1287,7 @@ def tire_service_order():
             abort(401, description=user_auth['text'])
 
         if not conn:
-            return 'Sorry, there is no connection to the database'
+            abort(503, description='There is no connection to the database')
 
         sql_query = """SELECT user_id, u_veh_id, manager_id FROM tire_service_order 
                         WHERE serv_order_id = '{0}';""".format(serv_order_id)
@@ -1345,7 +1350,7 @@ def task():
             abort(401, description=user_auth['text'])
 
         if not conn:
-            return 'Sorry, there is no connection to the database'
+            abort(503, description='There is no connection to the database')
 
         sql_query = """SELECT user_id FROM tire_service_order WHERE serv_order_id = '{0}';""".format(serv_order_id)
         cursor.execute(sql_query)
