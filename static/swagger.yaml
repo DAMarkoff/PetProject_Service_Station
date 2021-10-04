@@ -5,18 +5,25 @@ servers:
 info:
   description: CTO API
   version: 1.0.0
-  title: CTO
+  title: Service Station
   contact:
     email: dmitri.markoff@gmail.com
 tags:
-  - name: user
+  - name: users
     description: registration/login/activate/deactivate/delete/user_info
-  - name: storage
+  - name: warehouse
+    description: storage reports
+  - name: vehicle
+    description: user's vehicle(s)
+  - name: storage order
+    description: create/edit/delete user's tire storage order(s)
+  - name: tire service order
+    description: create/edit/delete user's tire service order(s)
 paths:
-  /all:
+  /users:
     get:
       tags:
-      - user
+      - users
       summary: A JSON array of user(s) data
       description: If the user ID is not provided, returns data about all users
       parameters: 
@@ -42,7 +49,6 @@ paths:
                 type: array
                 items:
                  $ref: '#/components/schemas/error'
-  /reg:
     post:
       tags:
       - user
@@ -83,7 +89,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-  /login:
+
+
+  /users/login:
     post:
       tags:
       - user
@@ -123,7 +131,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-  /deactivate_user:
+  /users/deactivate:
     post:
       tags:
       - user
@@ -176,7 +184,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'                  
-  /available_storage:
+  /warehouse:
     get:
       tags:
         - storage
