@@ -51,7 +51,7 @@ paths:
                  $ref: '#/components/schemas/error'
     post:
       tags:
-      - user
+      - users
       summary: new user registration
       requestBody:
         required: true
@@ -94,7 +94,7 @@ paths:
   /users/login:
     post:
       tags:
-      - user
+      - users
       #summary: login
       requestBody:
         content:
@@ -134,7 +134,7 @@ paths:
   /users/deactivate:
     post:
       tags:
-      - user
+      - users
       #summary: 
       description: mark a user as inactive by the user himself
       requestBody:
@@ -187,7 +187,7 @@ paths:
   /warehouse:
     get:
       tags:
-        - storage
+        - warehouse
       summary: summary here
       description: descrition here
       responses:
