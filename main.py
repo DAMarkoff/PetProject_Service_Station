@@ -15,7 +15,7 @@ API_URL = '/static/swagger.yaml'
 swaggerui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
-    config={'app_name':"CTO"}
+    config={'app_name':"Service_Station"}
 )
 #Seans-Python-Flask-REST-Boilerpate
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
