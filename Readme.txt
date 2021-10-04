@@ -74,7 +74,8 @@ d		/user_info
 		/available_storage
 		/reg
 	
-ToDo: 
+ToDo :)
+	- replace def vehicle_id_by_name and vehicle_name_by_id by vehicle_one_by_var
 	- warehouse:
 		- create a summary JSON report on demand
 		- include an info with unavailabe storage on demand
@@ -89,13 +90,10 @@ ToDo:
 	- staff: add other working professions
 	- distribution of workers by type of work
 
-	- /change_tire_service_order
-	- /add_task_to_list_of_works
-	- /change_list_of_works
-	- /delete_list_of_works
-	- /create_subscription
-	- /change_subscription
-	- /delete_subscription
+	- /tire_service_order [GET], [PUT] - change
+	- /tire_service_order/task [GET], [PUT], [DELETE]
+	- /storage_orders [GET]
+	- /users/vehicle [GET]
 	
 	- swagger
 

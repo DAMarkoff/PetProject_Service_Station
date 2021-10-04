@@ -239,7 +239,6 @@ def users():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        #result = {}
         if user_id is None:
             sql_query = "SELECT user_id, first_name, last_name, phone, email, pass, active FROM users"
             cursor.execute(sql_query)
