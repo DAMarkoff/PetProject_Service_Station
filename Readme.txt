@@ -80,7 +80,6 @@ ToDo:
 		- include an info with unavailabe storage on demand
 	- store the user's passwords in hash
 	- the user can delete a tire_service_order with an expired date
-*	- simple return after the DB connection error - 503
 	- the user can create two tire_service_orders for the same vehicle on the same date and time 
 	- schedule (for workers)
 	- add to list_of_works how to choose a worker 
