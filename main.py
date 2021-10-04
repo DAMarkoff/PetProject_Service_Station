@@ -1,5 +1,5 @@
 import random
-from flask import Flask, json, request, jsonify, abort
+from flask import Flask, request, jsonify, abort
 from jinja2 import Template
 import psycopg2
 import uuid
@@ -7,6 +7,7 @@ import re
 import redis
 import datetime
 from flask_swagger_ui import get_swaggerui_blueprint
+from defs import *
 
 app = Flask(__name__)
 
@@ -28,17 +29,7 @@ cursor = conn.cursor()
 
 
 
-def user_exist(email):
-    if conn:
-        sql_query = "SELECT user_id FROM users WHERE email = '{0}'".format(email)
-        cursor.execute(sql_query)
-        conn.commit()
-        usr_id_ = cursor.fetchone()
-        # cursor.close()
 
-        if usr_id_ is None:
-            return False
-    return True
 
 
 def get_user_id(email):

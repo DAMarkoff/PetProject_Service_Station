@@ -25,11 +25,12 @@ paths:
       tags:
       - users
       summary: A JSON array of user(s) data
-      description: If the user ID is not provided, returns data about all users
+      description: If the user_id is not provided, returns short info about all users
       parameters: 
       - name: user_id
         in: query
         required: false
+        description: the user_id must consist only of digits
         schema:
           type: integer
       responses:
@@ -41,6 +42,12 @@ paths:
                 type: array
                 items:
                  $ref: '#/components/schemas/users'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
         '405':
           description: method not allowed
           content:
