@@ -75,6 +75,7 @@ d		/user_info
 		/reg
 	
 ToDo :)
+	- move defs to defs.py
 	- replace def vehicle_id_by_name and vehicle_name_by_id by vehicle_one_by_var
 	- warehouse:
 		- create a summary JSON report on demand
