@@ -11,13 +11,13 @@ from flask_swagger_ui import get_swaggerui_blueprint
 app = Flask(__name__)
 
 SWAGGER_URL = '/swagger'
-API_URL = '/swagger.yaml'
+API_URL = '/swagger/swagger.yaml'
 swaggerui_blueprint = get_swaggerui_blueprint(
     SWAGGER_URL,
     API_URL,
-    config={'app_name':"Seans-Python-Flask-REST-Boilerpate"}
+    config={'app_name':"CTO"}
 )
-
+#Seans-Python-Flask-REST-Boilerpate
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
 #log
