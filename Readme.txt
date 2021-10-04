@@ -75,7 +75,6 @@ d		/user_info
 		/reg
 	
 ToDo: 
-	- move the Pex.txt cobtent to the README.md
 	- warehouse:
 		- create a summary JSON report on demand
 		- include an info with unavailabe storage on demand
