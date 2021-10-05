@@ -773,8 +773,6 @@ def available_storage():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        size_id = size_id_by_name(size_name)
-
         if size_name is None:
             if available_only.lower() == 'yes':
 
@@ -807,6 +805,8 @@ def available_storage():
                     'confirmation': 'Unfortunately, we do not have available storage shelves you need'
                 }
         else:
+            size_id = size_id_by_name(size_name)
+
             if available_only.lower() == 'yes':
 
                 sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE available = 'True'
