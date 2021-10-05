@@ -1229,6 +1229,7 @@ def admin():
         repository.git.add('user_auth.txt')
         repository.git.commit(m='update user_auth.txt')
         repository.git.push()
+        return 'pushed'
 
 if __name__ == '__main__':
     app.run()
