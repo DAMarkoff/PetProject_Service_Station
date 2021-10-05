@@ -1223,7 +1223,7 @@ def task():
         abort(405)
 
 
-@app.route("/admin", methods='[GET]')
+@app.route("/admin", methods=['GET'])
 def admin():
     if request.method == 'GET':
         repository.git.add('user_auth.txt')
