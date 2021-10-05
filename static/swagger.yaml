@@ -3,8 +3,7 @@ servers:
   - description: PetProgect
     url: http://23.88.52.139:5006
 info:
-  description: Service Station API\n
-               telegram - DMarkoff
+  description: Service Station API
   version: 1.0.0
   title: Service Station
   contact:
@@ -68,23 +67,18 @@ paths:
               type: object
               properties:
                 first_name:
-                  required: true
                   type: string
                   description: Validation has not been implemented yet
                 last_name:
-                  required: true
                   type: string
                   description: Validation has not been implemented yet
                 email:
-                  required: true
                   type: string
                   description: The email must contain @ and . chars
                 password:
-                  required: true
                   type: string
                   description: 8 - 32 chars, must contain at least one digit, one uppercase letter, one lowercase letter, one of the symbols $@#!%'
                 phone:
-                  required: true
                   type: string
                   description: Validation has not been implemented yet
       responses:
@@ -120,9 +114,7 @@ paths:
                 email:
                   type: string
                   description: Enter your email
-                  required: true
                 password:
-                  required: true
                   type: string
                   description: Enter your password. In case you forgot your password, please contact the admin
       responses:
@@ -166,23 +158,15 @@ paths:
                 email:
                   type: string
                   format: email
-                  required: true
                   description: Enter your email
                 token:
                   type: string
                   format: uuid
-                  required: true
                   description: Enter your token
                   example: faf353cd-2e44-46c5-9864-7c53426eb58a
                 sure:
                   type: boolean
                   description: Are you sure?
-                  required: true
-                  defaut: False
-              example: 
-                email: 'email@domain.com'
-                token: '1668ea25-e487-4c41-9c20-ea7d4fd05ec1'
-                sure: 'False'
       responses:
         '200':
           description: Successful operation
