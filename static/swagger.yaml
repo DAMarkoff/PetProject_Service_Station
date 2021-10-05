@@ -3,7 +3,7 @@ servers:
   - description: PetProgect
     url: http://23.88.52.139:5006
 info:
-  description: Service Station API
+  description: Service Station API\n
                telegram - DMarkoff
   version: 1.0.0
   title: Service Station
