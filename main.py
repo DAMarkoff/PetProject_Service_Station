@@ -816,7 +816,7 @@ def available_storage():
                                 AND size_id = '{0}'""".format(size_id)
                 cursor.execute(sql_query)
                 conn.commit()
-                res_ = cursor.fetchone()
+                res_ = cursor.fetchall()
                 # cursor.close()
 
             else:
@@ -825,20 +825,21 @@ def available_storage():
                                 WHERE size_id = '{0}'""".format(size_id)
                 cursor.execute(sql_query)
                 conn.commit()
-                res_ = cursor.fetchone()
+                res_ = cursor.fetchall()
                 # cursor.close()
 
             if res_ is not None:
                 result = []
-                result.append({
-                    'shelf_id': res_[0],
-                    'size_id': res_[1],
-                    'size_name': size_name_by_id(res_[1]),
-                    'available': res_[2]
-                })
+                for i in range(len(res_)):
+                    result.append({
+                        'shelf_id': res_[i][0],
+                        'size_id': res_[i][1],
+                        'size_name': size_name_by_id(res_[i][1]),
+                        'available': res_[i][2]
+                    })
             else:
                 result = {
-                    'confirmation': 'Unfortunately, we do not have storage shelf you need'
+                    'confirmation': 'Unfortunately, we do not have storage shelves you need'
                 }
         return jsonify(result)
     else:
