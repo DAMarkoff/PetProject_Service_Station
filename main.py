@@ -763,12 +763,13 @@ def users_vehicle():
         abort(405)
 
 
-@app.route("/warehouse", methods=['GET'])  # shows shelves in the warehouse (availability depends on request params)
+@app.route("/warehouse", methods=['GET'])  # shows shelves in the warehouse (availability depends on the request params)
 def available_storage():
     if request.method == 'GET':
         size_name = request.args.get('size_name')
         available_only = request.args.get('available_only')
 
+        # if size_name is None - show all sizes
         # if available_only.lower() = 'yes' - show only free shelves
         # if available_only.lower() = 'no' - show only occupied shelves
         # if available_only.lower() != 'yes' and != 'no' - show all free shelves
@@ -805,7 +806,7 @@ def available_storage():
                 res_ = cursor.fetchall()
                 # cursor.close()
 
-            if res_ is not None:
+            if res_:
                 result = []
                 for i in range(len(res_)):
                     result.append({
@@ -848,13 +849,13 @@ def available_storage():
                 res_ = cursor.fetchall()
                 # cursor.close()
 
-            if res_ is not None:
+            if res_:
                 result = []
                 for i in range(len(res_)):
                     result.append({
                         'shelf_id': res_[i][0],
                         'size_id': res_[i][1],
-                        'size_name': size_name_by_id(res_[i][1]),
+                        'size_name': size_name,
                         'available': res_[i][2]
                     })
             else:

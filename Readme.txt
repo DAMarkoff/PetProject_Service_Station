@@ -84,6 +84,7 @@ d		/user_info
 		/reg
 	
 ToDo :)
+	- /warehouse responses '[]' on '15', 'yes' request
 	- validate first_name and last_name
 	- restore hased passwords
 	- drop pass column from users
@@ -371,8 +372,9 @@ user_authorization checks:
 			availabe
 			
 	if there is a size_name in params: show shelf(s) for this size_name
-		if there is a availabe only in params: show only free shelf(s) for this size_name
-			if there is no params: show info about all shelf(s)
+		if there is no size_name in params: show shelf(s) for all size_name
+			if there is a availabe only 'yes' in params: show only free shelf(s) for this size_name
+				if there is a availabe only 'no' in params: show only occupied shelf(s) for this size_name
 
 /tire_service_order [POST]
 	input:
