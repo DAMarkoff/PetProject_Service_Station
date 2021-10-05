@@ -59,27 +59,31 @@ paths:
     post:
       tags:
       - users
-      summary: R  egister a new user
+      summary: Register a new user
       requestBody:
-        required: true
         content:
           multipart/form-data:
             schema:
               type: object
               properties:
                 first_name:
+                  required: true
                   type: string
                   description: Validation has not been implemented yet
                 last_name:
+                  required: true
                   type: string
                   description: Validation has not been implemented yet
                 email:
+                  required: true
                   type: string
                   description: The email must contain @ and . chars
                 password:
+                  required: true
                   type: string
                   description: 8 - 32 chars, must contain at least one digit, one uppercase letter, one lowercase letter, one of the symbols $@#!%'
                 phone:
+                  required: true
                   type: string
                   description: Validation has not been implemented yet
       responses:
@@ -115,9 +119,13 @@ paths:
               type: object
               properties:
                 email:
+                  required: true
                   type: string
+                  decription: Enter your email
                 password:
+                  required: true
                   type: string
+                  decription: Enter your password. In case you forgot your password, please contact the admin
       responses:
         '200':
           description: Successful operation
@@ -148,7 +156,7 @@ paths:
       tags:
       - users
       #summary: 
-      description: mark a user as inactive by the user himself
+      description: Mark yourself as an inactive user
       requestBody:
         content:
           multipart/form-data:
@@ -158,11 +166,18 @@ paths:
                 email:
                   type: string
                   format: email
+                  required: true
+                  decription: Enter your email
                 token:
                   type: string
                   format: uuid
+                  required: true
+                  decription: Enter your token
+                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
                 sure:
                   type: boolean
+                  required: true
+                  defaut: False
               example: 
                 email: 'email@domain.com'
                 token: '1668ea25-e487-4c41-9c20-ea7d4fd05ec1'
@@ -232,7 +247,9 @@ components:
           type: string
         l_name:
           type: string
-        password:
+        hash-password:
+          type: string
+        salt:
           type: string
         phone:
           type: string
