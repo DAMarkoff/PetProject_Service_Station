@@ -115,14 +115,18 @@ paths:
             schema:
               type: object
               properties:
-              - email:
-                required: true
-                type: string
-                decription: Enter your email
-              - password:
-                required: true
-                type: string
-                decription: Enter your password. In case you forgot your password, please contact the admin
+                first_name:
+                  required: true
+                  type: string
+                  description: Validation has not been implemented yet
+                email:
+                  required: true
+                  type: string
+                  decription: Enter your email
+                password:
+                  required: true
+                  type: string
+                  decription: Enter your password. In case you forgot your password, please contact the admin
       responses:
         '200':
           description: Successful operation
