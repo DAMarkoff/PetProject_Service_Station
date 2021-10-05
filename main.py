@@ -763,15 +763,17 @@ def users_vehicle():
         abort(405)
 
 
-@app.route("/warehouse", methods=['GET'])  # shows available free storage places in the warehouse
+@app.route("/warehouse", methods=['GET'])  # shows shelves in the warehouse (availability depends on request params)
 def available_storage():
     if request.method == 'GET':
         size_name = request.args.get('size_name')
         available_only = request.args.get('available_only')
 
-        # if available_only.lower() != 'yes' - show and occupied shelves
+        # if available_only.lower() = 'yes' - show only free shelves
+        # if available_only.lower() = 'no' - show only occupied shelves
+        # if available_only.lower() != 'yes' and != 'no' - show all free shelves
         if available_only is None:
-            available_only = 'No'
+            available_only = 'undefined'
 
         if not conn:
             abort(503, description='There is no connection to the database')
@@ -781,6 +783,15 @@ def available_storage():
 
                 sql_query = """SELECT shelf_id, size_id, available FROM warehouse 
                                 WHERE available = 'True'"""
+                cursor.execute(sql_query)
+                conn.commit()
+                res_ = cursor.fetchall()
+                # cursor.close()
+
+            elif available_only.lower() == 'no':
+
+                sql_query = """SELECT shelf_id, size_id, available FROM warehouse 
+                                                WHERE available = 'False'"""
                 cursor.execute(sql_query)
                 conn.commit()
                 res_ = cursor.fetchall()
@@ -814,6 +825,15 @@ def available_storage():
 
                 sql_query = """SELECT shelf_id, size_id, available FROM warehouse WHERE available = 'True'
                                 AND size_id = '{0}'""".format(size_id)
+                cursor.execute(sql_query)
+                conn.commit()
+                res_ = cursor.fetchall()
+                # cursor.close()
+
+            elif available_only.lower() == 'no':
+
+                sql_query = """SELECT shelf_id, size_id, available FROM warehouse WHERE available = 'False'
+                                                AND size_id = '{0}'""".format(size_id)
                 cursor.execute(sql_query)
                 conn.commit()
                 res_ = cursor.fetchall()
