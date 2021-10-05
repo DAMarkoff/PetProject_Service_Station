@@ -848,7 +848,7 @@ def available_storage():
                 res_ = cursor.fetchall()
                 # cursor.close()
 
-            if res_[0] is not None:
+            if res_ is not None:
                 result = []
                 for i in range(len(res_)):
                     result.append({
