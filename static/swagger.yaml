@@ -3,11 +3,12 @@ servers:
   - description: PetProgect
     url: http://23.88.52.139:5006
 info:
-  description: CTO API
+  description: Service Station API
   version: 1.0.0
   title: Service Station
   contact:
     email: dmitri.markoff@gmail.com
+    telegram: DMarkoff
 tags:
   - name: users
     description: registration/login/activate/deactivate/delete/user_info
@@ -153,8 +154,8 @@ paths:
     post:
       tags:
       - users
-      #summary: 
-      description: Mark yourself as an inactive user
+      summary: Mark yourself as an inactive user
+      description: Only the admin can mark you as an active user
       requestBody:
         required: true
         content:
