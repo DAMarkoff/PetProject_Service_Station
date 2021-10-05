@@ -108,6 +108,9 @@ ToDo :)
 	- /users/vehicle [GET]
 	
 	- swagger
+	- design
+	- requirements
+	- frontend
 
 DrawSQL DB:
 	table Payment (payment_id, user_id, card_number, exp_date, owner_name, cvv_cvc)
