@@ -769,8 +769,8 @@ def available_storage():
         size_name = request.args.get('size_name')
         available_only = request.args.get('available only')
 
-        if available_only != True and available_only != False:
-            abort(400, description='There available_only must be boolean')
+        if not isinstance(available_only, (bool)) or available_only is None:
+            abort(400, description='The value of available_only must be boolean')
 
         if not conn:
             abort(503, description='There is no connection to the database')
