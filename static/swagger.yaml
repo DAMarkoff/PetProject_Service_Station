@@ -59,7 +59,7 @@ paths:
     post:
       tags:
       - users
-      summary: new user registration
+      summary: R  egister a new user
       requestBody:
         required: true
         content:
@@ -69,14 +69,19 @@ paths:
               properties:
                 first_name:
                   type: string
+                  description: Validation has not been implemented yet
                 last_name:
                   type: string
+                  description: Validation has not been implemented yet
                 email:
                   type: string
+                  description: The email must contain @ and . chars
                 password:
                   type: string
+                  description: 8 - 32 chars, must contain at least one digit, one uppercase letter, one lowercase letter, one of the symbols $@#!%'
                 phone:
                   type: string
+                  description: Validation has not been implemented yet
       responses:
         '200':
           description: Successful operation
