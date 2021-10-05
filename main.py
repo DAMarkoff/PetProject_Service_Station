@@ -768,9 +768,7 @@ def available_storage():
     if request.method == 'GET':
         size_name = request.args.get('size_name')
         available_only = request.args.get('available only')
-
-        if not isinstance(available_only, (bool)) or available_only is None:
-            abort(400, description='The value of available_only must be boolean')
+        # if available_only.lower() != 'yes' - show and occupied shelves
 
         if not conn:
             abort(503, description='There is no connection to the database')
@@ -778,7 +776,7 @@ def available_storage():
         size_id = size_id_by_name(size_name)
 
         if size_name is None:
-            if available_only:
+            if available_only.lower() == 'yes':
 
                 sql_query = """SELECT shelf_id, size_id, available FROM warehouse 
                                 WHERE available = 'True'"""
@@ -809,7 +807,7 @@ def available_storage():
                     'confirmation': 'Unfortunately, we do not have available storage shelves you need'
                 }
         else:
-            if available_only:
+            if available_only.lower() == 'yes':
 
                 sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE available = 'True'
                                 AND size_id = '{0}'""".format(size_id)
