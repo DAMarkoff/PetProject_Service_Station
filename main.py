@@ -201,14 +201,23 @@ def users():
                 (f_name is None and l_name is None and phone is None and new_email is None):
             abort(400, description='Ok. Nothing needs to be changed :)')
 
-        # flag_relogin = False
+        flag_relogin = False
         # what data should be changed
         if f_name is None:
-            f_name = f_name_db
+            f_name = 'The first name has not been changed'
+            f_name_to_db = f_name_db
+        else:
+            f_name_to_db = f_name
         if l_name is None:
-            l_name = l_name_db
+            l_name = 'The last name has not been changed'
+            l_name_to_db = l_name_db
+        else:
+            l_name_to_db = l_name
         if phone is None:
-            phone = phone_db
+            phone = 'The phone number has not been changed'
+            new_phone_to_db = phone_db
+        else:
+            new_phone_to_db = phone
         # change password
         # if password is None:
         #     password = password_db
@@ -218,34 +227,37 @@ def users():
         #         abort(400, description=check_password['text'])
         #     flag_relogin = True
         if new_email is None:
-            new_email = email
+            new_email = 'The email has not been changed'
+            new_email_to_db = email
         else:
             check_email = validate_email(email)
             if not check_email['result']:
                 abort(400, description=check_email['text'])
+            new_email_to_db = email
             flag_relogin = True
 
         # if the pass and/or email have been changed - the user must log in again
-        # if flag_relogin:
-        #     r.delete(email)
+        if flag_relogin:
+            r.delete(email)
 
         # update the data in the users table
         sql_query = """UPDATE users SET first_name = '{0}', last_name = '{1}', email = '{2}', phone = '{3}'
-                     WHERE user_id = '{4}';""".format(f_name, l_name, new_email, phone, user_id_db)
+                     WHERE user_id = '{4}';""".format(f_name_to_db, l_name_to_db, new_email_to_db,
+                                                      new_phone_to_db, user_id_db)
         cursor.execute(sql_query)
         conn.commit()
         # cursor.close()
 
         result = {
             'user_id': user_id_db,
-            'f_name_new': f_name,
-            'f_name_old': f_name_db,
-            'l_name_new': l_name,
-            'l_name_old': l_name_db,
-            'email_new': new_email,
-            'email_old': email,
-            'phone_new': phone,
-            'phone_old': phone_db
+            'new first name': f_name,
+            'old first name': f_name_db,
+            'new last name': l_name,
+            'old last name': l_name_db,
+            'new email': new_email,
+            'old email': email,
+            'new phone': phone,
+            'old phone': phone_db
         }
 
         return jsonify(result)
