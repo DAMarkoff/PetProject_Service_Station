@@ -191,14 +191,7 @@ def user_authorization(email, token):
     return return_val
 
 
-def password_is_valid(email, password):
-    sql_query = "SELECT password, salt FROM users WHERE email = '{0}'".format(email)
-    cursor.execute(sql_query)
-    conn.commit()
-    res_ = cursor.fetchone()
-
-    password_db = res_[0]
-    salt = res_[1]
+def password_is_valid(salt, password, password_db):
     if str.encode(password_db) == bcrypt.hashpw(str.encode(password), str.encode(salt)):
         return True
     return False
@@ -211,8 +204,7 @@ def save_password_to_file(email, password):
         file_user_auth.write(stroka)
 
 
-def generate_password_hash_and_salt(password, salt):
-    if salt is None:
-        salt = bcrypt.gensalt(5)
+def generate_password_hash(password):
+    salt = bcrypt.gensalt(5)
     password = bcrypt.hashpw(str.encode(password), salt)
     return password.decode(), salt.decode()

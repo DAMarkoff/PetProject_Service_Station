@@ -62,7 +62,7 @@ def users():
             abort(503, description='There is no connection to the database')
 
         if user_id is None:
-            sql_query = "SELECT user_id, first_name, last_name, phone, email, pass, active FROM users"
+            sql_query = "SELECT user_id, first_name, last_name, phone, email, active FROM users"
             cursor.execute(sql_query)
             conn.commit()
             res = cursor.fetchall()
@@ -77,8 +77,7 @@ def users():
                         "l_name": res[i][2],
                         "phone": res[i][3],
                         "email": res[i][4],
-                        "password": res[i][5],
-                        "active": res[i][6]
+                        "active": res[i][5]
                     })
             else:
                 result = {
@@ -87,7 +86,7 @@ def users():
         else:
             if not str(user_id).isdigit():
                 abort(400, description='The user_id must contain only digits')
-            sql_query = """SELECT user_id, first_name, last_name, phone, email, pass, active FROM users
+            sql_query = """SELECT user_id, first_name, last_name, phone, email, active FROM users
                             WHERE user_id = '{0}'""".format(user_id)
             cursor.execute(sql_query)
             conn.commit()
@@ -102,8 +101,7 @@ def users():
                     "l_name": res[2],
                     "phone": res[3],
                     "email": res[4],
-                    "password": res[5],
-                    "active": res[6]
+                    "active": res[5]
                 })
             else:
                 result = {
@@ -141,11 +139,10 @@ def users():
 
         save_password_to_file(email, password)
 
-        salt = None
-        hash_password, salt = generate_password_hash_and_salt(password, salt)
+        hash_password, salt = generate_password_hash(password)
 
-        sql_query = """INSERT INTO users (first_name, last_name, pass, password, phone, email, active, salt) VALUES ('{0}', 
-                '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}')""".format(f_name, l_name, password, hash_password,
+        sql_query = """INSERT INTO users (first_name, last_name, password, phone, email, active, salt) VALUES ('{0}', 
+                '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')""".format(f_name, l_name, hash_password,
                                                                   phone, email, active, salt)
         cursor.execute(sql_query)
         conn.commit()
@@ -163,6 +160,7 @@ def users():
             "l_name": l_name,
             "phone": phone,
             "hash_password": hash_password,
+            "salt": salt,
             "active": active
         }
 
@@ -175,37 +173,35 @@ def users():
         l_name = request.form.get('l_name')
         phone = request.form.get('phone')
         new_email = request.form.get('new_email')
-        password = request.form.get('password')
 
         if token is None or email is None:
-            abort(400, description='The token, email are required')
+            abort(400, description='The email and token are required')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
             abort(401, description=user_auth['text'])
 
-#        if f_name is None and l_name is None and phone is None and new_email is None and password is None:
-#            abort(400, description='Ok. Nothing needs to be changed :)')
+       # if f_name is None and l_name is None and phone is None and new_email is None:
+       #     abort(400, description='Ok. Nothing needs to be changed :)')
 
         if not conn:
             abort(503, description='There is no connection to the database')
 
         # get the initial user's data
-        sql_query = """SELECT user_id, first_name, last_name, phone, pass 
+        sql_query = """SELECT user_id, first_name, last_name, phone 
                         FROM users WHERE email = '{0}';""".format(email)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
         # cursor.close()
 
-        user_id_db, f_name_db, l_name_db, phone_db, password_db = res_[0], res_[1], res_[2], res_[3], res_[4]
+        user_id_db, f_name_db, l_name_db, phone_db = res_[0], res_[1], res_[2], res_[3]
 
-        if (f_name == f_name_db and l_name == l_name_db and phone == phone_db
-            and password == password_db and new_email is None) or \
-                (f_name is None and l_name is None and phone is None and new_email is None and password is None):
+        if (f_name == f_name_db and l_name == l_name_db and phone == phone_db and new_email is None) or \
+                (f_name is None and l_name is None and phone is None and new_email is None):
             abort(400, description='Ok. Nothing needs to be changed :)')
 
-        flag_relogin = False
+        # flag_relogin = False
         # what data should be changed
         if f_name is None:
             f_name = f_name_db
@@ -213,13 +209,14 @@ def users():
             l_name = l_name_db
         if phone is None:
             phone = phone_db
-        if password is None:
-            password = password_db
-        else:
-            check_password = validate_password(password)
-            if not check_password['result']:
-                abort(400, description=check_password['text'])
-            flag_relogin = True
+        # change password
+        # if password is None:
+        #     password = password_db
+        # else:
+        #     check_password = validate_password(password)
+        #     if not check_password['result']:
+        #         abort(400, description=check_password['text'])
+        #     flag_relogin = True
         if new_email is None:
             new_email = email
         else:
@@ -229,12 +226,12 @@ def users():
             flag_relogin = True
 
         # if the pass and/or email have been changed - the user must log in again
-        if flag_relogin:
-            r.delete(email)
+        # if flag_relogin:
+        #     r.delete(email)
 
         # update the data in the users table
-        sql_query = """UPDATE users SET first_name = '{0}', last_name = '{1}', email = '{2}', phone = '{3}', 
-                    pass = '{4}' WHERE user_id = '{5}';""".format(f_name, l_name, new_email, phone, password, user_id_db)
+        sql_query = """UPDATE users SET first_name = '{0}', last_name = '{1}', email = '{2}', phone = '{3}'
+                     WHERE user_id = '{4}';""".format(f_name, l_name, new_email, phone, user_id_db)
         cursor.execute(sql_query)
         conn.commit()
         # cursor.close()
@@ -248,9 +245,7 @@ def users():
             'email_new': new_email,
             'email_old': email,
             'phone_new': phone,
-            'phone_old': phone_db,
-            'password_new': password,
-            'password_old': password_db
+            'phone_old': phone_db
         }
 
         return jsonify(result)
@@ -311,7 +306,7 @@ def user_info():
             abort(503, description='There is no connection to the database')
 
         # collecting the user's personal data from the users db
-        sql_query = """SELECT user_id, first_name, last_name, email, phone, pass 
+        sql_query = """SELECT user_id, first_name, last_name, email, phone 
                         FROM users WHERE email = '{0}'""".format(email)
         cursor.execute(sql_query)
         conn.commit()
@@ -323,8 +318,7 @@ def user_info():
             "f_name": res[1],
             "l_name": res[2],
             "email": res[3],
-            "phone": res[4],
-            "password": res[5]
+            "phone": res[4]
         })
 
         user_id = get_user_id(email)
@@ -337,7 +331,7 @@ def user_info():
 
         empty_result = []
         if res_ == empty_result:
-            result_order = 'There are no orders for storage from the user'
+            result_order = 'You do not have any storage orders'
         else:
             result_order = []
             for i in range(len(res_)):  # does the user need the size_id or size_name data?
@@ -361,8 +355,7 @@ def user_info():
 
         empty_result = []
         if res_ == empty_result:
-            result_vehicle = 'The user does not have a vehicle. BUT! If the user wants to get a vehicle, ' \
-                             'call 8-800-THIS-IS-NOT-A-SCAM right now!'
+            result_vehicle = 'You do not have any vehicles'
         else:
             result_vehicle = []
             for i in range(len(res_)):
@@ -407,7 +400,7 @@ def user_info():
 
         empty_result = []
         if res_ == empty_result:
-            result_tire_service_order = 'You do not have a tire service order(s).'
+            result_tire_service_order = 'You do not have any tire service orders'
         else:
             result_tire_service_order = []
             for i in range(len(res_)):
@@ -486,13 +479,14 @@ def login():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        sql_query = "SELECT pass, user_id, first_name, last_name FROM users WHERE email = '{0}'".format(email)
+        sql_query = "SELECT salt, user_id, first_name, last_name, password FROM users WHERE email = '{0}'".format(email)
         cursor.execute(sql_query)
         conn.commit()
         res = cursor.fetchone()
         # cursor.close()
 
-        if password_is_valid(email, password):  # если пароль верен
+        salt, password_db = res[0], res[4]
+        if password_is_valid(salt, password, password_db):  # если пароль верен
         # if password == res[0]:
             if r.exists(email) == 0:  # если токена нет в redis db
                 token = str(uuid.uuid4())  # генерация токена
@@ -1230,6 +1224,7 @@ def admin():
         repository.git.commit(m='update user_auth.txt')
         repository.git.push()
         return 'pushed'
+
 
 if __name__ == '__main__':
     app.run()
