@@ -9,6 +9,8 @@ import datetime
 from flask_swagger_ui import get_swaggerui_blueprint
 from defs import *
 import bcrypt
+import  git
+from git import Repo
 
 app = Flask(__name__)
 
@@ -18,6 +20,7 @@ swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app
 
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
+repository = Repo('~/server/Course')
 #log
 
 r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode_responses=True)
@@ -1219,6 +1222,14 @@ def task():
     else:
         abort(405)
 
+
+@app.route("/admin", methods='[GET]')
+def admin():
+    if request.method == 'GET':
+        repository.git.add('user_auth.txt')
+        repository.git.commit(m='update user_auth.txt')
+        repository.git.push()
+        return 'pushed'
 
 if __name__ == '__main__':
     app.run()
