@@ -812,7 +812,7 @@ def available_storage():
 
             if available_only.lower() == 'yes':
 
-                sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE available = 'True'
+                sql_query = """SELECT shelf_id, size_id, available FROM warehouse WHERE available = 'True'
                                 AND size_id = '{0}'""".format(size_id)
                 cursor.execute(sql_query)
                 conn.commit()
@@ -821,7 +821,8 @@ def available_storage():
 
             else:
 
-                sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE size_id = '{0}'""".format(size_id)
+                sql_query = """SELECT shelf_id, size_id, available FROM warehouse 
+                                WHERE size_id = '{0}'""".format(size_id)
                 cursor.execute(sql_query)
                 conn.commit()
                 res_ = cursor.fetchone()
