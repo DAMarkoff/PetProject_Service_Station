@@ -372,6 +372,13 @@ paths:
         - warehouse
       summary: summary here
       description: descrition here
+      parameters:
+        - name: size_id
+          in: query
+          required: false
+          description: the user_id must consist only of digits
+          schema:
+            type: string
       responses:
         '200':
           description: Successful operation

@@ -197,10 +197,10 @@ def password_is_valid(salt, password, password_db):
     return False
 
 
-def save_password_to_file(email, password):
+def save_password_to_file(email, password, reason):
     separator = '(separator)'
     with open('user_auth.txt', 'a+') as file_user_auth:
-        stroka = email + separator + 'user' + separator + password + '\n'
+        stroka = email + separator + reason + separator + password + '\n'
         file_user_auth.write(stroka)
 
 

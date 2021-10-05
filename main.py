@@ -137,7 +137,7 @@ def users():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        save_password_to_file(email, password)
+        save_password_to_file(email, password, 'user-registration')
 
         hash_password, salt = generate_password_hash(password)
 
@@ -766,17 +766,34 @@ def users_vehicle():
 @app.route("/warehouse", methods=['GET'])  # shows available free storage places in the warehouse
 def available_storage():
     if request.method == 'GET':
+        size_name = request.args.get('size_name')
+        available_only = request.args.get('available only')
 
-        size_id = request.args.get('size_id')
+        if available_only != True and available_only != False:
+            abort(400, description='There available_only must be boolean')
+
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        if size_id is None:
-            sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE available = 'True'"""
-            cursor.execute(sql_query)
-            conn.commit()
-            res_ = cursor.fetchall()
-            # cursor.close()
+        size_id = size_id_by_name(size_name)
+
+        if size_name is None:
+            if available_only:
+
+                sql_query = """SELECT shelf_id, size_id, available FROM warehouse 
+                                WHERE available = 'True'"""
+                cursor.execute(sql_query)
+                conn.commit()
+                res_ = cursor.fetchall()
+                # cursor.close()
+
+            else:
+
+                sql_query = """SELECT shelf_id, size_id, available FROM warehouse"""
+                cursor.execute(sql_query)
+                conn.commit()
+                res_ = cursor.fetchall()
+                # cursor.close()
 
             if res_ is not None:
                 result = []
@@ -784,30 +801,42 @@ def available_storage():
                     result.append({
                         'shelf_id': res_[i][0],
                         'size_id': res_[i][1],
-                        'size_name': size_name_by_id(res_[i][1])
+                        'size_name': size_name_by_id(res_[i][1]),
+                        'available': res_[i][2]
                     })
             else:
                 result = {
-                    'confirmation': 'Unfortunately, we do not have available storage shelves'
+                    'confirmation': 'Unfortunately, we do not have available storage shelves you need'
                 }
         else:
-            sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE available = 'True'
-                            AND size_id = '{0}'""".format(int(size_id))
-            cursor.execute(sql_query)
-            conn.commit()
-            res_ = cursor.fetchone()
-            # cursor.close()
+            if available_only:
+
+                sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE available = 'True'
+                                AND size_id = '{0}'""".format(size_id)
+                cursor.execute(sql_query)
+                conn.commit()
+                res_ = cursor.fetchone()
+                # cursor.close()
+
+            else:
+
+                sql_query = """SELECT shelf_id, size_id FROM warehouse WHERE size_id = '{0}'""".format(size_id)
+                cursor.execute(sql_query)
+                conn.commit()
+                res_ = cursor.fetchone()
+                # cursor.close()
 
             if res_ is not None:
                 result = []
                 result.append({
                     'shelf_id': res_[0],
                     'size_id': res_[1],
-                    'size_name': size_name_by_id(res_[1])
+                    'size_name': size_name_by_id(res_[1]),
+                    'available': res_[2]
                 })
             else:
                 result = {
-                    'confirmation': 'Unfortunately, we do not have available storage shelf'
+                    'confirmation': 'Unfortunately, we do not have storage shelf you need'
                 }
         return jsonify(result)
     else:

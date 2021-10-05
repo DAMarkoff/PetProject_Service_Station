@@ -26,50 +26,50 @@ DB diagram: https://drawsql.app/myowncompany/diagrams/cto
 Done:
 	endpoints:
 		/users:
-			GET - get the short user_info (one/all)
-			POST - register a new user
-			PUT - change the user_info
-			DELETE - delete the user by itsels (WARNING! ON DELETE CASCADE! (suicide :(
+			[GET] - get the short user_info (one/all)
+			[POST] - register a new user
+			[PUT] - change the user_info
+			[DELETE] - delete the user by itsels (WARNING! ON DELETE CASCADE! (suicide :(
 
 		/users/user_info
-			POST - get the full user_info 
+			[POST] - get the full user_info 
 			(include: short user_info; user's vehicle; user's storage_orders; user's tire_service_orders with tasks and costs)
 			
 		/users/login:
-			POST
+			[POST]
 
 		/users/activate:
-			POST - mark the user as active
+			[POST] - mark the user as active
 			
 		/users/deactivate:
-			POST - mark the user as inactive
+			[POST] - mark the user as inactive
 			
 		/users/vehicle:
-			*GET - request a user's vehicle  			- not implemented
-			POST - create new user vehicle
-			PUT - change a user's vehicle
-			DELETE - delete a user's vehicle
+			*[GET] - request a user's vehicle  			- not implemented
+			[POST] - create new user vehicle
+			[PUT] - change a user's vehicle
+			[DELETE] - delete a user's vehicle
 			
 		/storage_orders:
-			*GET - request the storage_order 			- not implemented
-			POST - create new storage_order
-			PUT - change the storage_order
-			DELETE - delete the storage_order
+			*[GET] - request the storage_order 			- not implemented
+			[POST] - create new storage_order
+			[PUT] - change the storage_order
+			[DELETE] - delete the storage_order
 			
 		/warehouse:
-			GET - available storage
+			[GET] - available storage
 			
 		/tire_service_order:
-			*GET - request a user tire_service_order 	- not implemented
-			POST - create new user's tire_service_order
-			*PUT - change a user's tire_service_order	- not implemented
-			DELETE - delete a user's tire_service_order
+			*[GET] - request a user tire_service_order 	- not implemented
+			[POST] - create new user's tire_service_order
+			*[PUT] - change a user's tire_service_order	- not implemented
+			[DELETE] - delete a user's tire_service_order
 			
 		/tire_service_order/task:
-			*GET - request the task 					- not implemented
-			POST - create new task
-			*PUT - change the task 						- not implemented
-			*DELETE - delete the task 					- not implemented
+			*[GET] - request the task 					- not implemented
+			[POST] - create new task
+			*[PUT] - change the task 						- not implemented
+			*[DELETE] - delete the task 					- not implemented
 		
 	block-diagram:
 *		/reg
@@ -86,6 +86,7 @@ d		/user_info
 ToDo :)
 	- validate first_name and last_name
 	- restore hased passwords
+	- drop pass column from users
 	- push the user_auth.txt to the remote repo after update - partially done
 	- replace def vehicle_id_by_name and vehicle_name_by_id by vehicle_one_by_var
 	- warehouse:
@@ -111,6 +112,9 @@ ToDo :)
 	- design
 	- requirements
 	- frontend
+	- testing:
+		- checklists
+		- 
 
 DrawSQL DB:
 	table Payment (payment_id, user_id, card_number, exp_date, owner_name, cvv_cvc)
@@ -358,14 +362,17 @@ user_authorization checks:
 
 /warehouse [GET]
 	input:
-			size_id				- optional
+			size_name			- optional
+			availabe only		- optional
 	output:
 			shelf_id
 			size_id
 			size_name
+			availabe
 			
-	if there is a size_id in params: shoe free shelf(s) for this size_id
-		if there is no params: show info about all free shelf(s)
+	if there is a size_name in params: show shelf(s) for this size_name
+		if there is a availabe only in params: show only free shelf(s) for this size_name
+			if there is no params: show info about all shelf(s)
 
 /tire_service_order [POST]
 	input:
