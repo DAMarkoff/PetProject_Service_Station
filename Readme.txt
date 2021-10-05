@@ -84,13 +84,14 @@ d		/user_info
 		/reg
 	
 ToDo :)
+	- validate first_name and last_name
 	- restore hased passwords
-	- push the user_auth.txt to the remote repo after update
+	- push the user_auth.txt to the remote repo after update - partially done
 	- replace def vehicle_id_by_name and vehicle_name_by_id by vehicle_one_by_var
 	- warehouse:
 		- create a summary JSON report on demand
 		- include an info with unavailabe storage on demand
-	- store the user's passwords in hash
+
 	- the user can delete a tire_service_order with an expired date
 	- the user can create two tire_service_orders for the same vehicle on the same date and time 
 	- schedule (for workers)
