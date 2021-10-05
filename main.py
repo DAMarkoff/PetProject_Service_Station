@@ -148,7 +148,6 @@ def users():
         conn.commit()
         # cursor.close()
 
-
         sql_query = """SELECT user_id FROM users WHERE email = '{0}'""".format(email)
         cursor.execute(sql_query)
         res = cursor.fetchone()
