@@ -767,8 +767,11 @@ def users_vehicle():
 def available_storage():
     if request.method == 'GET':
         size_name = request.args.get('size_name')
-        available_only = request.args.get('available only')
+        available_only = request.args.get('available_only')
+
         # if available_only.lower() != 'yes' - show and occupied shelves
+        if available_only is None:
+            available_only = 'No'
 
         if not conn:
             abort(503, description='There is no connection to the database')
