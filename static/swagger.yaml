@@ -109,18 +109,17 @@ paths:
     post:
       tags:
       - users
-      #summary: login
       requestBody:
         content:
           multipart/form-data:
             schema:
               type: object
               properties:
-                email:
+                - email:
                   required: true
                   type: string
                   decription: Enter your email
-                password:
+                - password:
                   required: true
                   type: string
                   decription: Enter your password. In case you forgot your password, please contact the admin
