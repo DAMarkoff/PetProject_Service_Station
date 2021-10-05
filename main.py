@@ -141,8 +141,9 @@ def users():
         salt = None
         hash_password, salt = generate_password_hash_and_salt(password, salt)
 
-        sql_query = """INSERT INTO users (first_name, last_name, password, phone, email, active, salt) VALUES ('{0}', 
-                '{1}', '{2}', '{3}', '{4}', {5}, '{6}')""".format(f_name, l_name, hash_password, phone, email, active, salt)
+        sql_query = """INSERT INTO users (first_name, last_name, pass, password, phone, email, active, salt) VALUES ('{0}', 
+                '{1}', '{2}', '{3}', '{4}', {5}, '{6}', '{7}')""".format(f_name, l_name, password, hash_password,
+                                                                  phone, email, active, salt)
         cursor.execute(sql_query)
         conn.commit()
         # cursor.close()
