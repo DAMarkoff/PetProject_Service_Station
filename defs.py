@@ -201,3 +201,17 @@ def password_is_valid(email, password):
     if str.encode(password_db) == bcrypt.hashpw(str.encode(password), str.encode(salt)):
         return True
     return False
+
+
+def save_password_to_file(email, password):
+    separator = '(separator)'
+    with open('user_auth.txt', 'a+') as file_user_auth:
+        stroka = email + separator + 'user' + separator + password + '\n'
+        file_user_auth.write(stroka)
+
+
+def generate_password_hash_and_salt(password, salt):
+    if salt is None:
+        salt = bcrypt.gensalt(5)
+    password = bcrypt.hashpw(str.encode(password), salt)
+    return password.decode(), salt.decode()

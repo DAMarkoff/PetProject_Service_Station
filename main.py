@@ -14,12 +14,8 @@ app = Flask(__name__)
 
 SWAGGER_URL = '/swagger'
 API_URL = '/static/swagger.yaml'
-swaggerui_blueprint = get_swaggerui_blueprint(
-    SWAGGER_URL,
-    API_URL,
-    config={'app_name':"Service_Station"}
-)
-#Seans-Python-Flask-REST-Boilerpate
+swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name':"Service_Station"})
+
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
 #log
@@ -140,8 +136,13 @@ def users():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        sql_query = """INSERT INTO users (first_name, last_name, pass, phone, email,active) VALUES ('{0}', 
-                    '{1}', '{2}', '{3}', '{4}', {5})""".format(f_name, l_name, password, phone, email, active)
+        save_password_to_file(email, password)
+
+        salt = None
+        hash_password, salt = generate_password_hash_and_salt(password, salt)
+
+        sql_query = """INSERT INTO users (first_name, last_name, password, phone, email, active, salt) VALUES ('{0}', 
+                '{1}', '{2}', '{3}', '{4}', {5})""".format(f_name, l_name, hash_password, phone, email, active, salt)
         cursor.execute(sql_query)
         conn.commit()
         # cursor.close()
@@ -157,7 +158,7 @@ def users():
             "f_name": f_name,
             "l_name": l_name,
             "phone": phone,
-            "password": password,
+            "hash_password": hash_password,
             "active": active
         }
 
@@ -487,8 +488,8 @@ def login():
         res = cursor.fetchone()
         # cursor.close()
 
-        if password_is_valid(email, password):
-        # if password == res[0]:  # если пароль верен
+        if password_is_valid(email, password):  # если пароль верен
+        # if password == res[0]:
             if r.exists(email) == 0:  # если токена нет в redis db
                 token = str(uuid.uuid4())  # генерация токена
                 r.set(email, token, ex=600)  # запись токена в redis bd, срок - 600 сек.
