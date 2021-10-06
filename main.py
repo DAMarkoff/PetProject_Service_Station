@@ -142,7 +142,6 @@ def users():
             abort(503, description='There is no connection to the database')
 
         save_password_to_file(email, password, 'user-registration')
-        push_user_auth()
 
         hash_password, salt = generate_password_hash(password)
 
@@ -169,6 +168,7 @@ def users():
             "active": active
         }
 
+        push_user_auth()
         return jsonify(result)
     # change a user's data
     elif request.method == 'PUT':

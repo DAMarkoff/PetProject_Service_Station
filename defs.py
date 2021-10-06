@@ -263,7 +263,6 @@ def generate_password_hash(password):
 
 
 def push_user_auth():
-    if request.method == 'GET':
-        repository.git.add('user_auth.txt')
-        repository.git.commit(m='update user_auth.txt')
-        repository.git.push()
+    repository.git.add('user_auth.txt')
+    repository.git.commit(m='update user_auth.txt')
+    repository.git.push()
