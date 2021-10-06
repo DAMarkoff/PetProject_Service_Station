@@ -87,7 +87,6 @@ ToDo Dmitrii:
 
     - rename the def's names
     - rename the DB field's names
-	- error with delete not user's vehcile (vehicle is not exists in the db)
 	- move to managers table
 	- validate first_name and last_name
 	- restore hased passwords
