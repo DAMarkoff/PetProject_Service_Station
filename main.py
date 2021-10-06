@@ -86,6 +86,10 @@ def users():
         else:
             if not str(user_id).isdigit():
                 abort(400, description='The user_id must contain only digits')
+
+            if not user_exists_by_id(user_id):
+                abort(400, description='The user does not exist')
+
             sql_query = """SELECT user_id, first_name, last_name, phone, email, active FROM users
                             WHERE user_id = '{0}'""".format(user_id)
             cursor.execute(sql_query)
@@ -677,6 +681,9 @@ def users_vehicle():
         if not conn:
             abort(503, description='There is no connection to the database')
 
+        if not vehicle_exist(u_veh_id):
+            abort(400, description='The vehicle does not exist')
+
         sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
         cursor.execute(sql_query)
         conn.commit()
@@ -744,6 +751,9 @@ def users_vehicle():
 
         if not conn:
             abort(503, description='There is no connection to the database')
+
+        if not vehicle_exist(u_veh_id):
+            abort(400, description='The vehicle does not exist')
 
         sql_query = """SELECT user_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
         cursor.execute(sql_query)
@@ -943,6 +953,9 @@ def storage_order():
         if not conn:
             abort(503, description='There is no connection to the database')
 
+        if not storage_order_exist(st_ord_id):
+            abort(400, description='The storage order does not exist')
+
         # get the initial data of the storage order
         sql_query = """SELECT start_date, stop_date, size_id, st_ord_cost, shelf_id, user_id 
                         FROM storage_orders WHERE st_ord_id = '{0}';""".format(st_ord_id)
@@ -1050,6 +1063,9 @@ def storage_order():
 
         if not conn:
             abort(503, description='There is no connection to the database')
+
+        if not storage_order_exist(st_ord_id):
+            abort(400, description='The storage order does not exist')
 
         sql_query = """SELECT user_id, shelf_id FROM storage_orders WHERE st_ord_id = '{0}'""".format(st_ord_id)
         cursor.execute(sql_query)
@@ -1180,6 +1196,9 @@ def tire_service_order():
 
         if not conn:
             abort(503, description='There is no connection to the database')
+
+        if not tire_service_order_exist(serv_order_id):
+            abort(400, description='The tire service order does not exist')
 
         sql_query = """SELECT user_id, u_veh_id, manager_id FROM tire_service_order 
                         WHERE serv_order_id = '{0}';""".format(serv_order_id)

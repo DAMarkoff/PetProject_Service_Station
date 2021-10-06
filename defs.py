@@ -26,6 +26,61 @@ def user_exist(email):
     return True
 
 
+def user_exists_by_id(user_id):
+    if conn:
+        sql_query = "SELECT user_id FROM users WHERE email = '{0}'".format(user_id)
+        cursor.execute(sql_query)
+        conn.commit()
+        usr_id_ = cursor.fetchone()
+        # cursor.close()
+
+        if usr_id_:
+            return True
+    return False
+
+
+def vehicle_exist(u_veh_id):
+    sql_query = """SELECT user_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
+    cursor.execute(sql_query)
+    conn.commit()
+    res_ = cursor.fetchone()
+    # cursor.close()
+
+    if res_:
+        return True
+    return False
+
+
+def storage_order_exist(st_ord_id):
+    sql_query = """SELECT user_id FROM storage_orders WHERE st_ord_id = '{0}';""".format(st_ord_id)
+    cursor.execute(sql_query)
+    conn.commit()
+    res_ = cursor.fetchone()
+    # cursor.close()
+
+    if res_:
+        return True
+    return False
+
+
+def tire_service_order_exist(serv_order_id):
+    sql_query = """SELECT user_id FROM tire_service_order WHERE serv_order_id = '{0}';""".format(serv_order_id)
+    cursor.execute(sql_query)
+    conn.commit()
+    res_ = cursor.fetchone()
+    # cursor.close()
+
+    if res_:
+        return True
+    return False
+
+
+def token_exist(email, token):
+    if token == r.get(email):
+        return True
+    return False
+
+
 def get_user_id(email):
     if conn:
         sql_query = "SELECT user_id FROM users WHERE email = '{0}'".format(email)
@@ -35,12 +90,6 @@ def get_user_id(email):
         # cursor.close()
 
         return usr_id_[0]
-
-
-def token_exist(email, token):
-    if token == r.get(email):
-        return True
-    return False
 
 
 def size_id_by_name(size_name):
@@ -208,3 +257,5 @@ def generate_password_hash(password):
     salt = bcrypt.gensalt(5)
     password = bcrypt.hashpw(str.encode(password), salt)
     return password.decode(), salt.decode()
+
+
