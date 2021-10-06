@@ -84,17 +84,15 @@ d		/user_info
 		/reg
 	
 ToDo Dmitrii:
-	
-	- user can provide the user's vehicle id to create the storage order. if the user's vehicle id has been provided, the size name will be ignored.
-		(size name or vehicle id) - required one of those
-    	- rename the def's names
-    	- rename the DB field's names
-	- move to managers table
+
+	- storage orders [PUT] - change size_id to size_name (and vehicle_id)
+    - rename the def's names and optimize (user_vehicle_by_ etc.)
+    	- replace def vehicle_id_by_name and vehicle_name_by_id by vehicle_one_by_var
+    - rename the DB field's names and def's names to full
+	- relocate to the managers DB table
 	- validate first_name and last_name
 	- restore hased passwords
 	- drop pass column from users
-	- push the user_auth.txt to the remote repo after update - partially done
-	- replace def vehicle_id_by_name and vehicle_name_by_id by vehicle_one_by_var
 	- warehouse:
 		- create a summary JSON report on demand
 
@@ -221,9 +219,9 @@ user_authorization checks:
 			st_ord_id
 
 	user_authorization
-			if there is no available shelf of the size needed in the warehouse: note		
-				add in the "storage_order" base info about the storage order
-				update in the "warehouse" base availability of the occupied storage place
+		if there is no available shelf of the size needed in the warehouse: note
+            the user can specify either the size_name or the user_vehicle_id
+                if both size_name and user_vehicle_id are specified, the size_name is ignored
 
 				
 /storage_orders [PUT]				
@@ -247,7 +245,7 @@ user_authorization checks:
 	user_authorization
 			if the provided dates are invalid: note
 				if the optional data is None: take the data needed from DB
-				if size_id is need to be changed make sure that the warehouse has an availabe shelf
+				    if size_id is need to be changed make sure that the warehouse has an available shelf
 
 				
 /vehicle [POST]

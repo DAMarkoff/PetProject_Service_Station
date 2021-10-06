@@ -756,13 +756,15 @@ def users_vehicle():
         if not vehicle_exist(u_veh_id):
             abort(400, description='The vehicle does not exist')
 
-        sql_query = """SELECT user_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-        # cursor.close()
+        # sql_query = """SELECT user_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
+        # cursor.execute(sql_query)
+        # conn.commit()
+        # res_ = cursor.fetchone()
+        # # cursor.close()
 
-        if get_user_id(email) != res_[0]:
+        user_id = vehicle_one_by_var('user_id', 'u_veh_id', u_veh_id)
+
+        if get_user_id(email) != user_id:
             abort(403, description='It is not your vehicle! Somebody call the police!')
         else:
 
@@ -890,13 +892,24 @@ def storage_order():
         start_date = request.form.get('start_date')
         stop_date = request.form.get('stop_date')
         size_name = request.form.get('size_name')
+        u_veh_id = request.form.get('user_vehicle_id')
 
-        if token is None or email is None or start_date is None or stop_date is None or size_name is None:
+        if token is None or email is None or start_date is None or stop_date is None:
             abort(400, description='The token, email, start_date, stop_date and size_name data are required')
+
+        if size_name is None or u_veh_id is None:
+            abort(400, description='The size_name OR user_vehicle_id is required')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
             abort(401, description=user_auth['text'])
+
+        user_id = get_user_id(email)
+
+        if u_veh_id is not None:
+            if vehicle_one_by_var('user_id', 'u_veh_id', u_veh_id) != user_id:
+                abort(403, description='It is not your vehicle! Somebody call the police!')
+            size_name = size_name_by_id(vehicle_one_by_var('size_id', 'u_veh_id', u_veh_id))
 
         # is there the necessary free storage space
         if not shelf_avail(size_name):
@@ -914,7 +927,7 @@ def storage_order():
         # create storage order
         sql_query = """INSERT INTO storage_orders (user_id, start_date, stop_date, size_id, shelf_id, 
                     st_ord_cost) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}');""".\
-                    format(get_user_id(email), start_date, stop_date, size_id_by, shelf_id, 1000)
+                    format(user_id, start_date, stop_date, size_id_by, shelf_id, 1000)
         cursor.execute(sql_query)
         conn.commit()
         # cursor.close()
@@ -1077,7 +1090,7 @@ def storage_order():
         shelf_id = res_[1]
 
         if get_user_id(email) != res_[0]:
-            abort(403, description='It is not your storage order! Somebody call the police!')
+            abort(403, description='It is not your storage order!')
 
         sql_query = """DELETE FROM storage_orders WHERE st_ord_id = '{0}'""".format(st_ord_id)
         cursor.execute(sql_query)
