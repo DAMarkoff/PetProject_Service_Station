@@ -1307,14 +1307,5 @@ def task():
         abort(405)
 
 
-# @app.route("/admin", methods=['GET'])
-# def admin():
-#     if request.method == 'GET':
-#         repository.git.add('user_auth.txt')
-#         repository.git.commit(m='update user_auth.txt')
-#         repository.git.push()
-#         return 'pushed'
-
-
 if __name__ == '__main__':
     app.run()

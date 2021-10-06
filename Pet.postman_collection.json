@@ -18,22 +18,22 @@
 							"formdata": [
 								{
 									"key": "first_name",
-									"value": "test",
+									"value": "test_hash",
 									"type": "text"
 								},
 								{
 									"key": "last_name",
-									"value": "test",
+									"value": "test_hash",
 									"type": "text"
 								},
 								{
 									"key": "password",
-									"value": "qwe1T!1a",
+									"value": "PassWord1$",
 									"type": "text"
 								},
 								{
 									"key": "email",
-									"value": "test@test1.ru",
+									"value": "test@test7.ru",
 									"type": "text"
 								},
 								{
@@ -78,12 +78,12 @@
 							"formdata": [
 								{
 									"key": "email",
-									"value": "max@bush.us",
+									"value": "test@test2.ru",
 									"type": "text"
 								},
 								{
 									"key": "password",
-									"value": "qwe1",
+									"value": "PassWord1$",
 									"type": "text"
 								}
 							]
@@ -246,12 +246,6 @@
 									"value": "",
 									"type": "text",
 									"disabled": true
-								},
-								{
-									"key": "password",
-									"value": "qwe#Q2qw",
-									"type": "text",
-									"disabled": true
 								}
 							]
 						},
@@ -288,8 +282,12 @@
 								{
 									"key": "ARE_YOU_SURE?",
 									"value": "True",
-									"type": "text",
-									"disabled": true
+									"type": "text"
+								},
+								{
+									"key": "admin",
+									"value": "",
+									"type": "text"
 								}
 							]
 						},
@@ -311,7 +309,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "23.88.52.139:5006/users?user_id=213123",
+							"raw": "23.88.52.139:5006/users",
 							"host": [
 								"23",
 								"88",
@@ -325,7 +323,8 @@
 							"query": [
 								{
 									"key": "user_id",
-									"value": "213123"
+									"value": "213123",
+									"disabled": true
 								}
 							]
 						}
@@ -747,7 +746,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/warehouse?size_id=14",
+							"raw": "{{url}}/warehouse?size_name=14&available_only=no",
 							"host": [
 								"{{url}}"
 							],
@@ -756,8 +755,12 @@
 							],
 							"query": [
 								{
-									"key": "size_id",
+									"key": "size_name",
 									"value": "14"
+								},
+								{
+									"key": "available_only",
+									"value": "no"
 								}
 							]
 						}
@@ -765,6 +768,10 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Admin",
+			"item": []
 		}
 	]
 }
