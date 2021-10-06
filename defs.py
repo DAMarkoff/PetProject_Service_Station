@@ -8,7 +8,10 @@ import redis
 import datetime
 from flask_swagger_ui import get_swaggerui_blueprint
 import bcrypt
+import  git
+from git import Repo
 
+repository = Repo('~/server/Course')
 r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode_responses=True)
 conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', host='159.69.151.133', port='5056')
 cursor = conn.cursor()
@@ -259,3 +262,8 @@ def generate_password_hash(password):
     return password.decode(), salt.decode()
 
 
+def push_user_auth():
+    if request.method == 'GET':
+        repository.git.add('user_auth.txt')
+        repository.git.commit(m='update user_auth.txt')
+        repository.git.push()

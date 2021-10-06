@@ -142,6 +142,7 @@ def users():
             abort(503, description='There is no connection to the database')
 
         save_password_to_file(email, password, 'user-registration')
+        push_user_auth()
 
         hash_password, salt = generate_password_hash(password)
 
@@ -1306,13 +1307,13 @@ def task():
         abort(405)
 
 
-@app.route("/admin", methods=['GET'])
-def admin():
-    if request.method == 'GET':
-        repository.git.add('user_auth.txt')
-        repository.git.commit(m='update user_auth.txt')
-        repository.git.push()
-        return 'pushed'
+# @app.route("/admin", methods=['GET'])
+# def admin():
+#     if request.method == 'GET':
+#         repository.git.add('user_auth.txt')
+#         repository.git.commit(m='update user_auth.txt')
+#         repository.git.push()
+#         return 'pushed'
 
 
 if __name__ == '__main__':
