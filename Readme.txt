@@ -84,6 +84,7 @@ d		/user_info
 		/reg
 	
 ToDo :)
+	- erroe with delete not user's vehcile
 	- move to managers table
 	- validate first_name and last_name
 	- restore hased passwords
