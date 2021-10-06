@@ -266,6 +266,7 @@ def users():
         email = request.form.get('email')
         token = request.form.get('token')
         sure = request.form.get('ARE_YOU_SURE?')
+        admin = request.form.get('admin_password')
 
         if token is None or email is None or sure is None:
             abort(400, description='The token, email and sure data are required')
@@ -276,6 +277,9 @@ def users():
 
         if sure != 'True':
             abort(400, description='АHA! Changed your mind?')
+
+        if admin != 'Do Not Do That!!!':
+            abort(400, description='admin password?')
 
         if not conn:
             abort(503, description='There is no connection to the database')
@@ -865,6 +869,7 @@ def available_storage():
         return jsonify(result)
     else:
         abort(405)
+
 
 @app.route("/storage_order", methods=['POST', 'PUT', 'DELETE'])  # add new/change/delete the user's storage order
 def storage_order():

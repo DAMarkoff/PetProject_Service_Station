@@ -84,6 +84,7 @@ d		/user_info
 		/reg
 	
 ToDo :)
+	- delete user under admin password only :)
 	- error with delete not user's vehcile
 	- move to managers table
 	- validate first_name and last_name
