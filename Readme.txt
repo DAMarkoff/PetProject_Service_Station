@@ -84,7 +84,7 @@ d		/user_info
 		/reg
 	
 ToDo :)
-	- /warehouse responses '[]' on '15', 'yes' request
+	- move to managers table
 	- validate first_name and last_name
 	- restore hased passwords
 	- drop pass column from users
@@ -92,7 +92,6 @@ ToDo :)
 	- replace def vehicle_id_by_name and vehicle_name_by_id by vehicle_one_by_var
 	- warehouse:
 		- create a summary JSON report on demand
-		- include an info with unavailabe storage on demand
 
 	- the user can delete a tire_service_order with an expired date
 	- the user can create two tire_service_orders for the same vehicle on the same date and time 
