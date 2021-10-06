@@ -85,7 +85,7 @@ d		/user_info
 	
 ToDo :)
 	- delete user under admin password only :)
-	- error with delete not user's vehcile
+	- error with delete not user's vehcile (vehicle is not exists in the db)
 	- move to managers table
 	- validate first_name and last_name
 	- restore hased passwords
