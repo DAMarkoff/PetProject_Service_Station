@@ -33,7 +33,7 @@
 								},
 								{
 									"key": "email",
-									"value": "test@test7.ru",
+									"value": "test@test8.ru",
 									"type": "text"
 								},
 								{
@@ -362,6 +362,11 @@
 								{
 									"key": "size_name",
 									"value": "20",
+									"type": "text"
+								},
+								{
+									"key": "user_vehicle_id",
+									"value": "",
 									"type": "text"
 								}
 							]
