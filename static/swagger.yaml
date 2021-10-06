@@ -1,0 +1,464 @@
+openapi: 3.0.0
+servers:
+  - description: PetProgect
+    url: http://23.88.52.139:5006
+info:
+  description: Service Station API
+  version: 1.0.0
+  title: Service Station
+  contact:
+    email: dmitri.markoff@gmail.com
+tags:
+  - name: users
+    description: registration/login/activate/deactivate/delete/user_info
+  - name: warehouse
+    description: storage reports
+  - name: vehicle
+    description: user's vehicle(s)
+  - name: storage order
+    description: create/edit/delete user's tire storage order(s)
+  - name: tire service order
+    description: create/edit/delete user's tire service order(s)
+
+#----------------------------------------------------------------------------------------------
+
+paths:
+  /users:
+    get:
+      tags:
+      - users
+      summary: A JSON array of user(s) data
+      description: If the user_id is not provided, returns short info about all users
+      parameters:
+      - name: user_id
+        in: query
+        required: false
+        description: the user_id must consist only of digits
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/users'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
+    post:
+      tags:
+      - users
+      summary: Register a new user
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                  description: Validation has not been implemented yet
+                last_name:
+                  type: string
+                  description: Validation has not been implemented yet
+                email:
+                  type: string
+                  description: The email must contain @ and . chars
+                password:
+                  type: string
+                  description: 8 - 32 chars, must contain at least one digit, one uppercase letter, one lowercase letter, one of the symbols $@#!%'
+                phone:
+                  type: string
+                  description: Validation has not been implemented yet
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/users'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    put:
+      tags:
+      - users
+      summary: Change the user info
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Enter your email
+                token:
+                  type: string
+                  format: uuid
+                  description: Enter your token
+                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
+                New first_name:
+                  type: string
+                  description: Validation has not been implemented yet
+                New last_name:
+                  type: string
+                  description: Validation has not been implemented yet
+                New email:
+                  type: string
+                  description: The email must contain @ and . chars
+                New phone:
+                  type: string
+                  description: Validation has not been implemented yet
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_changed'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    delete:
+      tags:
+      - users
+      summary: Delete the current user
+      description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
+      # requestBody:
+      #   content:
+      #     multipart/form-data:
+      #       schema:
+      #         type: object
+      #         properties:
+      #           email:
+      #             type: string
+      #             format: email
+      #             description: Enter your email
+      #           token:
+      #             type: string
+      #             format: uuid
+      #             description: Enter your token
+      #             example: faf353cd-2e44-46c5-9864-7c53426eb58a
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_changed'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+#----------------------------------------------------------------------------------------------
+
+  /users/login:
+    post:
+      tags:
+      - users
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: Enter your email
+                password:
+                  type: string
+                  description: Enter your password. In case you forgot your password, please contact the admin
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/hello'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+#----------------------------------------------------------------------------------------------
+
+  /users/deactivate:
+    post:
+      tags:
+      - users
+      summary: Mark yourself as an inactive user
+      description: WARNING! Only the admin can mark you as an active user
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Enter your email
+                token:
+                  type: string
+                  format: uuid
+                  description: Enter your token
+                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
+                sure:
+                  type: boolean
+                  description: Are you sure?
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  confirmation:
+                    type: string
+              example: 'User {first_name last_name} has been successfully deactivated'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+#----------------------------------------------------------------------------------------------
+
+  /users/activate:
+    post:
+      tags:
+      - users
+      summary: Mark the user as active
+      description: 'Note: Only the admin can mark you as an active user'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Enter your email
+                admin password:
+                  type: string
+                  format: uuid
+                  description: Enter the admin's password
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  confirmation:
+                    type: string
+              example: 'User {first_name last_name} has been successfully deactivated'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  #/users/user_info:
+
+#----------------------------------------------------------------------------------------------
+
+  /warehouse:
+    get:
+      tags:
+        - warehouse
+      summary: summary here
+      description: descrition here
+      parameters:
+        - name: size_id
+          in: query
+          required: false
+          description: the user_id must consist only of digits
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/storage_places'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+#----------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------
+
+components:
+  schemas:
+    users:
+      type: object
+      properties:
+        ID:
+          type: integer
+        active:
+          type: boolean
+        email:
+          type: string
+        f_name:
+          type: string
+        l_name:
+          type: string
+        hash-password:
+          type: string
+        salt:
+          type: string
+        phone:
+          type: string
+    user_changed:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        new first name:
+          type: string
+        old first name:
+          type: string
+        new last name:
+          type: string
+        old last name:
+          type: string
+        new email:
+          type: string
+        old email:
+          type: string
+        new phone:
+          type: string
+        old phone:
+          type: string
+    storage_places:
+      type: object
+      properties:
+        shelf_id:
+          type: integer
+        size_id:
+          type: integer
+        size_name:
+          type: integer
+    hello:
+      type: object
+      properties:
+        hello_message:
+          type: string
+        email:
+          type: string
+        user_id:
+          type: integer
+        token:
+          type: string
+    error:
+      type: object
+      properties:
+        confirmation:
+          type: string
