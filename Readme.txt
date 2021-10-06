@@ -115,7 +115,9 @@ ToDo :)
 	- testing:
 		- checklists
 		- 
-
+ToDo Azat: 
+        - design
+        - front
 DrawSQL DB:
 	table Payment (payment_id, user_id, card_number, exp_date, owner_name, cvv_cvc)
 	
