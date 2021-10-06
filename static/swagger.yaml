@@ -257,7 +257,7 @@ paths:
       tags:
       - users
       summary: Mark yourself as an inactive user
-      description: WARNING! Only the admin can mark you as an active user
+      description: WARNING! Only the admin can mark you as an active user again
       requestBody:
         required: true
         content:
