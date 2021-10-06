@@ -84,9 +84,11 @@ d		/user_info
 		/reg
 	
 ToDo Dmitrii:
-
-    - rename the def's names
-    - rename the DB field's names
+	
+	- user can provide the user's vehicle id to create the storage order. if the user's vehicle id has been provided, the size name will be ignored.
+		(size name or vehicle id) - required one of those
+    	- rename the def's names
+    	- rename the DB field's names
 	- move to managers table
 	- validate first_name and last_name
 	- restore hased passwords
