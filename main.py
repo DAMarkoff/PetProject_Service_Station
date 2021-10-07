@@ -236,13 +236,13 @@ def users():
             new_email = 'The email has not been changed'
             new_email_to_db = email
         else:
-            if user_exists('email', email):
+            if user_exists('email', new_email):
                 abort(400, description="The user with this email already exists")
-            check_email = validate_email(email)
+            check_email = validate_email(new_email)
             if not check_email['result']:
                 abort(400, description=check_email['text'])
-            save_to_file(user_id_db, email, '!password!', 'user-changed-email')
-            new_email_to_db = email
+            save_to_file(user_id_db, email + '->' + new_email, '!password!', 'user-changed-email')
+            new_email_to_db = new_email
             flag_relogin = True
             push_user_auth()
 
