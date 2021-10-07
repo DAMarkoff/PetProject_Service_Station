@@ -18,13 +18,13 @@ cursor = conn.cursor()
 
 def user_exists(where, email):
     if conn:
-        sql_query = "SELECT user_id FROM users WHERE '{0}' = '{1}'".format(where, email)
+        sql_query = "SELECT user_id FROM users WHERE {0} = '{1}'".format(where, email)
         cursor.execute(sql_query)
         conn.commit()
         usr_id_ = cursor.fetchone()
         # cursor.close()
 
-        if not usr_id_:
+        if usr_id_ is None:
             return False
     return True
 
@@ -194,7 +194,7 @@ def user_active(email):
 
 def size_one_by_var(select, where, what):
     if conn:
-        sql_query = """SELECT '{0}' FROM sizes WHERE '{1}' = '{2}'""".format(select, where, what)
+        sql_query = """SELECT {0} FROM sizes WHERE {1} = '{2}'""".format(select, where, what)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
@@ -232,7 +232,7 @@ def size_one_by_var(select, where, what):
 
 def vehicle_one_by_var(select, where, what):
     if conn:
-        sql_query = """SELECT '{0}' FROM vehicle WHERE '{1}' = '{2}'""".format(select, where, what)
+        sql_query = """SELECT {0} FROM vehicle WHERE {1} = '{2}'""".format(select, where, what)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
