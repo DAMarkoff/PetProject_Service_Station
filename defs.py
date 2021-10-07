@@ -16,9 +16,9 @@ r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode
 conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', host='159.69.151.133', port='5056')
 cursor = conn.cursor()
 
-def user_exists(email):
+def user_exists(where, email):
     if conn:
-        sql_query = "SELECT user_id FROM users WHERE email = '{0}'".format(email)
+        sql_query = "SELECT user_id FROM users WHERE '{0}' = '{1}'".format(where, email)
         cursor.execute(sql_query)
         conn.commit()
         usr_id_ = cursor.fetchone()
@@ -29,17 +29,17 @@ def user_exists(email):
     return True
 
 
-def user_exists_by_id(user_id):
-    if conn:
-        sql_query = "SELECT user_id FROM users WHERE user_id = '{0}'".format(user_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        usr_id_ = cursor.fetchone()
-        # cursor.close()
-
-        if usr_id_:
-            return True
-    return False
+# def user_exists_by_id(user_id):
+#     if conn:
+#         sql_query = "SELECT user_id FROM users WHERE user_id = '{0}'".format(user_id)
+#         cursor.execute(sql_query)
+#         conn.commit()
+#         usr_id_ = cursor.fetchone()
+#         # cursor.close()
+#
+#         if usr_id_:
+#             return True
+#     return False
 
 
 def vehicle_exists(u_veh_id):

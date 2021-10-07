@@ -87,7 +87,7 @@ def users():
             if not str(user_id).isdigit():
                 abort(400, description='The user_id must contain only digits')
 
-            if not user_exists_by_id(user_id):
+            if not user_exists('user_id', user_id):
                 abort(400, description='The user does not exist')
 
             sql_query = """SELECT user_id, first_name, last_name, phone, email, active FROM users
@@ -123,7 +123,7 @@ def users():
         if f_name is None or l_name is None or password is None or phone is None or email is None:
             abort(400, description='The f_name, l_name, password, phone and email data are required')
 
-        if user_exists(email):
+        if user_exists('email', email):
             abort(400, description="The user with this email already exists")
 
         # making sure that the password is strong enough 8-32 chars,
@@ -491,7 +491,7 @@ def login():
         if password is None or email is None:
             abort(400, description='The pass and email data are required')
 
-        if not user_exists(email):
+        if not user_exists('email', email):
             abort(400, description="The user does not exist. Please, register")
 
         if not user_active(email):
@@ -587,7 +587,7 @@ def activate_user():
         if admin_password is None or email is None:
             abort(400, description='The admin_password and email are required')
 
-        if not user_exists(email):
+        if not user_exists('email', email):
             abort(400, description='The user is not exist')
 
         if admin_password != 'admin':
