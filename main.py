@@ -685,7 +685,7 @@ def users_vehicle():
         new_size_name = request.form.get('new size name')
 
         if token is None or email is None or u_veh_id is None:
-            abort(400, description='The token, email and user_vehicle_id are required')
+            abort(400, description='The token, email and user vehicle id are required')
 
         if not vehicle_exists(u_veh_id):
             abort(400, description='The vehicle does not exist')
@@ -723,7 +723,7 @@ def users_vehicle():
             new_vehicle_id = vehicle_id_db
             vehicle_name_db = 'The vehicle name has not been changed'
 
-        if new_size_name:
+        if new_size_name is not None:
             new_size_id = size_one_by_var('size_id', 'size_name', new_size_name)
             if not new_size_id:
                 abort(400, description='Unknown size_name')
