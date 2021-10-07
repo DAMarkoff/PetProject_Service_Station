@@ -24,7 +24,7 @@ def user_exists(where, email):
         usr_id_ = cursor.fetchone()
         # cursor.close()
 
-        if usr_id_ is None:
+        if not usr_id_:
             return False
     return True
 
