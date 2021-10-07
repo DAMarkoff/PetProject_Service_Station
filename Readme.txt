@@ -84,17 +84,23 @@ d		/user_info
 		/reg
 	
 ToDo Dmitrii:
-
-    - 400 status code when the email or token does not exist?
+		
+		- hang on tire_service_order [PUT] - max connections
+		
+*	- improvements google form
+	- dates: create storage and tire_service_order before today
+    - hello message when user register
+    - 401 status code when the email or token does not exist?
     - change password
     - restore password
-    - google form for bug reports
+	
+*   - google form for bug reports
     - estimate the service time and store it in the tire_service_order
     - when the user deletes the tasks - delete them from the tire_service_order ON CASCADE
 
     - rename the DB field's names and def's names to full
-	- relocate to the managers DB table
-	- validate first_name and last_name
+
+!	- validate first_name and last_name
 	- drop pass column from users
 	- warehouse:
 		- create a summary JSON report on demand
@@ -109,6 +115,15 @@ ToDo Dmitrii:
 	- staff: add other working professions
 	- distribution of workers by type of work
 
+	- admin:
+	    - can change the managers in the tire_service_order
+	    - can change the worker in the list_of_works
+	    - can restore the user's password
+        - form a reports:
+            - staff: all/available/unavailable (by position or all)
+            - costs: all/storage_orders/tire_service_oreders
+            - costs: on staff
+
 	- /tire_service_order [GET], [PUT] - change
 	- /tire_service_order/task [GET], [PUT], [DELETE]
 	- /storage_orders [GET]
@@ -120,7 +135,9 @@ ToDo Dmitrii:
 	- frontend
 	- testing:
 		- checklists
-		- 
+*		- bug report google form
+*		- improvements google form
+
 ToDo Azat: 
         - design
         - front
@@ -249,9 +266,9 @@ user_authorization checks:
 			shelf_id
 	
 	user_authorization
-			if the provided dates are invalid: note
-				if the optional data is None: take the data needed from DB
-				    if size_id is need to be changed make sure that the warehouse has an available shelf
+		if the provided dates are invalid: note
+			if the optional data is None: take the data needed from DB
+				if size_id is need to be changed make sure that the warehouse has an available shelf
 
 				
 /vehicle [POST]
@@ -395,36 +412,62 @@ user_authorization checks:
 			email				- required
 			token				- required
 			order_date			- required
-			user_vehicle_id_id	- required
+			user_vehicle_id	    - required
 
 	
 	output:
 			service_order_id
 			date
-			worker_id
-			worker_first_name
-			worker_last_name
-			worker_phone
-			worker_email
+			manager_id
+			manager_first_name
+			manager_last_name
+			manager_phone
+			manager_email
 			
 	user_authorization
-			if it is not user's vehicle: :)
-				max load per one manager - 5
+		if it is not user's vehicle: :)
+		max load per one manager - 5:
+		    if the load of the manager == 4, mark him as unavailable
+		if the order date is before today	
+
+
+/tire_service_order [PUT]
+    input:
+			email				- required
+			token				- required
+			service_order_id	- required
+			new order date          - optional
+			other user vehicle id   - optional
+
+	output:
+			user_id
+			service_order_id
+			old order date
+			new order date
+			old user vehicle id
+			new user vehicle id
+			
+	user_authorization
+		if it is not user's order: :)
+		if it is not user's other vehicle: :)
+		if the new order date is before today
+		
 					
-/tire_service_order [DELETE}
+/tire_service_order [DELETE]
 	input:
 			email				- required
 			token				- required
 			service_order_id	- required
 			
 	output:
-			confirmaion message
+			confirmation message
 			
 	user_authorization
-			if it is not user's order: :)
-				if manager's load becomes less than 5, then mark the manager as available
-				
-			
+		if it is not user's order: :)
+		if the manager's load becomes less than 5 when the order is deleted, mark it as available
+		delete the tasks on delete tire_service_order - DB settings ON DELETE CASCADE
+
+
 /tire_service_order/task [POST]
 	input:
 			email				- required

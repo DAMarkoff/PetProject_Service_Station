@@ -1143,6 +1143,7 @@ def tire_service_order():
         if not conn:
             abort(503, description='There is no connection to the database')
 
+        # get the initial data about user's vehicle
         sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle 
                         WHERE u_veh_id = '{0}';""".format(u_veh_id)
         cursor.execute(sql_query)
@@ -1155,15 +1156,14 @@ def tire_service_order():
         if get_user_id(email) != user_id:
             abort(403, description='It is not your vehicle!')
 
-        sql_query = """SELECT worker_id, COUNT(manager_id) FROM staff AS s LEFT JOIN tire_service_order AS tso
-                        ON tso.manager_id = s.worker_id WHERE available = True AND position_id = 2
-                        GROUP BY worker_id HAVING COUNT(manager_id) < 5"""
+        sql_query = """SELECT manager_id, COUNT(manager_id) FROM managers LEFT JOIN tire_service_order 
+                    USING (manager_id) WHERE available = True GROUP BY manager_id HAVING COUNT(manager_id) < 5"""
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchall()
         # cursor.close()
 
-        if len(res_) == 0:
+        if not res_:
             abort(400, description='Sorry, all managers are busy')
 
         rand_id = random.randint(0, len(res_) - 1)
@@ -1190,8 +1190,8 @@ def tire_service_order():
 
         serv_order_id = res_[0]
 
-        sql_query = """SELECT first_name, last_name, phone, email FROM staff 
-                        WHERE worker_id = '{0}'""".format(manager_id)
+        sql_query = """SELECT first_name, last_name, phone, email FROM managers 
+                        WHERE manager_id = '{0}'""".format(manager_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
@@ -1208,8 +1208,53 @@ def tire_service_order():
             'manager_phone': manager_phone,
             'manager_email': manager_email
         }
-
         return jsonify(result)
+    elif request.method == 'PUT':
+        email = request.form.get('email')
+        token = request.form.get('token')
+        serv_order_id = request.form.get('service order id')
+        new_order_date = request.form.get('new order date')
+        other_u_veh_id = request.form.get('other user vehicle id')
+
+        if token is None or email is None or serv_order_id is None:
+            abort(400, description='The token, email, service_order_id are required')
+
+        user_auth = user_authorization(email, token)
+        if not user_auth['result']:
+            abort(401, description=user_auth['text'])
+
+        if not conn:
+            abort(503, description='There is no connection to the database')
+
+        if not tire_service_order_exists(serv_order_id):
+            abort(400, description='The tire service order does not exist')
+
+        # get the initial data about the tire_service_order
+        sql_query = """SELECT u_veh_id, manager_id FROM tire_service_order 
+                            WHERE serv_order_id = '{0}';""".format(serv_order_id)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchone()
+        # cursor.close()
+
+        user_id, u_veh_id, manager_id = res_[0], res_[1], res_[2]
+
+        if get_user_id(email) != user_id:
+            abort(403, description='It is not your tire service order!')
+
+
+
+
+
+        if (new_vehicle_name is None and new_size_name is None) or \
+                (new_vehicle_name == old_vehicle_name and new_size_name == old_size_name):
+            abort(400, description='Ok. Nothing needs to be changed :)')
+
+
+
+
+
+
     elif request.method == 'DELETE':
         email = request.form.get('email')
         token = request.form.get('token')
@@ -1228,6 +1273,7 @@ def tire_service_order():
         if not tire_service_order_exists(serv_order_id):
             abort(400, description='The tire service order does not exist')
 
+        # get the initial data about the tire_service_order
         sql_query = """SELECT user_id, u_veh_id, manager_id FROM tire_service_order 
                         WHERE serv_order_id = '{0}';""".format(serv_order_id)
         cursor.execute(sql_query)
@@ -1240,8 +1286,8 @@ def tire_service_order():
         if get_user_id(email) != user_id:
             abort(403, description='It is not your tire service order!')
 
-        sql_query = """SELECT worker_id, COUNT(manager_id) FROM staff AS s JOIN tire_service_order AS tso
-                    ON tso.manager_id = s.worker_id WHERE worker_id = '{0}' group by worker_id""".format(manager_id)
+        sql_query = """SELECT manager_id, COUNT(manager_id) FROM managers JOIN tire_service_order
+                    USING (manager_id) WHERE manager_id = '{0}' GROUP BY manager_id""".format(manager_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
@@ -1249,6 +1295,7 @@ def tire_service_order():
 
         manager_id, manager_load = res_[0], res_[1]
 
+        # if the manager's load becomes less than 5 when the order is deleted, mark it as available
         if manager_load == 5:
             sql_query = """UPDATE staff SET available = True WHERE worker_id = '{0}'""".format(manager_id)
             cursor.execute(sql_query)
@@ -1260,9 +1307,13 @@ def tire_service_order():
         conn.commit()
         # cursor.close()
 
+        text = 'Tire service order ID {{ name }} has been deleted'
+        template = Template(text)
+
         result = {
-            'confirmation': 'Tire service order ID ' + serv_order_id + ' has been deleted'
+            "confirmation": template.render(name=serv_order_id),
         }
+
         return jsonify(result)
     else:
         abort(405)
