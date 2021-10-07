@@ -141,8 +141,6 @@ def users():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        save_password_to_file(email, password, 'user-registration')
-
         hash_password, salt = generate_password_hash(password)
 
         sql_query = """INSERT INTO users (first_name, last_name, password, phone, email, active, salt) VALUES ('{0}', 
@@ -157,9 +155,12 @@ def users():
         res = cursor.fetchone()
         conn.commit()
         # cursor.close()
+        user_id = res[0]
+
+        save_to_file(user_id, email, password, 'user-registered')
 
         result = {
-            "ID": res[0],
+            "ID": user_id,
             "f_name": f_name,
             "l_name": l_name,
             "phone": phone,
@@ -238,6 +239,7 @@ def users():
             check_email = validate_email(email)
             if not check_email['result']:
                 abort(400, description=check_email['text'])
+            save_to_file(user_id_db, email, '!password!', 'user-changed-email')
             new_email_to_db = email
             flag_relogin = True
 
@@ -289,21 +291,25 @@ def users():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
+        sql_query = """SELECT first_name, last_name, user_id FROM users WHERE email = '{0}'""".format(email)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
         # cursor.close()
+
+        first_name, last_name, user_id = res_[0], res_[1], res_[2]
 
         sql_query = """DELETE FROM users WHERE email = '{0}'""".format(email)
         cursor.execute(sql_query)
         conn.commit()
         # cursor.close()
 
+        save_to_file(user_id, email, '!password!', 'user-deleted-himself')
+
         text = 'R.I.P {{ name }}, i will miss you :('
         template = Template(text)
         result = {
-            'confirmation': template.render(name=res_[0] + ' ' + res_[1])
+            'confirmation': template.render(name=first_name + ' ' + last_name)
         }
         return jsonify(result)
     else:
