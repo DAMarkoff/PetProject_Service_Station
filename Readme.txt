@@ -85,8 +85,11 @@ d		/user_info
 	
 ToDo Dmitrii:
 		
-		- hang on tire_service_order [PUT] - max connections
-		
+		- using conn.close()
+	
+	In progress: /vehicle [PUT]
+	
+	- vehicle.name in /vehicle	[POST] - ok, but in [PUT]?
 *	- improvements google form
 	- dates: create storage and tire_service_order before today
     - hello message when user register
@@ -388,9 +391,9 @@ user_authorization checks:
 			new_size_name
 			
 	user_authorization
-			if it is not user's vehicle: Call the police!!! :)
-				if all optional data is None OR the new data is equal to the DB data: nothing needs to be changed
-					if some optional data is None: take the data needed from DB
+		if it is not user's vehicle: Call the police!!! :)
+			if all optional data is None OR the new data is equal to the DB data: nothing needs to be changed
+				if some optional data is None: take the data needed from DB
 
 /warehouse [GET]
 	input:

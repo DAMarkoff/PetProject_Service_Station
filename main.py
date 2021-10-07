@@ -680,12 +680,26 @@ def users_vehicle():
     elif request.method == 'PUT':
         email = request.form.get('email')
         token = request.form.get('token')
-        u_veh_id = request.form.get('user_vehicle_id')
-        new_vehicle_name = request.form.get('new_vehicle_name')
-        new_size_name = request.form.get('new_size_name')
+        u_veh_id = request.form.get('user vehicle id')
+        new_vehicle_name = request.form.get('new vehicle name')
+        new_size_name = request.form.get('new size name')
 
         if token is None or email is None or u_veh_id is None:
             abort(400, description='The token, email and user_vehicle_id are required')
+
+        if not vehicle_exists(u_veh_id):
+            abort(400, description='The vehicle does not exist')
+
+        # if None?
+        new_size_id = size_one_by_var('size_id', 'size_name', new_size_name)
+        new_vehicle_id = vehicle_one_by_var('vehicle_id', 'vehicle_name', new_vehicle_name)
+
+        if new_size_id is None:
+            abort(400, description='Unknown tire size, add the tire size data to the sizes DB')
+
+        if new_vehicle_id is None:
+            abort(400, description='Unknown type of the vehicle, add the vehicle type data to the vehicle DB')
+
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
@@ -694,8 +708,7 @@ def users_vehicle():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        if not vehicle_exists(u_veh_id):
-            abort(400, description='The vehicle does not exist')
+
 
         sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
         cursor.execute(sql_query)
