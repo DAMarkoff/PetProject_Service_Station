@@ -85,17 +85,16 @@ d		/user_info
 	
 ToDo Dmitrii:
 
+    - 400 status code when the email or token does not exist?
     - change password
     - restore password
     - google form for bug reports
     - estimate the service time and store it in the tire_service_order
     - when the user deletes the tasks - delete them from the tire_service_order ON CASCADE
 
-    - rename the def's names
     - rename the DB field's names and def's names to full
 	- relocate to the managers DB table
 	- validate first_name and last_name
-	- restore hased passwords
 	- drop pass column from users
 	- warehouse:
 		- create a summary JSON report on demand
@@ -132,7 +131,7 @@ DrawSQL DB:
 DISCLAIMER:
 user_authorization checks: 	
 	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
-		if the token does not exist in redis db: redirect to /login
+		if the token does not exist in redis db: The token is invalid, please log in
 
 /users/login [POST]
 	input:  
@@ -145,6 +144,7 @@ user_authorization checks:
 			token
 			user_id
 
+    make sure that all the required fields are filled in
 	if email does not exist in DB: 400 - note
 		if pass does not valid: 401 - note
 			if token exists in the redis db: set new ex time and return the token
@@ -166,8 +166,10 @@ user_authorization checks:
 			l_name
 			email
 			phone
-			passw
-			
+			salt
+			hash_password
+
+	make sure that all the required fields are filled in
 	if email exists in the DB: 400 - note
 	else: 
 		add new user to the DB and return info from the DB with user_id
@@ -265,8 +267,8 @@ user_authorization checks:
 			size_name
 			
 	user_authorization
-			if the vehcile type or tire size is not specified in the DB: note 
-				add the date in to the DB
+		if the vehcile type or tire size is not specified in the DB: note
+		add the date in to the DB
 				
 /users/user [PUT]				
 	input:
@@ -275,23 +277,26 @@ user_authorization checks:
 			f_name				- optional
 			l_name				- optional
 			new_email			- optional
-			password			- optional
+			phone               - optional
 
-			
 	output:
 			user_id
-			f_name
-			l_name
-			email
-			phone
-			password
+			old_first_name
+			new_first_name
+			old_last_name
+			new_last_name
+			old_email
+			new_email
+			old_phone
+			new_phone
 	
 	user_authorization
-			if all optional data is None OR the new data is equal to the DB data: nothing needs to be changed
-				if some optional data is None: take the data needed from DB
-					if the password and/or email have been changed - the user must log in again
+        if all optional data is None OR the new data is equal to the DB data: nothing needs to be changed
+        if some optional data is None: take the data needed from DB
+        if the email has been changed - the user must log in again
+        if the new_email is already in the DB: 400 - email exists
 					
-/users/user [POST]
+/users/user [DELETE]
 	input:
 			email				- required
 			token				- required

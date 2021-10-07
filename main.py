@@ -166,7 +166,8 @@ def users():
             "phone": phone,
             "hash_password": hash_password,
             "salt": salt,
-            "active": active
+            "active": active,
+            "email": email
         }
 
         push_user_auth()

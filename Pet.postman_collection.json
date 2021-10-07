@@ -33,7 +33,7 @@
 								},
 								{
 									"key": "email",
-									"value": "test@test8.ru",
+									"value": "test@test12.ru",
 									"type": "text"
 								},
 								{
@@ -78,7 +78,7 @@
 							"formdata": [
 								{
 									"key": "email",
-									"value": "test@test2.ru",
+									"value": "test@test12.ru",
 									"type": "text"
 								},
 								{
@@ -237,7 +237,7 @@
 								},
 								{
 									"key": "new_email",
-									"value": "dexter@morgan.com",
+									"value": "test@test12_2.ru",
 									"type": "text",
 									"disabled": true
 								},
@@ -323,7 +323,7 @@
 							"query": [
 								{
 									"key": "user_id",
-									"value": "213123",
+									"value": "1",
 									"disabled": true
 								}
 							]
@@ -543,7 +543,7 @@
 									"type": "text"
 								},
 								{
-									"key": "size_id",
+									"key": "size_name",
 									"value": "2",
 									"type": "text"
 								},
