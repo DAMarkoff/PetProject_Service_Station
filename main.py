@@ -690,25 +690,12 @@ def users_vehicle():
         if not vehicle_exists(u_veh_id):
             abort(400, description='The vehicle does not exist')
 
-        # if None?
-        new_size_id = size_one_by_var('size_id', 'size_name', new_size_name)
-        new_vehicle_id = vehicle_one_by_var('vehicle_id', 'vehicle_name', new_vehicle_name)
-
-        if new_size_id is None:
-            abort(400, description='Unknown tire size, add the tire size data to the sizes DB')
-
-        if new_vehicle_id is None:
-            abort(400, description='Unknown type of the vehicle, add the vehicle type data to the vehicle DB')
-
-
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
             abort(401, description=user_auth['text'])
 
         if not conn:
             abort(503, description='There is no connection to the database')
-
-
 
         sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
         cursor.execute(sql_query)
@@ -718,35 +705,31 @@ def users_vehicle():
 
         user_id_db, vehicle_id_db, size_id_db = res_[0], res_[1], res_[2]
 
-        old_vehicle_name = vehicle_one_by_var('vehicle_name', 'vehicle_id', vehicle_id_db)
-        old_size_name = str(size_one_by_var('size_name', 'size_id', size_id_db))
-
         if user_id_db != get_user_id(email):
             abort(403, description='It is not your vehicle! Somebody call the police!')
 
+        vehicle_name_db = vehicle_one_by_var('vehicle_name', 'vehicle_id', vehicle_id_db)
+        size_name_db = str(size_one_by_var('size_name', 'size_id', size_id_db))
+
         if (new_vehicle_name is None and new_size_name is None) or \
-                (new_vehicle_name == old_vehicle_name and new_size_name == old_size_name):
+                (new_vehicle_name == vehicle_name_db and new_size_name == size_name_db):
             abort(400, description='Ok. Nothing needs to be changed :)')
 
-        # new_vehicle_id, new_size_id = 0, 0
-
-        if new_vehicle_name is None:
-            new_vehicle_id = vehicle_id_db
-        else:
-            vehicle_id_by = vehicle_one_by_var('vehicle_id', 'vehicle_name', new_vehicle_name)
-            if vehicle_id_by is not None:
-                new_vehicle_id = vehicle_id_by
-            else:
+        if new_vehicle_name:
+            new_vehicle_id = vehicle_one_by_var('vehicle_id', 'vehicle_name', new_vehicle_name)
+            if not new_vehicle_id:
                 abort(400, description='Unknown vehicle_name')
-
-        if new_size_name is None:
-            new_size_id = size_id_db
         else:
-            size_id_by = size_one_by_var('size_id', 'size_name', new_size_name)
-            if size_id_by is not None:
-                new_size_id = size_id_by
-            else:
+            new_vehicle_id = vehicle_id_db
+            vehicle_name_db = 'The vehicle name has not been changed'
+
+        if new_size_name:
+            new_size_id = size_one_by_var('size_id', 'size_name', new_size_name)
+            if not new_size_id:
                 abort(400, description='Unknown size_name')
+        else:
+            new_size_id = size_id_db
+            size_name_db = 'The size name has not been changed'
 
         sql_query = """UPDATE user_vehicle SET vehicle_id = '{0}', size_id = '{1}' 
                         WHERE u_veh_id = '{2}'""".format(new_vehicle_id, new_size_id, u_veh_id)
@@ -756,9 +739,9 @@ def users_vehicle():
 
         result = {
             'vehicle_id': u_veh_id,
-            'old_vehicle_name': old_vehicle_name,
+            'old_vehicle_name': vehicle_name_db,
             'new_vehicle_name': new_vehicle_name,
-            'old_size_name': old_size_name,
+            'old_size_name': size_name_db,
             'new_size_name': new_size_name
         }
 

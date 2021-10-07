@@ -200,7 +200,7 @@ def size_one_by_var(select, where, what):
         res_ = cursor.fetchone()
         # cursor.close()
 
-        if res_ is None:
+        if not res_:
             return None
         return res_[0]
 
@@ -238,7 +238,7 @@ def vehicle_one_by_var(select, where, what):
         res_ = cursor.fetchone()
         # cursor.close()
 
-        if res_ is None:
+        if not res_:
             return None
         return res_[0]
 
