@@ -123,7 +123,7 @@ def users():
         if f_name is None or l_name is None or password is None or phone is None or email is None:
             abort(400, description='The f_name, l_name, password, phone and email data are required')
 
-        if user_exist(email):
+        if user_exists(email):
             abort(400, description="The user with this email already exists")
 
         # making sure that the password is strong enough 8-32 chars,
@@ -491,7 +491,7 @@ def login():
         if password is None or email is None:
             abort(400, description='The pass and email data are required')
 
-        if not user_exist(email):
+        if not user_exists(email):
             abort(400, description="The user does not exist. Please, register")
 
         if not user_active(email):
@@ -587,7 +587,7 @@ def activate_user():
         if admin_password is None or email is None:
             abort(400, description='The admin_password and email are required')
 
-        if not user_exist(email):
+        if not user_exists(email):
             abort(400, description='The user is not exist')
 
         if admin_password != 'admin':
@@ -631,8 +631,8 @@ def users_vehicle():
 
         # get needed data
         user_id = get_user_id(email)
-        size_id = size_id_by_name(size_name)
-        vehicle_id = vehicle_id_by_name(vehicle_name)
+        size_id = size_one_by_var('size_id', 'size_name', size_name)
+        vehicle_id = vehicle_one_by_var('vehicle_id', 'vehicle_name', vehicle_name)
 
         if size_id is None:
             abort(400, description='Unknown tire size, add the tire size data to the sizes DB')
@@ -682,7 +682,7 @@ def users_vehicle():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        if not vehicle_exist(u_veh_id):
+        if not vehicle_exists(u_veh_id):
             abort(400, description='The vehicle does not exist')
 
         sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
@@ -693,8 +693,8 @@ def users_vehicle():
 
         user_id_db, vehicle_id_db, size_id_db = res_[0], res_[1], res_[2]
 
-        old_vehicle_name = vehicle_name_by_id(vehicle_id_db)
-        old_size_name = str(size_name_by_id(size_id_db))
+        old_vehicle_name = vehicle_one_by_var('vehicle_name', 'vehicle_id', vehicle_id_db)
+        old_size_name = str(size_one_by_var('size_name', 'size_id', size_id_db))
 
         if user_id_db != get_user_id(email):
             abort(403, description='It is not your vehicle! Somebody call the police!')
@@ -708,7 +708,7 @@ def users_vehicle():
         if new_vehicle_name is None:
             new_vehicle_id = vehicle_id_db
         else:
-            vehicle_id_by = vehicle_id_by_name(new_vehicle_name)
+            vehicle_id_by = vehicle_one_by_var('vehicle_id', 'vehicle_name', new_vehicle_name)
             if vehicle_id_by is not None:
                 new_vehicle_id = vehicle_id_by
             else:
@@ -717,7 +717,7 @@ def users_vehicle():
         if new_size_name is None:
             new_size_id = size_id_db
         else:
-            size_id_by = size_id_by_name(new_size_name)
+            size_id_by = size_one_by_var('size_id', 'size_name', new_size_name)
             if size_id_by is not None:
                 new_size_id = size_id_by
             else:
@@ -753,7 +753,7 @@ def users_vehicle():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        if not vehicle_exist(u_veh_id):
+        if not vehicle_exists(u_veh_id):
             abort(400, description='The vehicle does not exist')
 
         # sql_query = """SELECT user_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
@@ -829,7 +829,7 @@ def available_storage():
                     result.append({
                         'shelf_id': res_[i][0],
                         'size_id': res_[i][1],
-                        'size_name': size_name_by_id(res_[i][1]),
+                        'size_name': size_one_by_var('size_name', 'size_id', res_[i][1]),
                         'available': res_[i][2]
                     })
             else:
@@ -837,7 +837,7 @@ def available_storage():
                     'confirmation': 'Unfortunately, we do not have available storage shelves you need'
                 }
         else:
-            size_id = size_id_by_name(size_name)
+            size_id = size_one_by_var('size_id', 'size_name', size_name)
 
             if available_only.lower() == 'yes':
 
@@ -909,7 +909,7 @@ def storage_order():
         if u_veh_id is not None:
             if vehicle_one_by_var('user_id', 'u_veh_id', u_veh_id) != user_id:
                 abort(403, description='It is not your vehicle! Somebody call the police!')
-            size_name = size_name_by_id(vehicle_one_by_var('size_id', 'u_veh_id', u_veh_id))
+            size_name = size_one_by_var('size_name', 'size_id', vehicle_one_by_var('size_id', 'u_veh_id', u_veh_id))
 
         # is there the necessary free storage space
         if not shelf_avail(size_name):
@@ -920,7 +920,7 @@ def storage_order():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        size_id_by = size_id_by_name(size_name)
+        size_id_by = size_one_by_var('size_id', 'size_name', size_name)
         if size_id_by is None:
             abort(400, description='Unknown size_name')
 
@@ -955,7 +955,7 @@ def storage_order():
         start_date = request.form.get('start_date')
         stop_date = request.form.get('stop_date')
         st_ord_cost = request.form.get('st_ord_cost')
-        size_id = request.form.get('size_id')
+        size_name = request.form.get('size_name')
 
         if token is None or email is None or st_ord_id is None:
             abort(400, description='The token, email, st_ord_id data are required')
@@ -967,8 +967,10 @@ def storage_order():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        if not storage_order_exist(st_ord_id):
-            abort(400, description='The storage order does not exist')
+        if not storage_order_exists(st_ord_id):
+            abort(400, description='The storage order does not exists')
+
+        size_id = size_one_by_var('size_id', 'size_name', size_name)
 
         # get the initial data of the storage order
         sql_query = """SELECT start_date, stop_date, size_id, st_ord_cost, shelf_id, user_id 
@@ -1078,7 +1080,7 @@ def storage_order():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        if not storage_order_exist(st_ord_id):
+        if not storage_order_exists(st_ord_id):
             abort(400, description='The storage order does not exist')
 
         sql_query = """SELECT user_id, shelf_id FROM storage_orders WHERE st_ord_id = '{0}'""".format(st_ord_id)
@@ -1211,7 +1213,7 @@ def tire_service_order():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        if not tire_service_order_exist(serv_order_id):
+        if not tire_service_order_exists(serv_order_id):
             abort(400, description='The tire service order does not exist')
 
         sql_query = """SELECT user_id, u_veh_id, manager_id FROM tire_service_order 

@@ -16,7 +16,7 @@ r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode
 conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', host='159.69.151.133', port='5056')
 cursor = conn.cursor()
 
-def user_exist(email):
+def user_exists(email):
     if conn:
         sql_query = "SELECT user_id FROM users WHERE email = '{0}'".format(email)
         cursor.execute(sql_query)
@@ -31,7 +31,7 @@ def user_exist(email):
 
 def user_exists_by_id(user_id):
     if conn:
-        sql_query = "SELECT user_id FROM users WHERE email = '{0}'".format(user_id)
+        sql_query = "SELECT user_id FROM users WHERE user_id = '{0}'".format(user_id)
         cursor.execute(sql_query)
         conn.commit()
         usr_id_ = cursor.fetchone()
@@ -42,7 +42,7 @@ def user_exists_by_id(user_id):
     return False
 
 
-def vehicle_exist(u_veh_id):
+def vehicle_exists(u_veh_id):
     sql_query = """SELECT user_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
     cursor.execute(sql_query)
     conn.commit()
@@ -54,7 +54,7 @@ def vehicle_exist(u_veh_id):
     return False
 
 
-def storage_order_exist(st_ord_id):
+def storage_order_exists(st_ord_id):
     sql_query = """SELECT user_id FROM storage_orders WHERE st_ord_id = '{0}';""".format(st_ord_id)
     cursor.execute(sql_query)
     conn.commit()
@@ -66,7 +66,7 @@ def storage_order_exist(st_ord_id):
     return False
 
 
-def tire_service_order_exist(serv_order_id):
+def tire_service_order_exists(serv_order_id):
     sql_query = """SELECT user_id FROM tire_service_order WHERE serv_order_id = '{0}';""".format(serv_order_id)
     cursor.execute(sql_query)
     conn.commit()
@@ -78,10 +78,10 @@ def tire_service_order_exist(serv_order_id):
     return False
 
 
-def token_exist(email, token):
-    if token == r.get(email):
-        return True
-    return False
+# def token_exist(email, token):
+#     if token == r.get(email):
+#         return True
+#     return False
 
 
 def get_user_id(email):
@@ -93,19 +93,6 @@ def get_user_id(email):
         # cursor.close()
 
         return usr_id_[0]
-
-
-def size_id_by_name(size_name):
-    if conn:
-        sql_query = "SELECT size_id FROM sizes WHERE size_name = '{0}'".format(size_name)
-        cursor.execute(sql_query)
-        conn.commit()
-        size_id_ = cursor.fetchone()
-        # cursor.close()
-
-        if size_id_ is None:
-            return None
-        return size_id_[0]
 
 
 def shelf_avail(size_name):
@@ -179,9 +166,35 @@ def user_active(email):
         return False
 
 
-def size_name_by_id(size_id):
+# def size_name_by_id(size_id):
+#     if conn:
+#         sql_query = """SELECT size_name FROM sizes WHERE size_id = '{0}'""".format(size_id)
+#         cursor.execute(sql_query)
+#         conn.commit()
+#         res_ = cursor.fetchone()
+#         # cursor.close()
+#
+#         if res_ is None:
+#             return None
+#         return res_[0]
+#
+#
+# def size_id_by_name(size_name):
+#     if conn:
+#         sql_query = "SELECT size_id FROM sizes WHERE size_name = '{0}'".format(size_name)
+#         cursor.execute(sql_query)
+#         conn.commit()
+#         size_id_ = cursor.fetchone()
+#         # cursor.close()
+#
+#         if size_id_ is None:
+#             return None
+#         return size_id_[0]
+
+
+def size_one_by_var(select, where, what):
     if conn:
-        sql_query = """SELECT size_name FROM sizes WHERE size_id = '{0}'""".format(size_id)
+        sql_query = """SELECT '{0}' FROM sizes WHERE '{1}' = '{2}'""".format(select, where, what)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
@@ -191,31 +204,30 @@ def size_name_by_id(size_id):
             return None
         return res_[0]
 
-
-def vehicle_name_by_id(vehicle_id):
-    if conn:
-        sql_query = """SELECT vehicle_name FROM vehicle WHERE vehicle_id = '{0}'""".format(vehicle_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-        # cursor.close()
-
-        if res_ is None:
-            return None
-        return res_[0]
-
-
-def vehicle_id_by_name(vehicle_name):
-    if conn:
-        sql_query = """SELECT vehicle_id FROM vehicle WHERE vehicle_name = '{0}'""".format(vehicle_name)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-        # cursor.close()
-
-        if res_ is None:
-            return None
-        return res_[0]
+# def vehicle_name_by_id(vehicle_id):
+#     if conn:
+#         sql_query = """SELECT vehicle_name FROM vehicle WHERE vehicle_id = '{0}'""".format(vehicle_id)
+#         cursor.execute(sql_query)
+#         conn.commit()
+#         res_ = cursor.fetchone()
+#         # cursor.close()
+#
+#         if res_ is None:
+#             return None
+#         return res_[0]
+#
+#
+# def vehicle_id_by_name(vehicle_name):
+#     if conn:
+#         sql_query = """SELECT vehicle_id FROM vehicle WHERE vehicle_name = '{0}'""".format(vehicle_name)
+#         cursor.execute(sql_query)
+#         conn.commit()
+#         res_ = cursor.fetchone()
+#         # cursor.close()
+#
+#         if res_ is None:
+#             return None
+#         return res_[0]
 
 
 def vehicle_one_by_var(select, where, what):
@@ -233,11 +245,11 @@ def vehicle_one_by_var(select, where, what):
 
 def user_authorization(email, token):
     return_val = {'result': True, 'text': ''}
-    if not user_exist(email):
+    if not user_exists(email):
         return_val['result'] = False
         return_val['text'] = 'The user does not exist. Please, register'
     else:
-        if not token_exist(email, token):
+        if not (token == r.get(email)):
             return_val['result'] = False
             return_val['text'] = 'The token is invalid, please log in'
     return return_val

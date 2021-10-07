@@ -85,9 +85,13 @@ d		/user_info
 	
 ToDo Dmitrii:
 
-	- storage orders [PUT] - change size_id to size_name (and vehicle_id)
-    - rename the def's names and optimize (user_vehicle_by_ etc.)
-    	- replace def vehicle_id_by_name and vehicle_name_by_id by vehicle_one_by_var
+    - change password
+    - restore password
+    - google form for bug reports
+    - estimate the service time and store it in the tire_service_order
+    - when the user deletes the tasks - delete them from the tire_service_order ON CASCADE
+
+    - rename the def's names
     - rename the DB field's names and def's names to full
 	- relocate to the managers DB table
 	- validate first_name and last_name
