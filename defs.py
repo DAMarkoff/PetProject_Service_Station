@@ -245,7 +245,7 @@ def vehicle_one_by_var(select, where, what):
 
 def user_authorization(email, token):
     return_val = {'result': True, 'text': ''}
-    if not user_exists(email):
+    if not user_exists('email', email):
         return_val['result'] = False
         return_val['text'] = 'The user does not exist. Please, register'
     else:
