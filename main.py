@@ -208,17 +208,17 @@ def users():
 
         flag_relogin = False
         # what data should be changed
-        if f_name is None:
+        if f_name is None or f_name == f_name_db:
             f_name = 'The first name has not been changed'
             f_name_to_db = f_name_db
         else:
             f_name_to_db = f_name
-        if l_name is None:
+        if l_name is None or l_name == l_name_db:
             l_name = 'The last name has not been changed'
             l_name_to_db = l_name_db
         else:
             l_name_to_db = l_name
-        if phone is None:
+        if phone is None or phone == phone_db:
             phone = 'The phone number has not been changed'
             new_phone_to_db = phone_db
         else:
@@ -231,7 +231,7 @@ def users():
         #     if not check_password['result']:
         #         abort(400, description=check_password['text'])
         #     flag_relogin = True
-        if new_email is None:
+        if new_email is None or new_email == email:
             new_email = 'The email has not been changed'
             new_email_to_db = email
         else:
