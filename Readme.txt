@@ -87,19 +87,21 @@ ToDo Dmitrii:
 		
 		- using conn.close()
 	
-	In progress: /vehicle [PUT]
+	In progress: 
+		- /vehicle [PUT]
+		- swagger
 	
 	- vehicle.name in /vehicle	[POST] - ok, but in [PUT]?
 *	- improvements google form
 	- dates: create storage and tire_service_order before today
-    - hello message when user register
+    - hello message when the user has registered
     - 401 status code when the email or token does not exist?
     - change password
     - restore password
 	
 *   - google form for bug reports
     - estimate the service time and store it in the tire_service_order
-    - when the user deletes the tasks - delete them from the tire_service_order ON CASCADE
+!check!   - when the user deletes the tasks - delete them from the tire_service_order ON CASCADE
 
     - rename the DB field's names and def's names to full
 
@@ -122,10 +124,10 @@ ToDo Dmitrii:
 	    - can change the managers in the tire_service_order
 	    - can change the worker in the list_of_works
 	    - can restore the user's password
-        - form a reports:
-            - staff: all/available/unavailable (by position or all)
-            - costs: all/storage_orders/tire_service_oreders
-            - costs: on staff
+		- form a reports:
+		    - staff: all/available/unavailable (by position or all)
+		    - costs: all/storage_orders/tire_service_oreders
+		    - costs: on staff
 
 	- /tire_service_order [GET], [PUT] - change
 	- /tire_service_order/task [GET], [PUT], [DELETE]
