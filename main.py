@@ -236,12 +236,15 @@ def users():
             new_email = 'The email has not been changed'
             new_email_to_db = email
         else:
+            if user_exists('email', email):
+                abort(400, description="The user with this email already exists")
             check_email = validate_email(email)
             if not check_email['result']:
                 abort(400, description=check_email['text'])
             save_to_file(user_id_db, email, '!password!', 'user-changed-email')
             new_email_to_db = email
             flag_relogin = True
+            push_user_auth()
 
         # if the pass and/or email have been changed - the user must log in again
         if flag_relogin:
@@ -311,6 +314,8 @@ def users():
         result = {
             'confirmation': template.render(name=first_name + ' ' + last_name)
         }
+
+        push_user_auth()
         return jsonify(result)
     else:
         abort(405)
