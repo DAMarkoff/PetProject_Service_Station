@@ -161,7 +161,7 @@ def validate_names(name_type, name):
     if len(name) > 30:
         return_val['text'] = 'The {0} length should not exceed 30 chars'.format(name_type)
         return_val['result'] = False
-    if not not validate(name):
+    if not validate(name):
         return_val['text'] = """The {0} can only include the ' '(space) and '.,- chars""".format(name_type)
         return_val['result'] = False
     return return_val
