@@ -4,12 +4,13 @@ servers:
     url: http://23.88.52.139:5006
 info:
   description: |
-      # Pre-pre-alpha :)
+      # Pre-alpha
       **If you find any defects or have suggestions for improvement, feel free to fill out the Google forms below.**
 
       **I will be very grateful for any help. Thanks.**
       - [Bug Report Google Form](https://docs.google.com/forms/d/1Nh_-KE00CpirA_I4WLBXR5gWD5Gkl7KaT2u72x2CC7o/edit?usp=sharing)
       - [Suggestions for improvement](https://docs.google.com/forms/d/1mjiIaQwa0_C0FiihzpKBFCOUvVSR_PjzusJMgmsEQkM/edit?usp=sharing)
+      - [Readme Google Doc](https://docs.google.com/document/d/1j8iKLZLj_GRenQDMlHrvDHJkvNcg7s8gzdzcO8gdpiA/edit?usp=sharing)
   version: 1.0.0
   title: Service Station
   contact:
