@@ -181,7 +181,7 @@ def users():
         phone = request.form.get('phone')
         new_email = request.form.get('new_email')
 
-        if token is None or email is None:
+        if not token or not email:
             abort(400, description='The email and token are required')
 
         user_auth = user_authorization(email, token)
@@ -204,23 +204,23 @@ def users():
 
         user_id_db, f_name_db, l_name_db, phone_db = res_[0], res_[1], res_[2], res_[3]
 
-        if (f_name == f_name_db and l_name == l_name_db and phone == phone_db and new_email is None) or \
-                (f_name is None and l_name is None and phone is None and new_email is None):
+        if (f_name == f_name_db and l_name == l_name_db and phone == phone_db and not new_email) or \
+                (not f_name and not l_name and not phone and not new_email):
             abort(400, description='Ok. Nothing needs to be changed :)')
 
         flag_relogin = False
         # what data should be changed
-        if f_name is None or f_name == f_name_db:
+        if not f_name or f_name == f_name_db:
             f_name = 'The first name has not been changed'
             f_name_to_db = f_name_db
         else:
             f_name_to_db = f_name
-        if l_name is None or l_name == l_name_db:
+        if not l_name or l_name == l_name_db:
             l_name = 'The last name has not been changed'
             l_name_to_db = l_name_db
         else:
             l_name_to_db = l_name
-        if phone is None or phone == phone_db:
+        if not phone or phone == phone_db:
             phone = 'The phone number has not been changed'
             new_phone_to_db = phone_db
         else:
@@ -233,7 +233,7 @@ def users():
         #     if not check_password['result']:
         #         abort(400, description=check_password['text'])
         #     flag_relogin = True
-        if new_email is None or new_email == email:
+        if not new_email or new_email == email:
             new_email = 'The email has not been changed'
             new_email_to_db = email
         else:
@@ -328,7 +328,7 @@ def user_info():
         token = request.form.get('token')
         email = request.form.get('email')
 
-        if token is None or email is None:
+        if not token or not email:
             abort(400, description='The token and email data are required')
 
         user_auth = user_authorization(email, token)
@@ -386,8 +386,8 @@ def user_info():
         res_ = cursor.fetchall()
         # cursor.close()
 
-        empty_result = []
-        if res_ == empty_result:
+        # empty_result = []
+        if not res_:  # == empty_result:
             result_vehicle = 'You do not have any vehicles'
         else:
             result_vehicle = []
