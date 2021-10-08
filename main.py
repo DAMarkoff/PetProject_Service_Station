@@ -1248,9 +1248,9 @@ def tire_service_order():
                     datetime.datetime.strptime(str(datetime.datetime.now())[:10], '%Y-%m-%d'):
                 abort(400, description='The new tire service date can not be earlier than today')
 
-        if new_u_veh_id is None or new_u_veh_id == u_veh_id_db:
+        if not new_u_veh_id or new_u_veh_id == u_veh_id_db:
             u_veh_id_to_db = u_veh_id_db
-            new_u_veh_id = 'The tire service date has not been changed'
+            new_u_veh_id = 'The vehicle id has not been changed'
         else:
             u_veh_id_to_db = new_u_veh_id
 
