@@ -723,7 +723,7 @@ def users_vehicle():
             new_vehicle_id = vehicle_id_db
             vehicle_name_db = 'The vehicle name has not been changed'
 
-        if
+        # if
 
 
         if new_size_name is not None:
