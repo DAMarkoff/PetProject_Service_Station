@@ -497,7 +497,7 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
 
-        if password is None or email is None:
+        if not password or not email:
             abort(400, description='The pass and email data are required')
 
         if not user_exists('email', email):
@@ -517,7 +517,6 @@ def login():
 
         salt, password_db = res[0], res[4]
         if password_is_valid(salt, password, password_db):  # если пароль верен
-        # if password == res[0]:
             if r.exists(email) == 0:  # если токена нет в redis db
                 token = str(uuid.uuid4())  # генерация токена
                 r.set(email, token, ex=600)  # запись токена в redis bd, срок - 600 сек.
@@ -549,7 +548,7 @@ def deactivate_user():
         token = request.form.get('token')
         sure = request.form.get('ARE_YOU_SURE?')
 
-        if token is None or email is None or sure is None:
+        if not token or not email or not sure:
             abort(400, description='The token, email and sure data are required')
 
         user_auth = user_authorization(email, token)
@@ -593,7 +592,7 @@ def activate_user():
         email = request.form.get('email')
         admin_password = request.form.get('admin_password')
 
-        if admin_password is None or email is None:
+        if not admin_password or not email:
             abort(400, description='The admin_password and email are required')
 
         if not user_exists('email', email):
@@ -681,7 +680,7 @@ def users_vehicle():
         new_vehicle_name = request.form.get('new vehicle name')
         new_size_name = request.form.get('new size name')
 
-        if token is None or email is None or u_veh_id is None:
+        if not token or not email or not u_veh_id:
             abort(400, description='The token, email and user vehicle id are required')
 
         if not vehicle_exists(u_veh_id):
@@ -708,11 +707,11 @@ def users_vehicle():
         vehicle_name_db = vehicle_one_by_var('vehicle_name', 'vehicle', 'vehicle_id', vehicle_id_db)
         size_name_db = str(size_one_by_var('size_name', 'size_id', size_id_db))
 
-        if (new_vehicle_name is None and new_size_name is None) or \
+        if (not new_vehicle_name and not new_size_name) or \
                 (new_vehicle_name == vehicle_name_db and new_size_name == size_name_db):
             abort(400, description='Ok. Nothing needs to be changed :)')
 
-        if new_vehicle_name is None or new_vehicle_name == vehicle_name_db:
+        if not new_vehicle_name or new_vehicle_name == vehicle_name_db:
             new_vehicle_id = vehicle_id_db
             new_vehicle_name = 'The vehicle name has not been changed'
         else:
@@ -720,7 +719,7 @@ def users_vehicle():
             if not new_vehicle_id:
                 abort(400, description='Unknown vehicle_name')
 
-        if new_size_name is None or new_size_name == size_name_db:
+        if not new_size_name or new_size_name == size_name_db:
             new_size_id = size_id_db
             new_size_name = 'The size name has not been changed'
         else:
@@ -748,7 +747,7 @@ def users_vehicle():
         token = request.form.get('token')
         u_veh_id = request.form.get('user_vehicle_id')
 
-        if token is None or email is None or u_veh_id is None:
+        if not token or not email or not u_veh_id:
             abort(400, description='The token, email and user_vehicle_id are required')
 
         user_auth = user_authorization(email, token)
@@ -789,13 +788,13 @@ def available_storage():
         # if available_only.lower() = 'yes' - show only free shelves
         # if available_only.lower() = 'no' - show only occupied shelves
         # if available_only.lower() != 'yes' and != 'no' - show all free shelves
-        if available_only is None:
+        if not available_only:
             available_only = 'undefined'
 
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        if size_name is None:
+        if not size_name:
             if available_only.lower() == 'yes':
 
                 sql_query = """SELECT shelf_id, size_id, available FROM warehouse 
@@ -893,10 +892,13 @@ def storage_order():
         size_name = request.form.get('size_name')
         u_veh_id = request.form.get('user_vehicle_id')
 
-        if token is None or email is None or start_date is None or stop_date is None:
+        if not token or not email or not start_date or not stop_date:
             abort(400, description='The token, email, start_date, stop_date and size_name data are required')
 
-        if size_name is None or u_veh_id is None:
+        if size_name and u_veh_id:
+            abort(400, description='The size_name OR user_vehicle_id is required')
+
+        if not size_name or not u_veh_id:
             abort(400, description='The size_name OR user_vehicle_id is required')
 
         user_auth = user_authorization(email, token)
@@ -905,7 +907,7 @@ def storage_order():
 
         user_id = get_user_id(email)
 
-        if u_veh_id is not None:
+        if u_veh_id:
             if vehicle_one_by_var('user_id', 'user_vehicle', 'u_veh_id', u_veh_id) != user_id:
                 abort(403, description='It is not your vehicle! Somebody call the police!')
             size_name = size_one_by_var('size_name', 'size_id', vehicle_one_by_var('size_id', 'user_vehicle','u_veh_id', u_veh_id))
@@ -920,7 +922,7 @@ def storage_order():
             abort(503, description='There is no connection to the database')
 
         size_id_by = size_one_by_var('size_id', 'size_name', size_name)
-        if size_id_by is None:
+        if not size_id_by:
             abort(400, description='Unknown size_name')
 
         # create storage order
@@ -956,7 +958,7 @@ def storage_order():
         st_ord_cost = request.form.get('st_ord_cost')
         size_name = request.form.get('size_name')
 
-        if token is None or email is None or st_ord_id is None:
+        if not token or not email or not st_ord_id:
             abort(400, description='The token, email, st_ord_id data are required')
 
         user_auth = user_authorization(email, token)
@@ -988,27 +990,27 @@ def storage_order():
 
         # what data should be changed
         # check dates
-        if start_date is not None and stop_date is not None:
+        if start_date and stop_date:
             if start_date > stop_date:
                 abort(400, description='The start date can not be greater than the stop date')
             if stop_date < start_date:
                 abort(400, description='The stop date can not be less than the start date')
 
-        if start_date is not None and stop_date is None:
+        if start_date and not stop_date:
             if datetime.datetime.strptime(start_date, '%Y-%m-%d') > datetime.datetime.strptime(str(stop_date_db), '%Y-%m-%d'):
                 abort(400, description='The start date can not be greater than the stop date')
 
-        if start_date is None and stop_date is not None:
+        if not start_date and stop_date:
             if datetime.datetime.strptime(stop_date, '%Y-%m-%d') < datetime.datetime.strptime(str(start_date_db), '%Y-%m-%d'):
                 abort(400, description='The stop date can not be less than the start date')
 
-        if start_date is None:
+        if not start_date:
             start_date = start_date_db
-        if stop_date is None:
+        if not stop_date:
             stop_date = stop_date_db
-        if st_ord_cost is None:
+        if not st_ord_cost:
             st_ord_cost = st_ord_cost_db
-        if size_id is None:
+        if not size_id:
             size_id = size_id_db
         else:
             # if the tire size data needs to be changed
@@ -1021,7 +1023,7 @@ def storage_order():
                 # cursor.close()
 
                 # if there is available storage
-                if shelf_avail is not None:
+                if shelf_avail:
                     shelf_id = shelf_avail_[0]
 
                     # update changed storage places
@@ -1069,7 +1071,7 @@ def storage_order():
         token = request.form.get('token')
         st_ord_id = request.form.get('storage_order_id')
 
-        if token is None or email is None or st_ord_id is None:
+        if not token or not email or not st_ord_id:
             abort(400, description='The token, email and storage_order_id are required')
 
         user_auth = user_authorization(email, token)
@@ -1343,7 +1345,7 @@ def task():
         task_name = request.form.get('task_name')
         numbers_of_task = request.form.get('numbers_of_tasks')
 
-        if token is None or email is None or serv_order_id is None or task_name is None:
+        if not token or not email or not serv_order_id or not task_name:
             abort(400, description='The token, email, service_order_id and task_name are required')
 
         if not numbers_of_task.isdigit():
@@ -1371,7 +1373,7 @@ def task():
         res_ = cursor.fetchone()
         # cursor.close()
 
-        if res_ is None:
+        if not res_:
             abort(400, description='Sorry, we do not offer this service')
 
         task_id = res_[0]
