@@ -386,8 +386,7 @@ def user_info():
         res_ = cursor.fetchall()
         # cursor.close()
 
-        # empty_result = []
-        if not res_:  # == empty_result:
+        if not res_:
             result_vehicle = 'You do not have any vehicles'
         else:
             result_vehicle = []
@@ -431,8 +430,7 @@ def user_info():
         res_ = cursor.fetchall()
         # cursor.close()
 
-        empty_result = []
-        if res_ == empty_result:
+        if not res_:
             result_tire_service_order = 'You do not have any tire service orders'
         else:
             result_tire_service_order = []
@@ -446,7 +444,7 @@ def user_info():
                 res_cost = cursor.fetchone()
                 # cursor.close()
 
-                if res_cost[0] is None:
+                if not res_cost[0]:
                     tire_service_order_cost = 'Error! Sum is None!'
                 else:
                     tire_service_order_cost = res_cost[0]
@@ -458,8 +456,7 @@ def user_info():
                 res_task = cursor.fetchall()
                 # cursor.close()
 
-                empty_result_1 = []
-                if res_task == empty_result_1:
+                if not res_task:
                     result_tire_service_order_tasks = 'You do not have any tasks in your tire service order.'
                 else:
                     result_tire_service_order_tasks = []
