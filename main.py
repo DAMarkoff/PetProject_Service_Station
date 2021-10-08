@@ -764,12 +764,6 @@ def users_vehicle():
         if not vehicle_exists(u_veh_id):
             abort(400, description='The vehicle does not exist')
 
-        # sql_query = """SELECT user_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
-        # cursor.execute(sql_query)
-        # conn.commit()
-        # res_ = cursor.fetchone()
-        # # cursor.close()
-
         user_id = vehicle_one_by_var('user_id', 'u_veh_id', u_veh_id)
 
         if get_user_id(email) != user_id:
@@ -1210,7 +1204,7 @@ def tire_service_order():
         token = request.form.get('token')
         serv_order_id = request.form.get('service order id')
         new_order_date = request.form.get('new order date')
-        other_u_veh_id = request.form.get('other user vehicle id')
+        new_u_veh_id = request.form.get('new user vehicle id')
 
         if token is None or email is None or serv_order_id is None:
             abort(400, description='The token, email, service_order_id are required')
@@ -1219,6 +1213,10 @@ def tire_service_order():
         if not user_auth['result']:
             abort(401, description=user_auth['text'])
 
+        if datetime.datetime.strptime(new_order_date[:10], '%Y-%m-%d') < \
+            datetime.datetime.strptime(str(datetime.datetime.now())[:10], '%Y-%m-%d'):
+                abort(400, description='The new tire service date can not be earlier than today')
+
         if not conn:
             abort(503, description='There is no connection to the database')
 
@@ -1226,31 +1224,49 @@ def tire_service_order():
             abort(400, description='The tire service order does not exist')
 
         # get the initial data about the tire_service_order
-        sql_query = """SELECT u_veh_id, manager_id FROM tire_service_order 
+        sql_query = """SELECT user_id, u_veh_id, serv_order_date FROM tire_service_order 
                             WHERE serv_order_id = '{0}';""".format(serv_order_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
         # cursor.close()
 
-        user_id, u_veh_id, manager_id = res_[0], res_[1], res_[2]
+        user_id, u_veh_id_db, serv_order_date_db = res_[0], res_[1], res_[2]
 
         if get_user_id(email) != user_id:
             abort(403, description='It is not your tire service order!')
 
-
-
-
-
-        if (new_vehicle_name is None and new_size_name is None) or \
-                (new_vehicle_name == old_vehicle_name and new_size_name == old_size_name):
+        if (new_order_date is None and new_u_veh_id is None) or \
+                (new_order_date == serv_order_date_db and new_u_veh_id == u_veh_id_db):
             abort(400, description='Ok. Nothing needs to be changed :)')
 
+        if new_order_date is None or new_order_date == serv_order_date_db:
+            order_date_to_db = serv_order_date_db
+            new_order_date = 'The tire service date has not been changed'
+        else:
+            order_date_to_db = new_order_date
 
+        if new_u_veh_id is None or new_u_veh_id == u_veh_id_db:
+            u_veh_id_to_db = u_veh_id_db
+            new_u_veh_id = 'The tire service date has not been changed'
+        else:
+            u_veh_id_to_db = new_u_veh_id
 
+        sql_query = """UPDATE tire_service_order SET serv_order_date = '{0}', u_veh_id = '{1}'
+                                WHERE serv_order_id = '{2}'""".format(order_date_to_db, u_veh_id_to_db, serv_order_id)
+        cursor.execute(sql_query)
+        conn.commit()
+        # cursor.close()
 
+        result = {
+            'tire service order': serv_order_id,
+            'old_vehicle_id': u_veh_id_db,
+            'new_vehicle_id': new_u_veh_id,
+            'old_order_date': serv_order_date_db,
+            'new_order_date': new_order_date
+        }
 
-
+        return jsonify(result)
     elif request.method == 'DELETE':
         email = request.form.get('email')
         token = request.form.get('token')
