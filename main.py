@@ -726,13 +726,14 @@ def users_vehicle():
         # if
 
 
-        if new_size_name is not None:
+        if new_size_name is None or new_size_name == size_name_db:
+            new_size_id = size_id_db
+            size_name_db = 'The size name has not been changed'
+        else:
             new_size_id = size_one_by_var('size_id', 'size_name', new_size_name)
             if not new_size_id:
                 abort(400, description='Unknown size_name')
-        else:
-            new_size_id = size_id_db
-            size_name_db = 'The size name has not been changed'
+
 
         sql_query = """UPDATE user_vehicle SET vehicle_id = '{0}', size_id = '{1}' 
                         WHERE u_veh_id = '{2}'""".format(new_vehicle_id, new_size_id, u_veh_id)
