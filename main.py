@@ -581,6 +581,7 @@ def deactivate_user():
             'confirmation': template.render(name=res_[0] + ' ' + res_[1])
         }
 
+        r.delete(email)
         return jsonify(result)
     else:
         abort(405)
