@@ -1213,10 +1213,6 @@ def tire_service_order():
         if not user_auth['result']:
             abort(401, description=user_auth['text'])
 
-        if datetime.datetime.strptime(new_order_date[:10], '%Y-%m-%d') < \
-            datetime.datetime.strptime(str(datetime.datetime.now())[:10], '%Y-%m-%d'):
-                abort(400, description='The new tire service date can not be earlier than today')
-
         if not conn:
             abort(503, description='There is no connection to the database')
 
@@ -1245,6 +1241,9 @@ def tire_service_order():
             new_order_date = 'The tire service date has not been changed'
         else:
             order_date_to_db = new_order_date
+            if datetime.datetime.strptime(new_order_date[:10], '%Y-%m-%d') < \
+                    datetime.datetime.strptime(str(datetime.datetime.now())[:10], '%Y-%m-%d'):
+                abort(400, description='The new tire service date can not be earlier than today')
 
         if new_u_veh_id is None or new_u_veh_id == u_veh_id_db:
             u_veh_id_to_db = u_veh_id_db
