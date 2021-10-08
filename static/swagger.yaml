@@ -654,7 +654,7 @@ paths:
       - storage order
       summary: Create new storage order
       description: | 
-            The size_name OR user_vehicle_id is required
+            The size_name OR user_vehicle_id is required. Not both of those. 
             *This can only be done by the logged in user.*
       requestBody:
         required: true
@@ -681,7 +681,7 @@ paths:
                 stop_date:
                   type: string
                   description: |
-                      ***required*** - End date of storage start
+                      *optional* - End date of storage start
                 size_name:
                   type: integer
                   description: |
@@ -704,7 +704,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/user_info'
+                $ref: '#/components/schemas/storage_order'
         '400':
           description: bad request
           content:
@@ -731,7 +731,92 @@ paths:
                 type: array
                 items:
                  $ref: '#/components/schemas/error'
-                 
+    put:
+      tags:
+      - storage order
+      summary: Create new storage order
+      description: | 
+            The size_name OR user_vehicle_id is required. Not both of those. 
+            *This can only be done by the logged in user.*
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: |
+                      ***required*** - Enter your email
+                token:
+                  type: string
+                  format: uuid
+                  description: |
+                      ***required*** - Enter your token
+                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
+                st_ord_id:
+                  type: string
+                  description: |
+                      ***required*** - ID of your storage order that needs to be updated
+                start_date:
+                  type: string
+                  description: |
+                      *optional* - New initial storage start date
+                stop_date:
+                  type: string
+                  description: |
+                      *optional* - New end date of storage start
+                size_name:
+                  type: integer
+                  description: |
+                      *optional* - Choose the other size of your tires
+                  enum:
+                    - 14
+                    - 15
+                    - 16
+                    - 17
+                    - 18
+                    - 19
+                    - 20
+                # u_veh_id:
+                #   type: string
+                #   description: |
+                #       *optional* - ID of your vehicle whose tires will be stored
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/storage_order_changed'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'             
 #----------------------------------------------------------------------------------------------
 
   /warehouse:
@@ -780,6 +865,30 @@ paths:
 
 components:
   schemas:
+    storage_order_changed:
+      type: object
+      properties:
+        storage_order:
+          type: string
+        new_start_date:
+          type: string
+        new_stop_date:
+          type: string
+        new_size_id:
+          type: string
+        old_size_id:
+          type: string
+        new_shelf_id:
+          type: string
+        old_shelf_id:
+          type: string  
+    storage_order:
+      type: object
+      properties:
+        shelf_id:
+          type: integer
+        storage order id:
+          type: integer
     user_info:
       type: object
       properties:

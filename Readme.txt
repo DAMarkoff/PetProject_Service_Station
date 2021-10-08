@@ -90,6 +90,7 @@ d		/user_info
 	
 ToDo Dmitrii:
 		
+		- remove st_ord_cost from /storage_order [PUT] and add optional u_veh_id
 		- using conn.close()?
 	
 	In progress: 

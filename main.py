@@ -1067,13 +1067,13 @@ def storage_order():
 
         result = {
             'storage_order': st_ord_id,
-            'start_date': start_date,
-            'stop_date': stop_date,
-            'size_id_new': size_id,
-            'size_id_old': size_id_db,
+            'new_start_date': start_date,
+            'new_stop_date': stop_date,
+            'new_size_id': size_id,
+            'old_size_id': size_id_db,
             'storage_order_cost': st_ord_cost,
-            'shelf_id_new': shelf_id,
-            'shelf_id_old': shelf_id_db
+            'new_shelf_id': shelf_id,
+            'old_shelf_id': shelf_id_db
         }
 
         return jsonify(result)
