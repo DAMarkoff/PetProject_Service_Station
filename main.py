@@ -1207,7 +1207,10 @@ def tire_service_order():
         new_u_veh_id = request.form.get('new user vehicle id')
 
         if token is None or email is None or serv_order_id is None:
-            abort(400, description='The token, email, service_order_id are required')
+            abort(400, description='The token, email, service order id are required')
+
+        if not token or not email or not serv_order_id:
+            abort(400, description='The token, email, service order id are required')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
