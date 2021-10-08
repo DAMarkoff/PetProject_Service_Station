@@ -98,7 +98,7 @@ def get_user_id(email):
 def shelf_avail(size_name):
     if conn:
         sql_query = """SELECT shelf_id FROM warehouse WHERE size_id = '{0}' 
-                        AND available = 'True'""".format(size_id_by_name(size_name))
+                        AND available = 'True'""".format(size_one_by_var('size_id', 'size_name', size_name))
         cursor.execute(sql_query)
         conn.commit()
         avail = cursor.fetchone()
