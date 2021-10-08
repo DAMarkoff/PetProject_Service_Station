@@ -1,5 +1,8 @@
 openapi: 3.0.0
 servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/DAMarkoff/CTO/1.0.0
   - description: PetProgect
     url: http://23.88.52.139:5006
 info:
@@ -14,6 +17,9 @@ info:
   title: Service Station
   contact:
     email: dmitri.markoff@gmail.com
+
+#----------------------------------------------------------------------------------------------
+    
 tags:
   - name: users
     description: This suit contains API methods for operations with a user account and requests for information about user data
@@ -39,7 +45,8 @@ paths:
       - name: user_id
         in: query
         required: false
-        description: the user_id must consist only of digits
+        description: |
+              *optional* - the user_id must consist only of digits
         schema:
           type: string
       responses:
@@ -65,6 +72,14 @@ paths:
                 type: array
                 items:
                  $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
     post:
       tags:
       - users
@@ -77,19 +92,24 @@ paths:
               properties:
                 first_name:
                   type: string
-                  description: Validation has not been implemented yet
+                  description: |
+                      ***required*** - 1 - 30 chars, can include the space and the .,'- chars
                 last_name:
                   type: string
-                  description: Validation has not been implemented yet
+                  description: |
+                      ***required*** - 1 - 30 chars, can include the space and the .,'- chars
                 email:
                   type: string
-                  description: The email must contain @ and . chars
+                  description: |
+                      ***required*** - The email must contain @ and . chars
                 password:
                   type: string
-                  description: 8 - 32 chars, must contain at least one digit, one uppercase letter, one lowercase letter, one of the symbols $@#!%'
+                  description: |
+                      ***required*** - 8 - 32 chars, must contain at least one digit, one uppercase letter, one lowercase letter, one of the symbols $@#!%'
                 phone:
                   type: string
-                  description: Validation has not been implemented yet
+                  description: |
+                      ***required*** - Validation has not been implemented yet
       responses:
         '200':
           description: Successful operation
@@ -109,10 +129,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
     put:
       tags:
       - users
-      summary: Change the user info
+      summary: Change the user info.
+      description: |
+                *This can only be done by the logged in user.*
       requestBody:
         content:
           multipart/form-data:
@@ -122,24 +152,30 @@ paths:
                 email:
                   type: string
                   format: email
-                  description: Enter your email
+                  description: |
+                      ***required*** - Enter your email
                 token:
                   type: string
                   format: uuid
-                  description: Enter your token
+                  description: |
+                      ***required*** - Enter your token
                   example: faf353cd-2e44-46c5-9864-7c53426eb58a
                 New first_name:
                   type: string
-                  description: Validation has not been implemented yet
+                  description: |
+                      *optional* - 1 - 30 chars, can include the space and the .,'- chars
                 New last_name:
                   type: string
-                  description: Validation has not been implemented yet
+                  description: |
+                      *optional* - 1 - 30 chars, can include the space and the .,'- chars
                 New email:
                   type: string
-                  description: The email must contain @ and . chars
+                  description: |
+                      *optional* - The email must contain @ and . chars
                 New phone:
                   type: string
-                  description: Validation has not been implemented yet
+                  description: |
+                      *optional* - Validation has not been implemented yet
       responses:
         '200':
           description: Successful operation
@@ -165,11 +201,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
     delete:
       tags:
       - users
-      summary: Delete the current user
-      description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see [there](github.com/OAI/OpenAPI-Specification/pull/2117)
+      summary: Delete the current user. 
+      description: |
+        The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see [there](github.com/OAI/OpenAPI-Specification/pull/2117). ***This can only be done with an admin password.***
       responses:
         '200':
           description: Successful operation
@@ -184,8 +229,11 @@ paths:
     post:
       tags:
       - vehicle
-      summary: Register a new user's vehicle
+      summary: Register a new user's vehicle. 
+      description: |
+                *This can only be done by the logged in user.*
       requestBody:
+        required: true
         content:
           multipart/form-data:
             schema:
@@ -193,22 +241,51 @@ paths:
               properties:
                 email:
                   type: string
-                  description: Your email
-                password:
+                  format: email
+                  description: |
+                      ***required*** - Enter your email
+                token:
                   type: string
-                  description: 8 - 32 chars, must contain at least one digit, one uppercase letter, one lowercase letter, one of the symbols $@#!%'
-                phone:
+                  format: uuid
+                  description: |
+                      ***required*** - Enter your token
+                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
+                vehicle_name:
                   type: string
-                  description: Validation has not been implemented yet
+                  description: |
+                      ***required*** -Choose the type of your vehicle. 
+                  enum:
+                    - bus
+                    - truck
+                    - car
+                    - jeep
+                size_name:
+                  type: integer
+                  description: |
+                      ***required*** -Choose the size of your tires
+                  enum:
+                    - 14
+                    - 15
+                    - 16
+                    - 17
+                    - 18
+                    - 19
+                    - 20
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/users'
+                $ref: '#/components/schemas/vehicle'
         '400':
           description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
           content:
             application/json:
               schema:
@@ -219,10 +296,21 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
     put:
       tags:
       - vehicle
-      summary: Change the user info
+      summary: Change your vehicle type or tire size
+      description: You can fill in only one of the new_vehicle_name or new_size_name. Or both.
+                The email, token and vehicle_id are required. New_vehicle_name and new_size_name are optional.
+                *This can only be done by the logged in user.*
       requestBody:
         content:
           multipart/form-data:
@@ -232,31 +320,46 @@ paths:
                 email:
                   type: string
                   format: email
-                  description: Enter your email
+                  description: |
+                      ***required*** - Enter your email
                 token:
                   type: string
                   format: uuid
-                  description: Enter your token
+                  description: |
+                      ***required*** - Enter your token
                   example: faf353cd-2e44-46c5-9864-7c53426eb58a
-                New first_name:
+                vehicle_id:
+                  type: integer
+                  description: |
+                      ***required*** - ID of your vehicle that needs to be updated
+                new_vehicle_name:
                   type: string
-                  description: Validation has not been implemented yet
-                New last_name:
-                  type: string
-                  description: Validation has not been implemented yet
-                New email:
-                  type: string
-                  description: The email must contain @ and . chars
-                New phone:
-                  type: string
-                  description: Validation has not been implemented yet
+                  description: |
+                      *optional* - Choose the type of your vehicle. 
+                  enum:
+                    - bus
+                    - truck
+                    - car
+                    - jeep
+                new_size_name:
+                  type: integer
+                  description: |
+                      *optional* - Choose the size of your tires
+                  enum:
+                    - 14
+                    - 15
+                    - 16
+                    - 17
+                    - 18
+                    - 19
+                    - 20
       responses:
         '200':
           description: Successful operation
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/user_changed'
+                $ref: '#/components/schemas/vehicle_changed'
         '400':
           description: bad request
           content:
@@ -275,26 +378,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
     delete:
       tags:
       - vehicle
-      summary: Delete the current user
+      summary: Delete your vehicle
       description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
-      # requestBody:
-      #   content:
-      #     multipart/form-data:
-      #       schema:
-      #         type: object
-      #         properties:
-      #           email:
-      #             type: string
-      #             format: email
-      #             description: Enter your email
-      #           token:
-      #             type: string
-      #             format: uuid
-      #             description: Enter your token
-      #             example: faf353cd-2e44-46c5-9864-7c53426eb58a
       responses:
         '200':
           description: Successful operation
@@ -318,10 +414,12 @@ paths:
               properties:
                 email:
                   type: string
-                  description: Enter your email
+                  description: |
+                      ***required*** - Enter your email
                 password:
                   type: string
-                  description: Enter your password. In case you forgot your password, please contact the admin
+                  description: |
+                      ***required*** - Enter your password. In case you forgot your password, please feel free to contact the admin
       responses:
         '200':
           description: Successful operation
@@ -347,6 +445,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
 
 #----------------------------------------------------------------------------------------------
 
@@ -355,7 +461,7 @@ paths:
       tags:
       - users
       summary: Mark yourself as an inactive user
-      description: WARNING! Only the admin can mark you as an active user again
+      description: WARNING! Only the admin can mark you as an active user again. *This can only be done by the logged in user.*
       requestBody:
         required: true
         content:
@@ -366,15 +472,18 @@ paths:
                 email:
                   type: string
                   format: email
-                  description: Enter your email
+                  description: |
+                      ***required*** - Enter your email
                 token:
                   type: string
                   format: uuid
-                  description: Enter your token
+                  description: |
+                      ***required*** - Enter your token
                   example: faf353cd-2e44-46c5-9864-7c53426eb58a
                 sure:
-                  type: boolean
-                  description: Are you sure?
+                  type: string
+                  description: |
+                      ***required*** - Are you sure? Type 'yes' or 'no'
       responses:
         '200':
           description: Successful operation
@@ -404,6 +513,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
 
 #----------------------------------------------------------------------------------------------
 
@@ -423,11 +540,13 @@ paths:
                 email:
                   type: string
                   format: email
-                  description: Enter your email
+                  description: |
+                      ***required*** - Enter your email
                 admin password:
                   type: string
                   format: uuid
-                  description: Enter the admin's password
+                  description: |
+                      ***required*** - Enter the admin password
       responses:
         '200':
           description: Successful operation
@@ -457,23 +576,171 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-  #/users/user_info:
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
+ 
+#----------------------------------------------------------------------------------------------
+                 
+  /users/user_info:
+    post:
+      tags:
+      - users
+      summary: Provides complete information about the user
+      description: |
+          *This can only be done by the logged in user.*
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: |
+                      ***required*** - Enter your email
+                token:
+                  type: string
+                  format: uuid
+                  description: |
+                      ***required*** - Enter your token
+                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_info'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
+                 
+#----------------------------------------------------------------------------------------------
 
+  /storage_order:
+    post:
+      tags:
+      - storage order
+      summary: Provides complete information about the storage order(s)
+      description: |
+          *This can only be done by the logged in user.*
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: |
+                      ***required*** - Enter your email
+                token:
+                  type: string
+                  format: uuid
+                  description: |
+                      ***required*** - Enter your token
+                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
+                start_date:
+                  type: string
+                    description: |
+                      ***required*** - 
+                stop_date:
+                size_name:
+                u_veh_id:
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_info'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
+                 
 #----------------------------------------------------------------------------------------------
 
   /warehouse:
     get:
       tags:
         - warehouse
-      summary: summary here
-      description: descrition here
+      summary: Shows info about storage shelves
+      description: |
+                   - if size_name is not filled in, it shows all tire sizes
+                   - if available_only is 'yes', it shows only free shelves
+                   - if available_only is 'no', it shows only occupied shelves
+                   - if available_only neither one nor the other, it shows all free shelves
       parameters:
         - name: size_id
           in: query
           required: false
-          description: the user_id must consist only of digits
+          description: | 
+                *optional* - The size_id must contain only digits
           schema:
             type: string
+        - name: available_only
+          in: query
+          required: false
+          description: |
+                *optional* - The available_only can be 'yes' or 'no'. Or empty.
+          schema:
+            type: string 
       responses:
         '200':
           description: Successful operation
@@ -495,6 +762,100 @@ paths:
 
 components:
   schemas:
+    user_info:
+      type: object
+      properties:
+        your info:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+              first_name:
+                type: string
+              last_name:
+                type: string
+              email:
+                type: string
+              phone:
+                type: string
+        storage orders info:
+          oneOf:
+            - type: string
+            - type: object
+              properties:
+                storage orders info:
+                  type: string
+            - type: array
+              items:
+                type: object
+                properties:
+                  storage_order_id:
+                    type: string
+                  start_date:
+                    type: string
+                  stop_date:
+                    type: string
+                  order cost:
+                    type: string
+                  shelf_id:
+                    type: string
+        your vehicle(s):
+          oneOf:
+            - type: string
+            - type: object
+              properties:
+                your vehicle(s):
+                  type: string
+            - type: array
+              items:
+                type: object
+                properties:
+                  vehicle_id:
+                    type: string
+                  vehicle_name:
+                    type: string
+                  size_name:
+                    type: string
+        tire service order(s):
+           oneOf:
+            - type: string
+            - type: object
+              properties:
+                tire service order(s):
+                  type: string
+            - type: array
+              items:
+                type: object
+                properties:
+                  serv_order_id:
+                    type: string
+                  serv_order_date:
+                   type: string
+                  manager_id:
+                    type: string
+                  vehicle_id:
+                    type: string
+                  service order cost:
+                    type: string
+                  tasks:
+                    oneOf:
+                    - type: string
+                    - type: object
+                      properties:
+                        tasks:
+                          type: string
+                    - type: array
+                      items:
+                        type: object
+                        properties:
+                          task_name:
+                            type: string
+                          worker_id:
+                           type: string
+                          task cost:
+                            type: string
     users:
       type: object
       properties:
@@ -534,6 +895,28 @@ components:
         new phone:
           type: string
         old phone:
+          type: string
+    vehicle:
+      type: object
+      properties:
+        vehicle_id:
+          type: string
+        vehicle_name:
+          type: string
+        size_name:
+          type: string
+    vehicle_changed:
+      type: object
+      properties:
+        vehicle_id:
+          type: string
+        old_vehicle_name:
+          type: string
+        new_vehicle_name:
+          type: string
+        old_size_name:
+          type: string
+        new_size_name:
           type: string
     storage_places:
       type: object

@@ -358,8 +358,8 @@ def user_info():
 
         result_users = ({
             "ID": res[0],
-            "f_name": res[1],
-            "l_name": res[2],
+            "first_name": res[1],
+            "last_name": res[2],
             "email": res[3],
             "phone": res[4]
         })
@@ -403,8 +403,8 @@ def user_info():
             for i in range(len(res_)):
                 result_vehicle.append({
                     'vehicle_id': res_[i][0],
-                    'vehicle_type': res_[i][1],
-                    'tire size': res_[i][2]
+                    'vehicle_name': res_[i][1],
+                    'size_name': res_[i][2]
                 })
 
         sql_query = """CREATE OR REPLACE VIEW temp AS
@@ -681,15 +681,15 @@ def users_vehicle():
         result = {
             'new_vehicle_id': res_[0],
             'vehicle_name': vehicle_name,
-            'tire_size': size_name
+            'size_name': size_name
         }
         return jsonify(result)
     elif request.method == 'PUT':
         email = request.form.get('email')
         token = request.form.get('token')
-        u_veh_id = request.form.get('user vehicle id')
-        new_vehicle_name = request.form.get('new vehicle name')
-        new_size_name = request.form.get('new size name')
+        u_veh_id = request.form.get('user_vehicle_id')
+        new_vehicle_name = request.form.get('new_vehicle_name')
+        new_size_name = request.form.get('new_size_name')
 
         if not token or not email or not u_veh_id:
             abort(400, description='The token, email and user vehicle id are required')
@@ -909,7 +909,7 @@ def storage_order():
         if size_name and u_veh_id:
             abort(400, description='The size_name OR user_vehicle_id is required')
 
-        if not size_name or not u_veh_id:
+        if not size_name and not u_veh_id:
             abort(400, description='The size_name OR user_vehicle_id is required')
 
         user_auth = user_authorization(email, token)
@@ -1411,6 +1411,12 @@ def task():
     else:
         abort(405)
 
+
+@app.route("/admin/push_user_auth", methods=['POST'])
+if request.method == 'POST':
+    admin_password = request.form.get('admin password')
+    if admin_password == 'push':
+        push_user_auth()
 
 if __name__ == '__main__':
     app.run()
