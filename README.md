@@ -1,7 +1,7 @@
-Service Station API
-Сервер: http://23.88.52.139:5006
-Swagger: http://23.88.52.139:5006/swagger
-Database diagram: https://drawsql.app/myowncompany/diagrams/cto
+Service Station API:
+ - Сервер: http://23.88.52.139:5006
+ - Swagger: http://23.88.52.139:5006/swagger
+ - Database diagram: https://drawsql.app/myowncompany/diagrams/cto
 
 Проект реализуется в рамках авторского курса по тестированию ПО Вадима Ксендзова: https://ksendzov.com/, telegram - @peplomot
 
@@ -9,9 +9,9 @@ Database diagram: https://drawsql.app/myowncompany/diagrams/cto
 
 Саммари: проект - сервис по предоставлению услуг шиномонтажа и хранению шин на складе.
 
-Если Вы обнаружите в проекте баги, ошибки, неточности, либо у Вас возникнут пожелания или предложения, прошу Вас воспользоваться соответствующими формами. 
-Ссылка на Google форму баг репорта: https://docs.google.com/forms/d/1Nh_-KE00CpirA_I4WLBXR5gWD5Gkl7KaT2u72x2CC7o/edit?usp=sharing
-Ссылка на ваши предложения: https://docs.google.com/forms/d/1mjiIaQwa0_C0FiihzpKBFCOUvVSR_PjzusJMgmsEQkM/edit?usp=sharing
+Если Вы обнаружите в проекте баги, ошибки, неточности, либо у Вас возникнут пожелания или предложения, прошу Вас воспользоваться соответствующими формами:
+ - Ссылка на Google форму баг репорта: https://docs.google.com/forms/d/1Nh_-KE00CpirA_I4WLBXR5gWD5Gkl7KaT2u72x2CC7o/edit?usp=sharing
+ - Ссылка на ваши предложения: https://docs.google.com/forms/d/1mjiIaQwa0_C0FiihzpKBFCOUvVSR_PjzusJMgmsEQkM/edit?usp=sharing
 
 Что реализовано:
   - Для использования сервиса пользователю необходимо зарегистрироваться
