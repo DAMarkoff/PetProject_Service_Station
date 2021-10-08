@@ -104,7 +104,7 @@ def shelf_avail(size_name):
         avail = cursor.fetchone()
         # cursor.close()
 
-        if avail is not None:
+        if avail:
             return True
     return False
 
@@ -161,7 +161,7 @@ def user_active(email):
         res_ = cursor.fetchone()
         # cursor.close()
 
-        if res_[0]:
+        if res_:
             return True
         return False
 
