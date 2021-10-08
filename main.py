@@ -715,20 +715,21 @@ def users_vehicle():
                 (new_vehicle_name == vehicle_name_db and new_size_name == size_name_db):
             abort(400, description='Ok. Nothing needs to be changed :)')
 
-        if new_vehicle_name:
+        if new_vehicle_name is None or new_vehicle_name == vehicle_name_db:
+            new_vehicle_id = vehicle_id_db
+            new_vehicle_name = 'The vehicle name has not been changed'
+        else:
             new_vehicle_id = vehicle_one_by_var('vehicle_id', 'vehicle_name', new_vehicle_name)
             if not new_vehicle_id:
                 abort(400, description='Unknown vehicle_name')
-        else:
-            new_vehicle_id = vehicle_id_db
-            vehicle_name_db = 'The vehicle name has not been changed'
+
 
         # if
 
 
         if new_size_name is None or new_size_name == size_name_db:
             new_size_id = size_id_db
-            size_name_db = 'The size name has not been changed'
+            new_size_name = 'The size name has not been changed'
         else:
             new_size_id = size_one_by_var('size_id', 'size_name', new_size_name)
             if not new_size_id:
