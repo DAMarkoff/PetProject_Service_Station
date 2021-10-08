@@ -45,13 +45,13 @@ Done:
 			[POST] - mark the user as inactive
 			
 		/users/vehicle:
-			*[GET] - request a user's vehicle  			- not implemented
+			*[GET] - request a user's vehicle  			- not implemented (the info is provided in user_info. there will be another endpoint for managers)
 			[POST] - create new user vehicle
 			[PUT] - change a user's vehicle
 			[DELETE] - delete a user's vehicle
 			
 		/storage_orders:
-			*[GET] - request the storage_order 			- not implemented
+			*[GET] - request the storage_order 			- not implemented (the info is provided in user_info. there will be another endpoint for managers)
 			[POST] - create new storage_order
 			[PUT] - change the storage_order
 			[DELETE] - delete the storage_order
@@ -60,13 +60,13 @@ Done:
 			[GET] - available storage
 			
 		/tire_service_order:
-			*[GET] - request a user tire_service_order 	- not implemented
+			*[GET] - request a user tire_service_order 	- not implemented (the info is provided in user_info. there will be another endpoint for managers)
 			[POST] - create new user's tire_service_order
-			*[PUT] - change a user's tire_service_order	- not implemented
+			[PUT] - change a user's tire_service_order
 			[DELETE] - delete a user's tire_service_order
 			
 		/tire_service_order/task:
-			*[GET] - request the task 					- not implemented
+			*[GET] - request the task 					- not implemented (the info is provided in user_info. there will be another endpoint for managers)
 			[POST] - create new task
 			*[PUT] - change the task 						- not implemented
 			*[DELETE] - delete the task 					- not implemented
@@ -78,28 +78,31 @@ d		/user_info
 *		/login
 
 	swagger:
-		/login
-		/all
-		/available_storage
-		/reg
+		/users/activate
+		/users/deactivate
+		/users/login
+		/users
+		/users/user_info		- not implemented
+		/warehouse
+		/vehicle
+		/storage_order			- not implemented
+		/tire_service_order		- not implemented
 	
 ToDo Dmitrii:
 		
-		- using conn.close()
+		- using conn.close()?
 	
 	In progress: 
-		- /vehicle [PUT]
+		/tire_service_order/task [PUT], [DELETE]
 		- swagger
 	
 	- vehicle.name in /vehicle	[POST] - ok, but in [PUT]?
-*	- improvements google form
 	- dates: create storage and tire_service_order before today
     - hello message when the user has registered
     - 401 status code when the email or token does not exist?
     - change password
     - restore password
 	
-*   - google form for bug reports
     - estimate the service time and store it in the tire_service_order
 !check!   - when the user deletes the tasks - delete them from the tire_service_order ON CASCADE
 
@@ -129,10 +132,8 @@ ToDo Dmitrii:
 		    - costs: all/storage_orders/tire_service_oreders
 		    - costs: on staff
 
-	- /tire_service_order [GET], [PUT] - change
-	- /tire_service_order/task [GET], [PUT], [DELETE]
-	- /storage_orders [GET]
-	- /users/vehicle [GET]
+
+	- /tire_service_order/task [PUT], [DELETE]
 	
 	- swagger
 	- design

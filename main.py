@@ -170,7 +170,7 @@ def users():
             "email": email
         }
 
-        push_user_auth()
+        # push_user_auth()
         return jsonify(result)
     # change a user's data
     elif request.method == 'PUT':
@@ -245,7 +245,7 @@ def users():
             save_to_file(user_id_db, email + '->' + new_email, '!password!', 'user-changed-email')
             new_email_to_db = new_email
             flag_relogin = True
-            push_user_auth()
+            # push_user_auth()
 
         # if the pass and/or email have been changed - the user must log in again
         if flag_relogin:
@@ -316,7 +316,7 @@ def users():
             'confirmation': template.render(name=first_name + ' ' + last_name)
         }
 
-        push_user_auth()
+        # push_user_auth()
         return jsonify(result)
     else:
         abort(405)
