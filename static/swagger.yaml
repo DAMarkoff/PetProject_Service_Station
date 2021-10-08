@@ -271,7 +271,7 @@ paths:
                 $ref: '#/components/schemas/error'
     put:
       tags:
-      - users
+      - vehicle
       summary: Change the user info
       requestBody:
         content:
@@ -327,7 +327,7 @@ paths:
                 $ref: '#/components/schemas/error'
     delete:
       tags:
-      - users
+      - vehicle
       summary: Delete the current user
       description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
       # requestBody:
