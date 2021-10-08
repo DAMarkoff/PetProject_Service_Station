@@ -831,7 +831,7 @@ paths:
                 
 #----------------------------------------------------------------------------------------------
 
-  /tire service order:
+  /tire_service_order:
     post:
       tags:
       - tire service order
