@@ -1214,7 +1214,7 @@ def tire_service_order():
         token = request.form.get('token')
         serv_order_id = request.form.get('service order id')
         new_order_date = request.form.get('new order date')
-        new_u_veh_id = request.form.get('new user vehicle id')
+            new_u_veh_id = request.form.get('new user vehicle id')
 
         if not token or not email or not serv_order_id:
             abort(400, description='The token, email, service order id are required')

@@ -89,7 +89,7 @@ d		/user_info
 		/tire_service_order		- not implemented
 	
 ToDo Dmitrii:
-		
+		- u_veh_id in storage_order [PUT]?
 		- remove st_ord_cost from /storage_order [PUT] and add optional u_veh_id
 		- using conn.close()?
 	

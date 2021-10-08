@@ -221,7 +221,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/user_changed'
+                $ref: '#/components/schemas/error'
 
 #----------------------------------------------------------------------------------------------
 
@@ -397,7 +397,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/user_changed'
+                $ref: '#/components/schemas/error'
 
 #----------------------------------------------------------------------------------------------
 
@@ -736,7 +736,6 @@ paths:
       - storage order
       summary: Create new storage order
       description: | 
-            The size_name OR user_vehicle_id is required. Not both of those. 
             *This can only be done by the logged in user.*
       requestBody:
         required: true
@@ -816,9 +815,249 @@ paths:
               schema:
                 type: array
                 items:
-                 $ref: '#/components/schemas/error'             
+                 $ref: '#/components/schemas/error'
+    delete:
+      tags:
+      - storage order
+      summary: Delete your storage order
+      description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'             
+                
 #----------------------------------------------------------------------------------------------
 
+  /tire service order:
+    post:
+      tags:
+      - tire service order
+      summary: Create a new tire service order
+      description: | 
+            *This can only be done by the logged in user.*
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: |
+                      ***required*** - Enter your email
+                token:
+                  type: string
+                  format: uuid
+                  description: |
+                      ***required*** - Enter your token
+                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
+                order_date:
+                  type: string
+                  description: |
+                      ***required*** - Tire service order date
+                u_veh_id:
+                  type: string
+                  description: |
+                      ***required*** - The id of your car that will be serviced
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tire_service_order'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
+    put:
+      tags:
+      - tire service order
+      summary: Create new storage order
+      description: | 
+            You can change the date and time, as well as the vehicle in your tire order
+            *This can only be done by the logged in user.*
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: |
+                      ***required*** - Enter your email
+                token:
+                  type: string
+                  format: uuid
+                  description: |
+                      ***required*** - Enter your token
+                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
+                serv_order_id:
+                  type: string
+                  description: |
+                      ***required*** - ID of your tire service order that needs to be updated
+                new_order_date:
+                  type: string
+                  description: |
+                      *optional* - New tire service order date
+                new_u_veh_id:
+                  type: string
+                  description: |
+                      *optional* - Fill in another vehicle id 
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tire_service_order_changed'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
+    delete:
+      tags:
+      - tire service order
+      summary: Delete your storage order
+      description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error' 
+                
+#----------------------------------------------------------------------------------------------
+  
+  /tire_service_order/task:
+    post:
+      tags:
+      - tire service order
+      summary: You can add, update and delete a tasks in your tire service order
+      description: | 
+            *This can only be done by the logged in user.*
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: |
+                      ***required*** - Enter your email
+                token:
+                  type: string
+                  format: uuid
+                  description: |
+                      ***required*** - Enter your token
+                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
+                service_order_id:
+                  type: string
+                  description: |
+                      ***required*** - The id of your tire service order that will be updated
+                task_name:
+                  type: string
+                  description: |
+                      ***required*** - The task, that will be added to your tire service order
+                numbers_of_task:
+                  type: string
+                  description: |
+                      ***required*** - The number of the tasks, that will be added to your tire service order
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  confirmation:
+                    type: string
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
+                
+#----------------------------------------------------------------------------------------------
+  
   /warehouse:
     get:
       tags:
@@ -865,6 +1104,36 @@ paths:
 
 components:
   schemas:
+    tire_service_order_changed:
+      type: object
+      properties:
+        tire service order:
+          type: string
+        old_vehicle_id:
+          type: string
+        new_vehicle_id:
+          type: string
+        old_order_date:
+          type: string
+        new_order_date:
+          type: string
+    tire_service_order:
+      type: object
+      properties:
+        service_order_id:
+          type: string
+        date:
+          type: string
+        manager_id:
+          type: string
+        manager_first_name:
+          type: string
+        manager_last_name:
+          type: string
+        manager_phone:
+          type: string  
+        manager_email:
+          type: string  
     storage_order_changed:
       type: object
       properties:
