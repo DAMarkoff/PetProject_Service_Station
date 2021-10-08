@@ -18,7 +18,7 @@
 							"formdata": [
 								{
 									"key": "first_name",
-									"value": "test_hash",
+									"value": "test-hash",
 									"type": "text"
 								},
 								{
@@ -33,12 +33,12 @@
 								},
 								{
 									"key": "email",
-									"value": "test@test12.ru",
+									"value": "test@test15.u",
 									"type": "text"
 								},
 								{
 									"key": "phone",
-									"value": "4449997171",
+									"value": "222333",
 									"type": "text"
 								}
 							]
@@ -78,12 +78,12 @@
 							"formdata": [
 								{
 									"key": "email",
-									"value": "test@test12.ru",
+									"value": "dan@dan.us",
 									"type": "text"
 								},
 								{
 									"key": "password",
-									"value": "PassWord1$",
+									"value": "qwe",
 									"type": "text"
 								}
 							]
@@ -309,7 +309,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "23.88.52.139:5006/users",
+							"raw": "23.88.52.139:5006/users?user_id=",
 							"host": [
 								"23",
 								"88",
@@ -323,8 +323,7 @@
 							"query": [
 								{
 									"key": "user_id",
-									"value": "1",
-									"disabled": true
+									"value": ""
 								}
 							]
 						}
@@ -363,11 +362,6 @@
 									"key": "size_name",
 									"value": "20",
 									"type": "text"
-								},
-								{
-									"key": "user_vehicle_id",
-									"value": "",
-									"type": "text"
 								}
 							]
 						},
@@ -403,7 +397,7 @@
 								},
 								{
 									"key": "user_vehicle_id",
-									"value": "6",
+									"value": "10",
 									"type": "text"
 								}
 							]
@@ -440,18 +434,20 @@
 								},
 								{
 									"key": "user_vehicle_id",
-									"value": "3",
+									"value": "6",
 									"type": "text"
 								},
 								{
 									"key": "new_vehicle_name",
 									"value": "bus",
-									"type": "text"
+									"type": "text",
+									"disabled": true
 								},
 								{
 									"key": "new_size_name",
-									"value": "16",
-									"type": "text"
+									"value": "14",
+									"type": "text",
+									"disabled": true
 								}
 							]
 						},
@@ -739,6 +735,54 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Change the tire service order",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "text"
+								},
+								{
+									"key": "service order id",
+									"value": "17",
+									"type": "text"
+								},
+								{
+									"key": "new order date",
+									"value": "2021-11-01 13:05",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "new user vehicle id",
+									"value": "6",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/tire_service_order",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tire_service_order"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -751,7 +795,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{url}}/warehouse?size_name=14&available_only=no",
+							"raw": "{{url}}/warehouse?available_only=no",
 							"host": [
 								"{{url}}"
 							],
@@ -761,7 +805,8 @@
 							"query": [
 								{
 									"key": "size_name",
-									"value": "14"
+									"value": "14",
+									"disabled": true
 								},
 								{
 									"key": "available_only",
