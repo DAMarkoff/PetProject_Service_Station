@@ -1413,10 +1413,11 @@ def task():
 
 
 @app.route("/admin/push_user_auth", methods=['POST'])
-if request.method == 'POST':
-    admin_password = request.form.get('admin password')
-    if admin_password == 'push':
-        push_user_auth()
+def push():
+    if request.method == 'POST':
+        admin_password = request.form.get('admin password')
+        if admin_password == 'push':
+            push_user_auth()
 
 if __name__ == '__main__':
     app.run()
