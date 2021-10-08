@@ -1239,7 +1239,7 @@ def tire_service_order():
                 (new_order_date == serv_order_date_db and new_u_veh_id == u_veh_id_db):
             abort(400, description='Ok. Nothing needs to be changed :)')
 
-        if new_order_date is None or new_order_date == serv_order_date_db:
+        if not new_order_date or new_order_date == serv_order_date_db:
             order_date_to_db = serv_order_date_db
             new_order_date = 'The tire service date has not been changed'
         else:
