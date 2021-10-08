@@ -153,6 +153,21 @@ def validate_email(email):
     return return_val
 
 
+def validate_names(name_type, name):
+    valid_pattern = re.compile("^[a-z ,.'-]+$", re.I)
+    return_val = {'result': True, 'text': ''}
+    if len(name) < 1:
+        return_val['text'] = 'The {0} must be at least 1 characters long'.format(name_type)
+        return_val['result'] = False
+    if len(name) > 30:
+        return_val['text'] = 'The {0} length should not exceed 30 chars'.format(name_type)
+        return_val['result'] = False
+    if not bool(valid_pattern.match('name')):
+        return_val['text'] = """The {0} can only include the ' '(space) and '.,- chars""".format(name_type)
+        return_val['result'] = False
+    return return_val
+
+
 def user_active(email):
     if conn:
         sql_query = """SELECT active FROM users WHERE email = '{0}'""".format(email)

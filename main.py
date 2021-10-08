@@ -126,6 +126,14 @@ def users():
         if user_exists('email', email):
             abort(400, description="The user with this email already exists")
 
+        check_first_name = validate_names('first name', f_name)
+        if not check_first_name['result']:
+            abort(400, description=check_first_name['text'])
+
+        check_last_name = validate_names('last name', l_name)
+        if not check_last_name['result']:
+            abort(400, description=check_last_name['text'])
+
         # making sure that the password is strong enough 8-32 chars,
         # min one digit, min one upper and min one lower letter, min one special char
         check_password = validate_password(password)
@@ -320,7 +328,6 @@ def users():
         return jsonify(result)
     else:
         abort(405)
-
 
 
 @app.route("/users/user_info", methods=['POST'])  # get all info about the logged user

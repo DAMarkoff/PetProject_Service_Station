@@ -94,6 +94,8 @@ ToDo Dmitrii:
 	
 	In progress: 
 		/tire_service_order/task [PUT], [DELETE]
+		- exclude hash_password and salt from user_info after the registration
+		- add to the /users [GET] active choice
 		- swagger
 	
 	- vehicle.name in /vehicle	[POST] - ok, but in [PUT]?

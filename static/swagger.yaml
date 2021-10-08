@@ -3,14 +3,20 @@ servers:
   - description: PetProgect
     url: http://23.88.52.139:5006
 info:
-  description: Service Station API
+  description: |
+      # Pre-alpha
+      **If you find any defects or have suggestions for improvement, feel free to fill out the Google forms below.**
+
+      **I will be very grateful for any help. Thanks.**
+      - [Bug Report Google Form](https://docs.google.com/forms/d/1Nh_-KE00CpirA_I4WLBXR5gWD5Gkl7KaT2u72x2CC7o/edit?usp=sharing)
+      - [Suggestions for improvement](https://docs.google.com/forms/d/1mjiIaQwa0_C0FiihzpKBFCOUvVSR_PjzusJMgmsEQkM/edit?usp=sharing)
   version: 1.0.0
   title: Service Station
   contact:
     email: dmitri.markoff@gmail.com
 tags:
   - name: users
-    description: registration/login/activate/deactivate/delete/user_info
+    description: This suit contains API methods for operations with a user account and requests for information about user data
   - name: warehouse
     description: storage reports
   - name: vehicle
@@ -163,22 +169,7 @@ paths:
       tags:
       - users
       summary: Delete the current user
-      description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
-      # requestBody:
-      #   content:
-      #     multipart/form-data:
-      #       schema:
-      #         type: object
-      #         properties:
-      #           email:
-      #             type: string
-      #             format: email
-      #             description: Enter your email
-      #           token:
-      #             type: string
-      #             format: uuid
-      #             description: Enter your token
-      #             example: faf353cd-2e44-46c5-9864-7c53426eb58a
+      description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see [there](github.com/OAI/OpenAPI-Specification/pull/2117)
       responses:
         '200':
           description: Successful operation
@@ -190,41 +181,6 @@ paths:
 #----------------------------------------------------------------------------------------------
 
   /vehicle:
-#    get:
-#      tags:
-#      - vehicle
-#      summary: A JSON array of user(s) data
-#      description: If the user_id is not provided, returns short info about all users
-#      parameters:
-#      - name: user_id
-#        in: query
-#        required: false
-#        description: the user_id must consist only of digits
-#        schema:
-#          type: string
-#      responses:
-#        '200':
-#          description: Successful operation
-#          content:
-#            application/json:
-#              schema:
-#                type: array
-#                items:
-#                 $ref: '#/components/schemas/users'
-#        '400':
-#          description: bad request
-#          content:
-#            application/json:
-#              schema:
-#                $ref: '#/components/schemas/error'
-#        '405':
-#          description: method not allowed
-#          content:
-#            application/json:
-#              schema:
-#                type: array
-#                items:
-#                 $ref: '#/components/schemas/error'
     post:
       tags:
       - vehicle
@@ -235,15 +191,9 @@ paths:
             schema:
               type: object
               properties:
-                first_name:
-                  type: string
-                  description: Validation has not been implemented yet
-                last_name:
-                  type: string
-                  description: Validation has not been implemented yet
                 email:
                   type: string
-                  description: The email must contain @ and . chars
+                  description: Your email
                 password:
                   type: string
                   description: 8 - 32 chars, must contain at least one digit, one uppercase letter, one lowercase letter, one of the symbols $@#!%'
