@@ -110,7 +110,6 @@ ToDo Dmitrii:
 
     - rename the DB field's names and def's names to full
 
-!	- validate first_name and last_name
 	- drop pass column from users
 	- warehouse:
 		- create a summary JSON report on demand

@@ -126,6 +126,8 @@ def users():
         if user_exists('email', email):
             abort(400, description="The user with this email already exists")
 
+        #The names can only include the ' '(space) and '.,- chars
+        #The {0} must be at least 1 characters long and not exceed 30 chars
         check_first_name = validate_names('first name', f_name)
         if not check_first_name['result']:
             abort(400, description=check_first_name['text'])
