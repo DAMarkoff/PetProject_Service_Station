@@ -45,13 +45,13 @@ Done:
 			[POST] - mark the user as inactive
 			
 		/users/vehicle:
-			*[GET] - request a user's vehicle  			- not implemented
+			*[GET] - request a user's vehicle  			- not implemented (the info is provided in user_info. there will be another endpoint for managers)
 			[POST] - create new user vehicle
 			[PUT] - change a user's vehicle
 			[DELETE] - delete a user's vehicle
 			
 		/storage_orders:
-			*[GET] - request the storage_order 			- not implemented
+			*[GET] - request the storage_order 			- not implemented (the info is provided in user_info. there will be another endpoint for managers)
 			[POST] - create new storage_order
 			[PUT] - change the storage_order
 			[DELETE] - delete the storage_order
@@ -60,13 +60,13 @@ Done:
 			[GET] - available storage
 			
 		/tire_service_order:
-			*[GET] - request a user tire_service_order 	- not implemented
+			*[GET] - request a user tire_service_order 	- not implemented (the info is provided in user_info. there will be another endpoint for managers)
 			[POST] - create new user's tire_service_order
-			*[PUT] - change a user's tire_service_order	- not implemented
+			[PUT] - change a user's tire_service_order
 			[DELETE] - delete a user's tire_service_order
 			
 		/tire_service_order/task:
-			*[GET] - request the task 					- not implemented
+			*[GET] - request the task 					- not implemented (the info is provided in user_info. there will be another endpoint for managers)
 			[POST] - create new task
 			*[PUT] - change the task 						- not implemented
 			*[DELETE] - delete the task 					- not implemented
@@ -78,20 +78,40 @@ d		/user_info
 *		/login
 
 	swagger:
-		/login
-		/all
-		/available_storage
-		/reg
+		/users/activate
+		/users/deactivate
+		/users/login
+		/users
+		/users/user_info		- not implemented
+		/warehouse
+		/vehicle
+		/storage_order			- not implemented
+		/tire_service_order		- not implemented
 	
-ToDo :)
-	- delete user under admin password only :)
-	- error with delete not user's vehcile (vehicle is not exists in the db)
-	- move to managers table
-	- validate first_name and last_name
-	- restore hased passwords
+ToDo Dmitrii:
+		
+		- remove st_ord_cost from /storage_order [PUT] and add optional u_veh_id
+		- using conn.close()?
+	
+	In progress: 
+		/tire_service_order/task [PUT], [DELETE]
+		- exclude hash_password and salt from user_info after the registration
+		- add to the /users [GET] active choice
+		- swagger
+	
+	- vehicle.name in /vehicle	[POST] - ok, but in [PUT]?
+	- dates: create storage and tire_service_order before today
+    - hello message when the user has registered
+    - 401 status code when the email or token does not exist?
+    - change password
+    - restore password
+	
+    - estimate the service time and store it in the tire_service_order
+!check!   - when the user deletes the tasks - delete them from the tire_service_order ON CASCADE
+
+    - rename the DB field's names and def's names to full
+
 	- drop pass column from users
-	- push the user_auth.txt to the remote repo after update - partially done
-	- replace def vehicle_id_by_name and vehicle_name_by_id by vehicle_one_by_var
 	- warehouse:
 		- create a summary JSON report on demand
 
@@ -105,10 +125,17 @@ ToDo :)
 	- staff: add other working professions
 	- distribution of workers by type of work
 
-	- /tire_service_order [GET], [PUT] - change
-	- /tire_service_order/task [GET], [PUT], [DELETE]
-	- /storage_orders [GET]
-	- /users/vehicle [GET]
+	- admin:
+	    - can change the managers in the tire_service_order
+	    - can change the worker in the list_of_works
+	    - can restore the user's password
+		- form a reports:
+		    - staff: all/available/unavailable (by position or all)
+		    - costs: all/storage_orders/tire_service_oreders
+		    - costs: on staff
+
+
+	- /tire_service_order/task [PUT], [DELETE]
 	
 	- swagger
 	- design
@@ -116,7 +143,9 @@ ToDo :)
 	- frontend
 	- testing:
 		- checklists
-		- 
+*		- bug report google form
+*		- improvements google form
+
 ToDo Azat: 
         - design
         - front
@@ -127,7 +156,7 @@ DrawSQL DB:
 DISCLAIMER:
 user_authorization checks: 	
 	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
-		if the token does not exist in redis db: redirect to /login
+		if the token does not exist in redis db: The token is invalid, please log in
 
 /users/login [POST]
 	input:  
@@ -140,6 +169,7 @@ user_authorization checks:
 			token
 			user_id
 
+    make sure that all the required fields are filled in
 	if email does not exist in DB: 400 - note
 		if pass does not valid: 401 - note
 			if token exists in the redis db: set new ex time and return the token
@@ -161,8 +191,10 @@ user_authorization checks:
 			l_name
 			email
 			phone
-			passw
-			
+			salt
+			hash_password
+
+	make sure that all the required fields are filled in
 	if email exists in the DB: 400 - note
 	else: 
 		add new user to the DB and return info from the DB with user_id
@@ -218,9 +250,9 @@ user_authorization checks:
 			st_ord_id
 
 	user_authorization
-			if there is no available shelf of the size needed in the warehouse: note		
-				add in the "storage_order" base info about the storage order
-				update in the "warehouse" base availability of the occupied storage place
+		if there is no available shelf of the size needed in the warehouse: note
+            the user can specify either the size_name or the user_vehicle_id
+                if both size_name and user_vehicle_id are specified, the size_name is ignored
 
 				
 /storage_orders [PUT]				
@@ -242,9 +274,9 @@ user_authorization checks:
 			shelf_id
 	
 	user_authorization
-			if the provided dates are invalid: note
-				if the optional data is None: take the data needed from DB
-				if size_id is need to be changed make sure that the warehouse has an availabe shelf
+		if the provided dates are invalid: note
+			if the optional data is None: take the data needed from DB
+				if size_id is need to be changed make sure that the warehouse has an available shelf
 
 				
 /vehicle [POST]
@@ -260,8 +292,8 @@ user_authorization checks:
 			size_name
 			
 	user_authorization
-			if the vehcile type or tire size is not specified in the DB: note 
-				add the date in to the DB
+		if the vehcile type or tire size is not specified in the DB: note
+		add the date in to the DB
 				
 /users/user [PUT]				
 	input:
@@ -270,23 +302,26 @@ user_authorization checks:
 			f_name				- optional
 			l_name				- optional
 			new_email			- optional
-			password			- optional
+			phone               - optional
 
-			
 	output:
 			user_id
-			f_name
-			l_name
-			email
-			phone
-			password
+			old_first_name
+			new_first_name
+			old_last_name
+			new_last_name
+			old_email
+			new_email
+			old_phone
+			new_phone
 	
 	user_authorization
-			if all optional data is None OR the new data is equal to the DB data: nothing needs to be changed
-				if some optional data is None: take the data needed from DB
-					if the password and/or email have been changed - the user must log in again
+        if all optional data is None OR the new data is equal to the DB data: nothing needs to be changed
+        if some optional data is None: take the data needed from DB
+        if the email has been changed - the user must log in again
+        if the new_email is already in the DB: 400 - email exists
 					
-/users/user [POST]
+/users/user [DELETE]
 	input:
 			email				- required
 			token				- required
@@ -361,9 +396,9 @@ user_authorization checks:
 			new_size_name
 			
 	user_authorization
-			if it is not user's vehicle: Call the police!!! :)
-				if all optional data is None OR the new data is equal to the DB data: nothing needs to be changed
-					if some optional data is None: take the data needed from DB
+		if it is not user's vehicle: Call the police!!! :)
+			if all optional data is None OR the new data is equal to the DB data: nothing needs to be changed
+				if some optional data is None: take the data needed from DB
 
 /warehouse [GET]
 	input:
@@ -385,36 +420,62 @@ user_authorization checks:
 			email				- required
 			token				- required
 			order_date			- required
-			user_vehicle_id_id	- required
+			user_vehicle_id	    - required
 
 	
 	output:
 			service_order_id
 			date
-			worker_id
-			worker_first_name
-			worker_last_name
-			worker_phone
-			worker_email
+			manager_id
+			manager_first_name
+			manager_last_name
+			manager_phone
+			manager_email
 			
 	user_authorization
-			if it is not user's vehicle: :)
-				max load per one manager - 5
+		if it is not user's vehicle: :)
+		max load per one manager - 5:
+		    if the load of the manager == 4, mark him as unavailable
+		if the order date is before today	
+
+
+/tire_service_order [PUT]
+    input:
+			email				- required
+			token				- required
+			service_order_id	- required
+			new order date          - optional
+			other user vehicle id   - optional
+
+	output:
+			user_id
+			service_order_id
+			old order date
+			new order date
+			old user vehicle id
+			new user vehicle id
+			
+	user_authorization
+		if it is not user's order: :)
+		if it is not user's other vehicle: :)
+		if the new order date is before today
+		
 					
-/tire_service_order [DELETE}
+/tire_service_order [DELETE]
 	input:
 			email				- required
 			token				- required
 			service_order_id	- required
 			
 	output:
-			confirmaion message
+			confirmation message
 			
 	user_authorization
-			if it is not user's order: :)
-				if manager's load becomes less than 5, then mark the manager as available
-				
-			
+		if it is not user's order: :)
+		if the manager's load becomes less than 5 when the order is deleted, mark it as available
+		delete the tasks on delete tire_service_order - DB settings ON DELETE CASCADE
+
+
 /tire_service_order/task [POST]
 	input:
 			email				- required
