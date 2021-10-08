@@ -1206,8 +1206,8 @@ def tire_service_order():
         new_order_date = request.form.get('new order date')
         new_u_veh_id = request.form.get('new user vehicle id')
 
-        if token is None or email is None or serv_order_id is None:
-            abort(400, description='The token, email, service order id are required')
+        # if token is None or email is None or serv_order_id is None:
+        #     abort(400, description='The token, email, service order id are required')
 
         if not token or not email or not serv_order_id:
             abort(400, description='The token, email, service order id are required')
