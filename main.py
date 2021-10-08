@@ -120,7 +120,7 @@ def users():
         phone = request.form.get('phone')
         email = request.form.get('email')
 
-        if f_name is None or l_name is None or password is None or phone is None or email is None:
+        if not f_name or not l_name or not password or not phone or not email:
             abort(400, description='The f_name, l_name, password, phone and email data are required')
 
         if user_exists('email', email):
@@ -1206,9 +1206,6 @@ def tire_service_order():
         new_order_date = request.form.get('new order date')
         new_u_veh_id = request.form.get('new user vehicle id')
 
-        # if token is None or email is None or serv_order_id is None:
-        #     abort(400, description='The token, email, service order id are required')
-
         if not token or not email or not serv_order_id:
             abort(400, description='The token, email, service order id are required')
 
@@ -1230,9 +1227,12 @@ def tire_service_order():
         res_ = cursor.fetchone()
         # cursor.close()
 
-        user_id, u_veh_id_db, serv_order_date_db = res_[0], res_[1], res_[2]
+        user_id_order, u_veh_id_db, serv_order_date_db = res_[0], res_[1], res_[2]
+        user_id = get_user_id(email)
 
-        if get_user_id(email) != user_id:
+
+
+        if user_id_order != user_id:
             abort(403, description='It is not your tire service order!')
 
         if (new_order_date is None and new_u_veh_id is None) or \
@@ -1243,15 +1243,18 @@ def tire_service_order():
             order_date_to_db = serv_order_date_db
             new_order_date = 'The tire service date has not been changed'
         else:
-            order_date_to_db = new_order_date
             if datetime.datetime.strptime(new_order_date[:10], '%Y-%m-%d') < \
                     datetime.datetime.strptime(str(datetime.datetime.now())[:10], '%Y-%m-%d'):
                 abort(400, description='The new tire service date can not be earlier than today')
+            order_date_to_db = new_order_date
 
         if not new_u_veh_id or new_u_veh_id == u_veh_id_db:
             u_veh_id_to_db = u_veh_id_db
             new_u_veh_id = 'The vehicle id has not been changed'
         else:
+            user_id_vehicle = vehicle_one_by_var('user_id', 'user_vehicle', 'u_veh_id', new_u_veh_id)
+            if user_id_vehicle != user_id:
+                abort(403, description='It is not your vehicle! Somebody call the police!')
             u_veh_id_to_db = new_u_veh_id
 
         sql_query = """UPDATE tire_service_order SET serv_order_date = '{0}', u_veh_id = '{1}'
