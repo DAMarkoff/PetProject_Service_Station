@@ -456,7 +456,7 @@ def user_info():
                 res_task = cursor.fetchall()
                 # cursor.close()
 
-                if not res_task[0]:
+                if not res_task[0][0]:
                     result_tire_service_order_tasks = 'You do not have any tasks in your tire service order.'
                 else:
                     result_tire_service_order_tasks = []
