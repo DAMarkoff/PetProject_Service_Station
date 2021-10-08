@@ -322,6 +322,7 @@ def users():
         abort(405)
 
 
+
 @app.route("/users/user_info", methods=['POST'])  # get all info about the logged user
 def user_info():
     if request.method == 'POST':
