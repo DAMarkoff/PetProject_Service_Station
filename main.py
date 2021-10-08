@@ -644,7 +644,7 @@ def users_vehicle():
         # get needed data
         user_id = get_user_id(email)
         size_id = size_one_by_var('size_id', 'size_name', size_name)
-        vehicle_id = vehicle_one_by_var('vehicle_id', 'vehicle_name', vehicle_name)
+        vehicle_id = vehicle_one_by_var('vehicle_id', 'vehicle','vehicle_name', vehicle_name)
 
         if size_id is None:
             abort(400, description='Unknown tire size, add the tire size data to the sizes DB')
@@ -708,7 +708,7 @@ def users_vehicle():
         if user_id_db != get_user_id(email):
             abort(403, description='It is not your vehicle! Somebody call the police!')
 
-        vehicle_name_db = vehicle_one_by_var('vehicle_name', 'vehicle_id', vehicle_id_db)
+        vehicle_name_db = vehicle_one_by_var('vehicle_name', 'vehicle', 'vehicle_id', vehicle_id_db)
         size_name_db = str(size_one_by_var('size_name', 'size_id', size_id_db))
 
         if (new_vehicle_name is None and new_size_name is None) or \
@@ -719,7 +719,7 @@ def users_vehicle():
             new_vehicle_id = vehicle_id_db
             new_vehicle_name = 'The vehicle name has not been changed'
         else:
-            new_vehicle_id = vehicle_one_by_var('vehicle_id', 'vehicle_name', new_vehicle_name)
+            new_vehicle_id = vehicle_one_by_var('vehicle_id', 'vehicle','vehicle_name', new_vehicle_name)
             if not new_vehicle_id:
                 abort(400, description='Unknown vehicle_name')
 
@@ -764,7 +764,7 @@ def users_vehicle():
         if not vehicle_exists(u_veh_id):
             abort(400, description='The vehicle does not exist')
 
-        user_id = vehicle_one_by_var('user_id', 'u_veh_id', u_veh_id)
+        user_id = vehicle_one_by_var('user_id', 'user_vehicle','u_veh_id', u_veh_id)
 
         if get_user_id(email) != user_id:
             abort(403, description='It is not your vehicle! Somebody call the police!')
@@ -909,9 +909,9 @@ def storage_order():
         user_id = get_user_id(email)
 
         if u_veh_id is not None:
-            if vehicle_one_by_var('user_id', 'u_veh_id', u_veh_id) != user_id:
+            if vehicle_one_by_var('user_id', 'user_vehicle', 'u_veh_id', u_veh_id) != user_id:
                 abort(403, description='It is not your vehicle! Somebody call the police!')
-            size_name = size_one_by_var('size_name', 'size_id', vehicle_one_by_var('size_id', 'u_veh_id', u_veh_id))
+            size_name = size_one_by_var('size_name', 'size_id', vehicle_one_by_var('size_id', 'user_vehicle','u_veh_id', u_veh_id))
 
         # is there the necessary free storage space
         if not shelf_avail(size_name):

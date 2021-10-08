@@ -230,9 +230,9 @@ def size_one_by_var(select, where, what):
 #         return res_[0]
 
 
-def vehicle_one_by_var(select, where, what):
+def vehicle_one_by_var(select, from_db, where, what):
     if conn:
-        sql_query = """SELECT {0} FROM user_vehicle WHERE {1} = '{2}'""".format(select, where, what)
+        sql_query = """SELECT {0} FROM {1} WHERE {2} = '{3}'""".format(select, from_db, where, what)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
