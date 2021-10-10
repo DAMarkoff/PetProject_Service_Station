@@ -198,6 +198,7 @@ def users():
         if not user_auth['result']:
             abort(401, description=user_auth['text'])
 
+        r.expire(email, 600)
        # if f_name is None and l_name is None and phone is None and new_email is None:
        #     abort(400, description='Ok. Nothing needs to be changed :)')
 
@@ -344,6 +345,8 @@ def user_info():
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
             abort(401, description=user_auth['text'])
+
+        r.expire(email, 600)
 
         if not conn:
             abort(503, description='There is no connection to the database')
@@ -532,7 +535,7 @@ def login():
                 r.set(email, token, ex=600)  # запись токена в redis bd, срок - 600 сек.
             else:
                 token = r.get(email)  # возврат токена
-                r.set(email, token, ex=600)  # пролонгация токена, срок - 600 сек.
+                r.expire(email, 600)  # пролонгация токена, срок - 600 сек.
 
             # генерация Hello message (For fun :)
             text = 'Hello, {{ name }}!'
@@ -663,6 +666,8 @@ def users_vehicle():
         if not user_auth['result']:
             abort(401, description=user_auth['text'])
 
+        r.expire(email, 600)
+
         if not conn:
             abort(503, description='There is no connection to the database')
 
@@ -700,6 +705,8 @@ def users_vehicle():
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
             abort(401, description=user_auth['text'])
+
+        r.expire(email, 600)
 
         if not conn:
             abort(503, description='There is no connection to the database')
@@ -764,6 +771,8 @@ def users_vehicle():
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
             abort(401, description=user_auth['text'])
+
+        r.expire(email, 600)
 
         if not conn:
             abort(503, description='There is no connection to the database')
@@ -916,6 +925,8 @@ def storage_order():
         if not user_auth['result']:
             abort(401, description=user_auth['text'])
 
+        r.expire(email, 600)
+
         user_id = get_user_id(email)
 
         if u_veh_id:
@@ -975,6 +986,8 @@ def storage_order():
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
             abort(401, description=user_auth['text'])
+
+        r.expire(email, 600)
 
         if not conn:
             abort(503, description='There is no connection to the database')
@@ -1089,6 +1102,8 @@ def storage_order():
         if not user_auth['result']:
             abort(401, description=user_auth['text'])
 
+        r.expire(email, 600)
+
         if not conn:
             abort(503, description='There is no connection to the database')
 
@@ -1139,6 +1154,8 @@ def tire_service_order():
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
             abort(401, description=user_auth['text'])
+
+        r.expire(email, 600)
 
         if not conn:
             abort(503, description='There is no connection to the database')
@@ -1223,6 +1240,8 @@ def tire_service_order():
         if not user_auth['result']:
             abort(401, description=user_auth['text'])
 
+        r.expire(email, 600)
+
         if not conn:
             abort(503, description='There is no connection to the database')
 
@@ -1294,6 +1313,8 @@ def tire_service_order():
         if not user_auth['result']:
             abort(401, description=user_auth['text'])
 
+        r.expire(email, 600)
+
         if not conn:
             abort(503, description='There is no connection to the database')
 
@@ -1348,8 +1369,10 @@ def tire_service_order():
 
 @app.route("/tire_service_order/task", methods=['POST']) # add new/change/delete a task to the user's service order
 def task():
+    if request.method == 'GET':
+        pass
     # add a task to the list_of_works
-    if request.method == 'POST':
+    elif request.method == 'POST':
         email = request.form.get('email')
         token = request.form.get('token')
         serv_order_id = request.form.get('service_order_id')
@@ -1365,6 +1388,8 @@ def task():
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
             abort(401, description=user_auth['text'])
+
+        r.expire(email, 600)
 
         if not conn:
             abort(503, description='There is no connection to the database')
@@ -1408,6 +1433,51 @@ def task():
             }
 
         return jsonify(result)
+    elif request.method == 'DELETE':
+        email = request.form.get('email')
+        token = request.form.get('token')
+        serv_order_id = request.form.get('service_order_id')
+        task_name = request.form.get('new_task_name')
+
+        if not token or not email or not serv_order_id:
+            abort(400, description='The token, email, service_order_id and task_name are required')
+
+        user_auth = user_authorization(email, token)
+        if not user_auth['result']:
+            abort(401, description=user_auth['text'])
+
+        r.expire(email, 600)
+
+        if not conn:
+            abort(503, description='There is no connection to the database')
+
+        if not task_name:
+
+            sql_query = """SELECT task_name, task_duration, task_cost, s.first_name, s.last_name, 
+                        m.first_name, m.last_name 
+                        FROM list_of_works 
+                        JOIN tasks USING (task_id) 
+                        JOIN staff as s USING (worker_id)
+                        JOIN tire_service_order USING (serv_order_id)
+                        JOIN managers as m USING (manager_id)
+                        WHERE serv_order_id  = {0}""".format(serv_order_id)
+            cursor.execute(sql_query)
+            conn.commit()
+            res = cursor.fetchall()
+
+            result = {}
+            for i in res:
+                name = 'task' + str(i)
+                result[name]:{
+                    'task name': res[i][0],
+                    'task duration': res[i][1],
+                    'task cost': res[i][2],
+                    'worker first name': res[i][3],
+                    'worker last name': res[i][4],
+                    'manager first name': res[i][5],
+                    'manager last name': res[i][6]
+                }
+            return jsonify(result)
     else:
         abort(405)
 
