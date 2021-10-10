@@ -1367,7 +1367,7 @@ def tire_service_order():
         abort(405)
 
 
-@app.route("/tire_service_order/task", methods=['POST']) # add new/change/delete a task to the user's service order
+@app.route("/tire_service_order/task", methods=['GET', 'POST', 'DELETE']) # add new/change/delete a task to the user's service order
 def task():
     if request.method == 'GET':
         pass
