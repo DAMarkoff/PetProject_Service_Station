@@ -1469,13 +1469,13 @@ def task():
             for i in res:
                 name = 'task' + str(cnt)
                 result[name] = {
-                    'task name': res[i][0],
-                    'task duration': res[i][1],
-                    'task cost': res[i][2],
-                    'worker first name': res[i][3],
-                    'worker last name': res[i][4],
-                    'manager first name': res[i][5],
-                    'manager last name': res[i][6]
+                    'task name': i[0],
+                    'task duration': i[1],
+                    'task cost': i[2],
+                    'worker first name': i[3],
+                    'worker last name': i[4],
+                    'manager first name': i[5],
+                    'manager last name': i[6]
                 }
                 cnt += 1
             return jsonify(result)
