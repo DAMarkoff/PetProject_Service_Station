@@ -1498,7 +1498,7 @@ def task():
 
             sql_query = """SELECT work_id FROM list_of_works WHERE serv_order_id = {0}""".format(serv_order_id)
             cursor.execute(sql_query)
-            res = cursor.fetchone()
+            res = cursor.fetchall()
 
             if task_number not in res:
                 abort(400, description='Incorrect task number')
