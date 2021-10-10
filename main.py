@@ -1502,7 +1502,7 @@ def task():
 
             flag = False
             for i in res:
-                if task_number == i[0]:
+                if task_number == int(i[0]):
                     flag = True
                     break
 
