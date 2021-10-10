@@ -1379,11 +1379,11 @@ def task():
         task_name = request.form.get('task_name')
         numbers_of_task = request.form.get('numbers_of_tasks')
 
-        if not token or not email or not serv_order_id or not task_name:
+        if not token or not email or not serv_order_id or not task_name or not numbers_of_task:
             abort(400, description='The token, email, service_order_id and task_name are required')
 
-        if not numbers_of_task.isdigit():
-            abort(400, description='Please, provide a numbers of tasks in digits')
+        if not str(numbers_of_task.isdigit()) or not str(serv_order_id.isdigit()):
+            abort(400, description='Please, provide a numbers of tasks and service_order_id in digits')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
@@ -1421,7 +1421,7 @@ def task():
             cursor.execute(sql_query)
             conn.commit()
 
-        if int(numbers_of_task) == 1:
+        if numbers_of_task == 1:
             result = {
                 'confirmation': 'The ' + task_name + ' task is successfully added to your tire_service_order ID ' \
                                 + serv_order_id
@@ -1442,7 +1442,7 @@ def task():
         if not token or not email or not serv_order_id:
             abort(400, description='The token, email, service_order_id are required')
 
-        if not serv_order_id.isdigit():
+        if not str(serv_order_id.isdigit()):
             abort(400, description='Please, provide the service_order_id in digits')
 
         user_auth = user_authorization(email, token)
@@ -1493,7 +1493,7 @@ def task():
 
         else:
 
-            if not task_number.isdigit():
+            if not str(task_number.isdigit()):
                 abort(400, description='Please, provide the task_number in digits')
 
             sql_query = """SELECT work_id FROM list_of_works WHERE serv_order_id = {0}""".format(serv_order_id)
@@ -1502,7 +1502,7 @@ def task():
 
             flag = False
             for i in res:
-                if int(task_number) == i[0]:
+                if task_number == i[0]:
                     flag = True
                     break
 

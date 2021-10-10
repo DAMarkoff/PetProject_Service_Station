@@ -68,8 +68,8 @@ Done:
 		/tire_service_order/task:
 			*[GET] - request the task 					- not implemented (the info is provided in user_info. there will be another endpoint for managers)
 			[POST] - create new task
-			*[PUT] - change the task 						- not implemented
-			*[DELETE] - delete the task 					- not implemented
+			*[PUT] - change the task 							- not implemented (the user can delete or add tasks in the tire service order. only the manager can change workers)
+			[DELETE] - delete the task
 		
 	block-diagram:
 *		/reg
