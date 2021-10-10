@@ -1437,10 +1437,10 @@ def task():
         email = request.form.get('email')
         token = request.form.get('token')
         serv_order_id = request.form.get('service_order_id')
-        task_name = request.form.get('new_task_name')
+        task_name = request.form.get('task_name')
 
         if not token or not email or not serv_order_id:
-            abort(400, description='The token, email, service_order_id and task_name are required')
+            abort(400, description='The token, email, service_order_id are required')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
@@ -1454,7 +1454,7 @@ def task():
         if not task_name:
 
             sql_query = """SELECT task_name, task_duration, task_cost, s.first_name, s.last_name, 
-                        m.first_name, m.last_name 
+                        m.first_name, m.last_name, work_id 
                         FROM list_of_works 
                         JOIN tasks USING (task_id) 
                         JOIN staff as s USING (worker_id)
@@ -1465,9 +1465,9 @@ def task():
             conn.commit()
             res = cursor.fetchall()
 
-            result, cnt = {}, 1
+            result = {}
             for i in res:
-                name = 'task №' + str(cnt)
+                name = 'task №' + str(i[7])
                 result[name] = {
                     'task name': i[0],
                     'task duration': str(i[1]),
@@ -1477,7 +1477,6 @@ def task():
                     'manager first name': i[5],
                     'manager last name': i[6]
                 }
-                cnt += 1
             return jsonify(result)
     else:
         abort(405)
