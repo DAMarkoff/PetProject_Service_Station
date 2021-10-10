@@ -1442,7 +1442,7 @@ def task():
         if not token or not email or not serv_order_id:
             abort(400, description='The token, email, service_order_id are required')
 
-        if not str(serv_order_id.isdigit()):
+        if not serv_order_id.isdigit():
             abort(400, description='Please, provide the service_order_id in digits')
 
         user_auth = user_authorization(email, token)
