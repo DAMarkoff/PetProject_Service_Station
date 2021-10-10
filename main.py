@@ -1504,6 +1504,7 @@ def task():
             for i in res:
                 if task_number == i[0]:
                     flag = True
+                    print(i[0])
                     break
 
             if not flag:
