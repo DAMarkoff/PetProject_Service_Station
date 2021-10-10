@@ -1465,10 +1465,10 @@ def task():
             conn.commit()
             res = cursor.fetchall()
 
-            result = {}
+            result, cnt = {}, 1
             for i in res:
-                name = 'task' + str(i)
-                result[name]:{
+                name = 'task' + str(cnt)
+                result[name] = {
                     'task name': res[i][0],
                     'task duration': res[i][1],
                     'task cost': res[i][2],
@@ -1477,6 +1477,7 @@ def task():
                     'manager first name': res[i][5],
                     'manager last name': res[i][6]
                 }
+                cnt += 1
             return jsonify(result)
     else:
         abort(405)
