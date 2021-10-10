@@ -1467,10 +1467,10 @@ def task():
 
             result, cnt = {}, 1
             for i in res:
-                name = 'task' + str(cnt)
+                name = 'task №' + str(cnt)
                 result[name] = {
                     'task name': i[0],
-                    'task duration': i[1],
+                    'task duration': str(i[1]),
                     'task cost': i[2],
                     'worker first name': i[3],
                     'worker last name': i[4],
