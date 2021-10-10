@@ -1504,10 +1504,9 @@ def task():
             for i in res:
                 if task_number == i[0]:
                     flag = True
-                    print(i[0])
                     break
 
-            if flag == False:
+            if not flag:
                 abort(400, description='Incorrect task number')
 
             sql_query = """DELETE FROM list_of_works WHERE work_id = {0}""". format(task_number)
