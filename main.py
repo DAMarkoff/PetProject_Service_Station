@@ -1437,7 +1437,7 @@ def task():
         email = request.form.get('email')
         token = request.form.get('token')
         serv_order_id = request.form.get('service_order_id')
-        task_number = request.form.get('task_number')
+        task_number = int(request.form.get('task_number'))
 
         if not token or not email or not serv_order_id:
             abort(400, description='The token, email, service_order_id are required')
@@ -1502,7 +1502,7 @@ def task():
 
             flag = False
             for i in res:
-                if int(task_number) == int(i[0]):
+                if task_number == i[0]:
                     flag = True
                     break
 
