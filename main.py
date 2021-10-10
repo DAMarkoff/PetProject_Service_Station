@@ -1496,12 +1496,24 @@ def task():
             if not task_number.isdigit():
                 abort(400, description='Please, provide the task_number in digits')
 
+            sql_query = """SELECT work_id FROM list_of_works WHERE serv_order_id = {0}""".format(serv_order_id)
+            cursor.execute(sql_query)
+            res = cursor.fetchone()
+
+            if task_number != res[0]:
+                abort(400, description='Incorrect task number')
+
             sql_query = """DELETE FROM list_of_works WHERE work_id = {0}""". format(task_number)
             cursor.execute(sql_query)
             conn.commit()
 
-            result = 'The task number ' + task_number + ' has been deleted'
-            return result
+            text = 'The task number {{ name }} has been deleted'
+            template = Template(text)
+
+            result = {
+                "confirmation": template.render(name=task_number),
+            }
+            return jsonify(result)
     else:
         abort(405)
 
