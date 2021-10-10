@@ -1507,7 +1507,7 @@ def task():
                     print(i[0])
                     break
 
-            if not flag:
+            if flag == False:
                 abort(400, description='Incorrect task number')
 
             sql_query = """DELETE FROM list_of_works WHERE work_id = {0}""". format(task_number)
