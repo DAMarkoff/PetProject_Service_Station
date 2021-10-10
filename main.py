@@ -1500,7 +1500,13 @@ def task():
             cursor.execute(sql_query)
             res = cursor.fetchall()
 
-            if task_number not in res:
+            flag = False
+            for i in res:
+                if task_number == i[0]:
+                    flag = True
+                    break
+
+            if not flag:
                 abort(400, description='Incorrect task number')
 
             sql_query = """DELETE FROM list_of_works WHERE work_id = {0}""". format(task_number)
