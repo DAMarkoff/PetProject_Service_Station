@@ -1437,10 +1437,13 @@ def task():
         email = request.form.get('email')
         token = request.form.get('token')
         serv_order_id = request.form.get('service_order_id')
-        task_name = request.form.get('task_name')
+        task_number = request.form.get('task_number')
 
         if not token or not email or not serv_order_id:
             abort(400, description='The token, email, service_order_id are required')
+
+        if not serv_order_id.isdigit():
+            abort(400, description='Please, provide the service_order_id in digits')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
@@ -1451,7 +1454,16 @@ def task():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        if not task_name:
+        sql_query = """SELECT user_id FROM tire_service_order WHERE serv_order_id = '{0}';""".format(serv_order_id)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchone()
+        # cursor.close()
+
+        if get_user_id(email) != res_[0]:
+            abort(403, description='It is not your tire service order!')
+
+        if not task_number:
 
             sql_query = """SELECT task_name, task_duration, task_cost, s.first_name, s.last_name, 
                         m.first_name, m.last_name, work_id 
@@ -1467,7 +1479,7 @@ def task():
 
             result = {}
             for i in res:
-                name = 'task №' + str(i[7])
+                name = 'task № ' + str(i[7])
                 result[name] = {
                     'task name': i[0],
                     'task duration': str(i[1]),
@@ -1478,6 +1490,18 @@ def task():
                     'manager last name': i[6]
                 }
             return jsonify(result)
+
+        else:
+
+            if not task_number.isdigit():
+                abort(400, description='Please, provide the task_number in digits')
+
+            sql_query = """DELETE FROM list_of_works WHERE work_id = {0}""". format(task_number)
+            cursor.execute(sql_query)
+            conn.commit()
+
+            result = 'The task number ' + task_number + ' has been deleted'
+            return result
     else:
         abort(405)
 
