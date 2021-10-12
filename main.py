@@ -977,13 +977,13 @@ def storage_order():
             sql_query = """WITH dates_intersection AS (
                             SELECT DISTINCT shelf_id FROM storage_orders WHERE 
                                 (
-                                    start_date BETWEEN {0} AND {1}
+                                    start_date BETWEEN '{0}' AND '{1}'
                                     OR
-                                    stop_date BETWEEN {0} AND {1}
+                                    stop_date BETWEEN '{0}' AND '{1}'
                                     OR
-                                    {0} BETWEEN start_date AND stop_date 
+                                    '{0}' BETWEEN start_date AND stop_date 
                                     OR
-                                    {1} BETWEEN start_date AND stop_date
+                                    '{1}' BETWEEN start_date AND stop_date
                                 )	
                             AND
                             size_id = {2})
