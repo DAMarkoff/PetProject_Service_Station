@@ -78,7 +78,7 @@
 							"formdata": [
 								{
 									"key": "email",
-									"value": "dan@dan.us",
+									"value": "max@bush.us",
 									"type": "text"
 								},
 								{
@@ -493,12 +493,17 @@
 								},
 								{
 									"key": "start_date",
-									"value": "2021.10.01",
+									"value": "2021-11-02",
 									"type": "text"
 								},
 								{
 									"key": "stop_date",
-									"value": "2021.11.01",
+									"value": "2021-11-24",
+									"type": "text"
+								},
+								{
+									"key": "user_vehicle_id",
+									"value": "",
 									"type": "text"
 								}
 							]
@@ -535,22 +540,22 @@
 								},
 								{
 									"key": "st_ord_id",
-									"value": "6",
+									"value": "13",
 									"type": "text"
 								},
 								{
 									"key": "size_name",
-									"value": "2",
+									"value": "18",
 									"type": "text"
 								},
 								{
 									"key": "start_date",
-									"value": "2021-09-24",
+									"value": "2021-11-25",
 									"type": "text"
 								},
 								{
 									"key": "stop_date",
-									"value": "2021-09-29",
+									"value": "2021-12-25",
 									"type": "text"
 								}
 							]
@@ -587,7 +592,7 @@
 								},
 								{
 									"key": "storage_order_id",
-									"value": "15",
+									"value": "20",
 									"type": "text"
 								}
 							]
@@ -635,6 +640,54 @@
 								{
 									"key": "user_vehicle_id",
 									"value": "8",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}/tire_service_order",
+							"host": [
+								"{{url}}"
+							],
+							"path": [
+								"tire_service_order"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change the tire service order",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "{{email}}",
+									"type": "text"
+								},
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "text"
+								},
+								{
+									"key": "service order id",
+									"value": "17",
+									"type": "text"
+								},
+								{
+									"key": "new order date",
+									"value": "2021-11-01 13:05",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "new user vehicle id",
+									"value": "6",
 									"type": "text"
 								}
 							]
@@ -708,7 +761,7 @@
 								},
 								{
 									"key": "service_order_id",
-									"value": "17",
+									"value": "1",
 									"type": "text"
 								},
 								{
@@ -737,9 +790,9 @@
 					"response": []
 				},
 				{
-					"name": "Change the tire service order",
+					"name": "Delete the tsak from tire service order",
 					"request": {
-						"method": "PUT",
+						"method": "DELETE",
 						"header": [],
 						"body": {
 							"mode": "formdata",
@@ -755,30 +808,25 @@
 									"type": "text"
 								},
 								{
-									"key": "service order id",
-									"value": "17",
+									"key": "service_order_id",
+									"value": "1",
 									"type": "text"
 								},
 								{
-									"key": "new order date",
-									"value": "2021-11-01 13:05",
-									"type": "text",
-									"disabled": true
-								},
-								{
-									"key": "new user vehicle id",
-									"value": "6",
+									"key": "task_number",
+									"value": "45",
 									"type": "text"
 								}
 							]
 						},
 						"url": {
-							"raw": "{{url}}/tire_service_order",
+							"raw": "{{url}}/tire_service_order/task",
 							"host": [
 								"{{url}}"
 							],
 							"path": [
-								"tire_service_order"
+								"tire_service_order",
+								"task"
 							]
 						}
 					},

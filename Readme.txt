@@ -53,7 +53,7 @@ Done:
 		/storage_orders:
 			*[GET] - request the storage_order 			- not implemented (the info is provided in user_info. there will be another endpoint for managers)
 			[POST] - create new storage_order
-			[PUT] - change the storage_order
+			*[PUT] - change the storage_order			- closed. on maintenance
 			[DELETE] - delete the storage_order
 			
 		/warehouse:
@@ -68,7 +68,7 @@ Done:
 		/tire_service_order/task:
 			*[GET] - request the task 					- not implemented (the info is provided in user_info. there will be another endpoint for managers)
 			[POST] - create new task
-			*[PUT] - change the task 							- not implemented (the user can delete or add tasks in the tire service order. only the manager can change workers)
+			*[PUT] - change the task 					- not implemented (the user can delete or add tasks in the tire service order. only the manager can change workers)
 			[DELETE] - delete the task
 		
 	block-diagram:
@@ -82,26 +82,26 @@ d		/user_info
 		/users/deactivate
 		/users/login
 		/users
-		/users/user_info		- not implemented
+		/users/user_info		
 		/warehouse
 		/vehicle
-		/storage_order			- not implemented
-		/tire_service_order		- not implemented
+		/storage_order			
+		/tire_service_order		
 	
 ToDo Dmitrii:
-		- u_veh_id in storage_order [PUT]?
-		- remove st_ord_cost from /storage_order [PUT] and add optional u_veh_id
+
+		- user_vehicle_id in storage_order [PUT]?
+		- remove storage_order_cost from /storage_order [PUT] and add optional user_vehicle_id
 		- using conn.close()?
 	
 	In progress: 
-		/tire_service_order/task [PUT], [DELETE]
-		- exclude hash_password and salt from user_info after the registration
-		- add to the /users [GET] active choice
 		- swagger
+		- dates when workers are selected
+		- put the timestamp in the DB as result of [POST]
 	
 	- vehicle.name in /vehicle	[POST] - ok, but in [PUT]?
-	- dates: create storage and tire_service_order before today
-    - hello message when the user has registered
+	- dates: change the storage_order dates
+    - hello message when the user has been registered
     - 401 status code when the email or token does not exist?
     - change password
     - restore password
@@ -113,7 +113,7 @@ ToDo Dmitrii:
 
 	- drop pass column from users
 	- warehouse:
-		- create a summary JSON report on demand
+		- create an on demand summary JSON report 
 
 	- the user can delete a tire_service_order with an expired date
 	- the user can create two tire_service_orders for the same vehicle on the same date and time 
@@ -157,6 +157,15 @@ DISCLAIMER:
 user_authorization checks: 	
 	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: The token is invalid, please log in
+		
+In memories:
+	- the name of the availabe column in the warehouse has been changed to active - need to be tested
+	- the size_id column in the storage_orders has been deleted - need to be tested
+	- the st_ord_cost in the storage_orders has been renamed to storage_order_cost
+	- the st_ord_id in the storage_orders has been renamed to storage_order_id
+	- the u_veh_id in the user_vehicle has been renamed to user_vehicle_id
+	- the u_veh_id in the tire_service_order has been renamed to user_vehicle_id
+	- the serv_order__id in the tire_service_order has been renamed to service_order_id
 
 /users/login [POST]
 	input:  
@@ -237,47 +246,44 @@ user_authorization checks:
 	input:
 			token				- required
 			email				- required
-			start_date			- required
-			stop_date			- required
+			start_date			- required - format - YYYY-MM-DD
+			stop_date			- required - format - YYYY-MM-DD
 			size_name			- required
 	
 	output:
-			email
+			storage_order_cost
 			start_date
 			stop_date
-			size_id
 			shelf_id
-			st_ord_id
+			storage_order_id
 
 	user_authorization
-		if there is no available shelf of the size needed in the warehouse: note
-            the user can specify either the size_name or the user_vehicle_id
-                if both size_name and user_vehicle_id are specified, the size_name is ignored
+		the user can specify either the size_name or the user_vehicle_id
+			if both size_name and user_vehicle_id are specified, the size_name is ignored
 				
 !!!	Delete the size_id from storage_orders table
-				
-	Даты:
-		в первую очередь выбираем полку с минимальным ИД, для которой нет ни одного заказа:
-			sr_ord_id is NULL
-		либо если дата окончания заказа менее необходимой даты старта и дата 
+
+	shelf_id selection:
+		- min shelf_id, that have no storage_order and matches on size_id needed
+		- min shelf_id with the dates, that do not cross others
 
 				
-/storage_orders [PUT]				
+/storage_orders [PUT]	=========================================== ON MAINTENANCE ===============================================			
 	input:
-			st_ord_id 			- required
+			storage_order_id 			- required
 			email				- required
 			token				- required
 			start_date			- optional
 			stop_date			- optional
-			st_ord_cost			- optional
+			storage_order_cost	- optional
 			size_id				- optional
 			
 	output:
-			st_ord_id
+			storage_order_id
 			start_date
 			stop_date
 			size_id
-			st_ord_cost
+			storage_order_cost
 			shelf_id
 	
 	user_authorization
@@ -294,7 +300,7 @@ user_authorization checks:
 			size_name			-required
 	
 	output:
-			u_veh_id
+			user_vehicle_id
 			vehicle_name
 			size_name
 			
@@ -396,7 +402,7 @@ user_authorization checks:
 			new_size_name		- optional
 			
 	output:
-			u_veh_id
+			user_vehicle_id
 			old_vehicle_name
 			new_vehicle_name
 			old_size_name

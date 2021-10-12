@@ -6,7 +6,7 @@ import uuid
 import re
 import redis
 import datetime
-from flask_swagger_ui import get_swaggerui_blueprint
+# from flask_swagger_ui import get_swaggerui_blueprint
 import bcrypt
 import  git
 from git import Repo
@@ -22,66 +22,43 @@ def user_exists(where, email):
         cursor.execute(sql_query)
         conn.commit()
         usr_id_ = cursor.fetchone()
-        # cursor.close()
 
         if not usr_id_:
             return False
     return True
 
 
-# def user_exists_by_id(user_id):
-#     if conn:
-#         sql_query = "SELECT user_id FROM users WHERE user_id = '{0}'".format(user_id)
-#         cursor.execute(sql_query)
-#         conn.commit()
-#         usr_id_ = cursor.fetchone()
-#         # cursor.close()
-#
-#         if usr_id_:
-#             return True
-#     return False
-
-
-def vehicle_exists(u_veh_id):
-    sql_query = """SELECT user_id FROM user_vehicle WHERE u_veh_id = '{0}'""".format(u_veh_id)
+def vehicle_exists(user_vehicle_id):
+    sql_query = """SELECT user_id FROM user_vehicle WHERE user_vehicle_id = '{0}'""".format(user_vehicle_id)
     cursor.execute(sql_query)
     conn.commit()
     res_ = cursor.fetchone()
-    # cursor.close()
 
     if res_:
         return True
     return False
 
 
-def storage_order_exists(st_ord_id):
-    sql_query = """SELECT user_id FROM storage_orders WHERE st_ord_id = '{0}';""".format(st_ord_id)
+def storage_order_exists(storage_order_id):
+    sql_query = """SELECT user_id FROM storage_orders WHERE storage_order_id = '{0}';""".format(storage_order_id)
     cursor.execute(sql_query)
     conn.commit()
     res_ = cursor.fetchone()
-    # cursor.close()
 
     if res_:
         return True
     return False
 
 
-def tire_service_order_exists(serv_order_id):
-    sql_query = """SELECT user_id FROM tire_service_order WHERE serv_order_id = '{0}';""".format(serv_order_id)
+def tire_service_order_exists(service_order_id):
+    sql_query = """SELECT user_id FROM tire_service_order WHERE service_order_id = '{0}';""".format(service_order_id)
     cursor.execute(sql_query)
     conn.commit()
     res_ = cursor.fetchone()
-    # cursor.close()
 
     if res_:
         return True
     return False
-
-
-# def token_exist(email, token):
-#     if token == r.get(email):
-#         return True
-#     return False
 
 
 def get_user_id(email):
@@ -90,7 +67,6 @@ def get_user_id(email):
         cursor.execute(sql_query)
         conn.commit()
         usr_id_ = cursor.fetchone()
-        # cursor.close()
 
         return usr_id_[0]
 
@@ -102,7 +78,6 @@ def shelf_avail(size_name):
         cursor.execute(sql_query)
         conn.commit()
         avail = cursor.fetchone()
-        # cursor.close()
 
         if avail:
             return True
@@ -116,7 +91,6 @@ def shelf_id_by_size(size_name):
         cursor.execute(sql_query)
         conn.commit()
         shelf_id_ = cursor.fetchone()
-        # cursor.close()
 
         return shelf_id_[0]
 
@@ -178,84 +152,18 @@ def user_active(email):
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        # cursor.close()
 
         if res_:
             return True
         return False
 
 
-# def size_name_by_id(size_id):
-#     if conn:
-#         sql_query = """SELECT size_name FROM sizes WHERE size_id = '{0}'""".format(size_id)
-#         cursor.execute(sql_query)
-#         conn.commit()
-#         res_ = cursor.fetchone()
-#         # cursor.close()
-#
-#         if res_ is None:
-#             return None
-#         return res_[0]
-#
-#
-# def size_id_by_name(size_name):
-#     if conn:
-#         sql_query = "SELECT size_id FROM sizes WHERE size_name = '{0}'".format(size_name)
-#         cursor.execute(sql_query)
-#         conn.commit()
-#         size_id_ = cursor.fetchone()
-#         # cursor.close()
-#
-#         if size_id_ is None:
-#             return None
-#         return size_id_[0]
-
-
-def size_one_by_var(select, where, what):
-    if conn:
-        sql_query = """SELECT {0} FROM sizes WHERE {1} = '{2}'""".format(select, where, what)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-        # cursor.close()
-
-        if not res_:
-            return None
-        return res_[0]
-
-# def vehicle_name_by_id(vehicle_id):
-#     if conn:
-#         sql_query = """SELECT vehicle_name FROM vehicle WHERE vehicle_id = '{0}'""".format(vehicle_id)
-#         cursor.execute(sql_query)
-#         conn.commit()
-#         res_ = cursor.fetchone()
-#         # cursor.close()
-#
-#         if res_ is None:
-#             return None
-#         return res_[0]
-#
-#
-# def vehicle_id_by_name(vehicle_name):
-#     if conn:
-#         sql_query = """SELECT vehicle_id FROM vehicle WHERE vehicle_name = '{0}'""".format(vehicle_name)
-#         cursor.execute(sql_query)
-#         conn.commit()
-#         res_ = cursor.fetchone()
-#         # cursor.close()
-#
-#         if res_ is None:
-#             return None
-#         return res_[0]
-
-
-def vehicle_one_by_var(select, from_db, where, what):
+def get_value_from_table(select, from_db, where, what):
     if conn:
         sql_query = """SELECT {0} FROM {1} WHERE {2} = '{3}'""".format(select, from_db, where, what)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
-        # cursor.close()
 
         if not res_:
             return None
@@ -281,7 +189,7 @@ def password_is_valid(salt, password, password_db):
 
 
 def save_to_file(user_id, email, password, reason):
-    separator = '(separator)'
+    separator = '/'
     with open('user_auth.txt', 'a+') as file_user_auth:
         timestamp_now = str(datetime.datetime.now())[:22] + str(datetime.datetime.now().astimezone())[26:]
         content = timestamp_now + separator + str(user_id) + separator + \
