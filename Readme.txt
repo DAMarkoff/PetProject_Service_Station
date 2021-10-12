@@ -253,6 +253,13 @@ user_authorization checks:
 		if there is no available shelf of the size needed in the warehouse: note
             the user can specify either the size_name or the user_vehicle_id
                 if both size_name and user_vehicle_id are specified, the size_name is ignored
+				
+!!!	Delete the size_id from storage_orders table
+				
+	Даты:
+		в первую очередь выбираем полку с минимальным ИД, для которой нет ни одного заказа:
+			sr_ord_id is NULL
+		либо если дата окончания заказа менее необходимой даты старта и дата 
 
 				
 /storage_orders [PUT]				
@@ -488,6 +495,20 @@ user_authorization checks:
 			confirmaion message
 	
 	user_authorization
-			if it is not user's order: :)
-				if numbers_of_tasks is none or not isdigit: return warning message
-					
+		if it is not user's order: :)
+			if numbers_of_tasks is none or not isdigit: return warning message
+				
+/tire_service_order/task [DELETE]
+	input:
+			email				- required
+			token				- required
+			service_order_id	- required
+			task_number			- optional
+			
+	output:
+			list of works OR confirmaion message
+	
+	user_authorization
+		if it is not user's order: :)
+			if numbers_of_tasks is none or not isdigit: return warning message
+				

@@ -915,11 +915,17 @@ def storage_order():
         if not token or not email or not start_date or not stop_date:
             abort(400, description='The token, email, start_date, stop_date and size_name data are required')
 
+        if not size_name and not u_veh_id:
+            abort(400, description='The size_name OR user_vehicle_id is required')
+
         if size_name and u_veh_id:
             abort(400, description='The size_name OR user_vehicle_id is required')
 
-        if not size_name and not u_veh_id:
-            abort(400, description='The size_name OR user_vehicle_id is required')
+        if start_date < str(datetime.datetime.now()):
+            abort(400, description='The start_date can not be less than today')
+
+        if start_date > stop_date:
+            abort(400, description='The start date can not be greater than the stop date')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
@@ -934,26 +940,100 @@ def storage_order():
                 abort(403, description='It is not your vehicle! Somebody call the police!')
             size_name = size_one_by_var('size_name', 'size_id', vehicle_one_by_var('size_id', 'user_vehicle','u_veh_id', u_veh_id))
 
-        # is there the necessary free storage space
-        if not shelf_avail(size_name):
-            abort(400, description="Sorry, we do not have the storage you need")
+        size_id = size_one_by_var('size_id', 'size_name', size_name)
 
-        shelf_id = shelf_id_by_size(size_name)
+        #set the storage order cost 1000, the calculation will be implemented after some time
+        st_ord_cost = 1000
 
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        size_id_by = size_one_by_var('size_id', 'size_name', size_name)
-        if not size_id_by:
-            abort(400, description='Unknown size_name')
-
-        # create storage order
-        sql_query = """INSERT INTO storage_orders (user_id, start_date, stop_date, size_id, shelf_id, 
-                    st_ord_cost) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}');""".\
-                    format(user_id, start_date, stop_date, size_id_by, shelf_id, 1000)
+                    # Проверяем, вдруг есть полка нужного размера вообще без заказов
+        sql_query = """SELECT w.shelf_id FROM storage_orders AS so RIGHT JOIN warehouse AS w USING(shelf_id) WHERE
+                        st_ord_id IS NULL
+                        AND
+                        w.size_id = {0}""".format(size_id)
         cursor.execute(sql_query)
-        conn.commit()
-        # cursor.close()
+        res = cursor.fetchall()
+
+        if res:
+            # Если таких несколько, выбираем меньшую по ИД
+            shelves = []
+            for i in res:
+                shelves.append(i[0])
+
+            shelf_id = min(shelves)
+
+            # create storage order
+            sql_query = """INSERT INTO storage_orders (user_id, start_date, stop_date, size_id, shelf_id, 
+                                            st_ord_cost) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}');""". \
+                format(user_id, start_date, stop_date, size_id, shelf_id, st_ord_cost)
+            cursor.execute(sql_query)
+            conn.commit()
+
+        # Если нет:
+        else:
+                # Запрос на полки, у которых нет пересечений по датам
+            sql_query = """WITH dates_intersection AS (
+                            SELECT DISTINCT shelf_id FROM storage_orders WHERE 
+                                (
+                                    start_date BETWEEN {0} AND {1}
+                                    OR
+                                    stop_date BETWEEN {0} AND {1}
+                                    OR
+                                    {0} BETWEEN start_date AND stop_date 
+                                    OR
+                                    {1} BETWEEN start_date AND stop_date
+                                )	
+                            AND
+                            size_id = {2})
+    
+                            SELECT shelf_id FROM storage_orders WHERE shelf_id NOT IN 
+                            (SELECT shelf_id FROM dates_intersection) 
+                            AND 
+                            size_id = {2}""".format(start_date, stop_date, size_id)
+            cursor.execute(sql_query)
+            res = cursor.fetchall()
+
+            # Если есть, то записываем заказ на нее
+            if res:
+                # Если таких несколько, выбираем меньшую по ИД
+                shelves = []
+                for i in res:
+                    shelves.append(i[0])
+
+                shelf_id = min(shelves)
+
+                # create storage order
+                sql_query = """INSERT INTO storage_orders (user_id, start_date, stop_date, size_id, shelf_id, 
+                                    st_ord_cost) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}');""". \
+                    format(user_id, start_date, stop_date, size_id, shelf_id, st_ord_cost)
+                cursor.execute(sql_query)
+                conn.commit()
+
+            else:
+                abort(400, description='We do not have storage place on the dates you need')
+                            # Если незанятых полок нужного размера нет, сверяем даты
+                            # Выбираем полки с необходимым размером и минимальной дельтой от необходимых дат
+                            # предоставляем информацию о дельтах дат и перенаправляем на ресепшн
+
+                # sql_query = """SELECT shelf_id FROM storage_order JOIN warehouse USING (shelf_id)
+                # WHERE ({0} > stop_date OR {1} < start_date) AND size_id = {2}""".format(start_date, stop_date, size_id)
+                # cursor.execute(sql_query)
+                # res = cursor.fetchall()
+
+                # Если такие есть, выбираем минимальную ИД и оформляем заказ
+                # if res:
+
+
+
+
+                            # # is there the necessary free storage space
+                            # if not shelf_avail(size_name):
+                            #     abort(400, description="Sorry, we do not have the storage you need")
+                            #
+                            # shelf_id = shelf_id_by_size(size_name)
+
 
         # get the new storage order id
         sql_query = """SELECT st_ord_id FROM storage_orders WHERE shelf_id = '{0}';""".format(shelf_id)
@@ -964,13 +1044,20 @@ def storage_order():
 
         new_st_ord_id = res_[0]
 
-        # set the shelf_id as not available
-        sql_query = """UPDATE warehouse SET available = False WHERE shelf_id = '{0}';""".format(shelf_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        # cursor.close()
+                    # # set the shelf_id as not available
+                    # sql_query = """UPDATE warehouse SET available = False WHERE shelf_id = '{0}';""".format(shelf_id)
+                    # cursor.execute(sql_query)
+                    # conn.commit()
+                    # # cursor.close()
 
-        return jsonify({'shelf_id': shelf_id, 'storage order id': new_st_ord_id})
+        result = {
+            'storage order id': new_st_ord_id,
+            'shelf_id': shelf_id,
+            'start_date': start_date,
+            'stop_date': stop_date,
+            'storage_order_cost': st_ord_cost
+        }
+        return jsonify(result)
     elif request.method == 'PUT':
         st_ord_id = request.form.get('st_ord_id')
         token = request.form.get('token')
@@ -994,8 +1081,6 @@ def storage_order():
 
         if not storage_order_exists(st_ord_id):
             abort(400, description='The storage order does not exists')
-
-        size_id = size_one_by_var('size_id', 'size_name', size_name)
 
         # get the initial data of the storage order
         sql_query = """SELECT start_date, stop_date, size_id, st_ord_cost, shelf_id, user_id 
@@ -1034,10 +1119,11 @@ def storage_order():
             stop_date = stop_date_db
         if not st_ord_cost:
             st_ord_cost = st_ord_cost_db
-        if not size_id:
+        if not size_name:
             size_id = size_id_db
         else:
             # if the tire size data needs to be changed
+            size_id = size_one_by_var('size_id', 'size_name', size_name)
             if int(size_id) != size_id_db:
                 sql_query = """SELECT MIN(shelf_id) FROM warehouse WHERE available = 'True' 
                                 AND size_id = '{0}';""".format(size_id)
