@@ -79,7 +79,7 @@ def users():
             conn.commit()
             res = cursor.fetchall()
 
-            if res is not None:
+            if res:
                 result = []
                 for i in range(len(res)):
                     result.append({
@@ -94,7 +94,7 @@ def users():
                     'confirmation': 'There are no users in the DB'
                 }
         else:
-            if not isinstance(user_id, int):   #  str(user_id).isdigit():
+            if not str(user_id).isdigit():
                 abort(400, description='The user_id must contain only digits')
 
             if not user_exists('user_id', user_id):
@@ -1422,7 +1422,7 @@ def task():
         if not token or not email or not service_order_id or not task_name or not numbers_of_task:
             abort(400, description='The token, email, service_order_id and task_name are required')
 
-        if not isinstance(numbers_of_task, int) or not isinstance(service_order_id, int):
+        if not str(numbers_of_task).isdigit() or not str(service_order_id).isdigit():
             abort(400, description='Please, provide a numbers of tasks and service_order_id in digits')
 
         user_auth = user_authorization(email, token)
@@ -1480,7 +1480,7 @@ def task():
         if not token or not email or not service_order_id:
             abort(400, description='The token, email, service_order_id are required')
 
-        if not isinstance(service_order_id, int):
+        if not str(service_order_id).isdigit():
             abort(400, description='Please, provide the service_order_id in digits')
 
         user_auth = user_authorization(email, token)
@@ -1530,7 +1530,7 @@ def task():
 
         else:
 
-            if not isinstance(task_number, int):
+            if not str(task_number).isdigit():
                 abort(400, description='Please, provide the task_number in digits')
 
             sql_query = """SELECT work_id FROM list_of_works WHERE service_order_id = {0}""".format(service_order_id)
