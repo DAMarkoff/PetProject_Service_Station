@@ -87,8 +87,7 @@ def users():
                         "f_name": res[i][1],
                         "l_name": res[i][2],
                         "phone": res[i][3],
-                        "email": res[i][4],
-                        "active": res[i][5]
+                        "email": res[i][4]
                     })
             else:
                 result = {
@@ -119,8 +118,7 @@ def users():
                     "f_name": res[1],
                     "l_name": res[2],
                     "phone": res[3],
-                    "email": res[4],
-                    "active": res[5]
+                    "email": res[4]
                 })
             else:
                 result = {
