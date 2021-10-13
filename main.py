@@ -59,7 +59,7 @@ def unauthorized(e):
 def users():
     # request a short data about all/one of the users
     if request.method == 'GET':
-        user_id = request.args.get('user_id')
+        user_id = int(request.args.get('user_id'))
         active = request.args.get('active')
 
         if not conn:
@@ -515,7 +515,7 @@ def login():
             abort(400, description="The user does not exist. Please, register")
 
         if not user_active(email):
-            abort(400, description='User is deactivated')
+            abort(400, description='The user is deactivated')
 
         if not conn:
             abort(503, description='There is no connection to the database')
