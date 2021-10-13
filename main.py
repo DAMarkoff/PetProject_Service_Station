@@ -149,7 +149,7 @@ def users():
         if not check_last_name['result']:
             abort(400, description=check_last_name['text'])
 
-        # making sure that the password is strong enough 8-32 chars,
+        # make sure that the password is strong enough: 8-32 chars,
         # min one digit, min one upper and min one lower letter, min one special char
         check_password = validate_password(password)
         if not check_password['result']:
@@ -208,8 +208,6 @@ def users():
             abort(401, description=user_auth['text'])
 
         r.expire(email, 600)
-       # if f_name is None and l_name is None and phone is None and new_email is None:
-       #     abort(400, description='Ok. Nothing needs to be changed :)')
 
         if not conn:
             abort(503, description='There is no connection to the database')
@@ -221,37 +219,31 @@ def users():
         conn.commit()
         res_ = cursor.fetchone()
 
-        user_id_db, f_name_db, l_name_db, phone_db = res_[0], res_[1], res_[2], res_[3]
+        user_id_db, f_name_db, l_name_db, phone_db = [data for data in res_]
 
         if (f_name == f_name_db and l_name == l_name_db and phone == phone_db and not new_email) or \
                 (not f_name and not l_name and not phone and not new_email):
             abort(400, description='Ok. Nothing needs to be changed :)')
 
-        flag_relogin = False
         # what data should be changed
         if not f_name or f_name == f_name_db:
             f_name = 'The first name has not been changed'
             f_name_to_db = f_name_db
         else:
             f_name_to_db = f_name
+
         if not l_name or l_name == l_name_db:
             l_name = 'The last name has not been changed'
             l_name_to_db = l_name_db
         else:
             l_name_to_db = l_name
+
         if not phone or phone == phone_db:
             phone = 'The phone number has not been changed'
             new_phone_to_db = phone_db
         else:
             new_phone_to_db = phone
-        # change password
-        # if password is None:
-        #     password = password_db
-        # else:
-        #     check_password = validate_password(password)
-        #     if not check_password['result']:
-        #         abort(400, description=check_password['text'])
-        #     flag_relogin = True
+
         if not new_email or new_email == email:
             new_email = 'The email has not been changed'
             new_email_to_db = email
@@ -259,21 +251,17 @@ def users():
             if user_exists('email', new_email):
                 abort(400, description="The user with this email already exists")
             check_email = validate_email(new_email)
+
             if not check_email['result']:
                 abort(400, description=check_email['text'])
             save_to_file(user_id_db, email + '->' + new_email, '!password!', 'user-changed-email')
             new_email_to_db = new_email
-            flag_relogin = True
-            # push_user_auth()
-
-        # if the pass and/or email have been changed - the user must log in again
-        if flag_relogin:
             r.delete(email)
+            # push_user_auth()
 
         # update the data in the users table
         sql_query = """UPDATE users SET first_name = '{0}', last_name = '{1}', email = '{2}', phone = '{3}'
-                     WHERE user_id = '{4}';""".format(f_name_to_db, l_name_to_db, new_email_to_db,
-                                                      new_phone_to_db, user_id_db)
+            WHERE user_id = '{4}';""".format(f_name_to_db, l_name_to_db, new_email_to_db, new_phone_to_db, user_id_db)
         cursor.execute(sql_query)
         conn.commit()
 
@@ -297,8 +285,8 @@ def users():
         sure = request.form.get('ARE_YOU_SURE?')
         admin = request.form.get('admin_password')
 
-        if token is None or email is None or sure is None:
-            abort(400, description='The token, email and sure data are required')
+        if not token or not email or not sure or not admin:
+            abort(400, description='The token, email, answer and admin password data are required')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
@@ -318,7 +306,7 @@ def users():
         conn.commit()
         res_ = cursor.fetchone()
 
-        first_name, last_name, user_id = res_[0], res_[1], res_[2]
+        first_name, last_name, user_id = [data for data in res_]
 
         sql_query = """DELETE FROM users WHERE email = '{0}'""".format(email)
         cursor.execute(sql_query)
@@ -383,13 +371,13 @@ def user_info():
             result_order = 'You do not have any storage orders'
         else:
             result_order = []
-            for i in range(len(res_)):  # does the user need the size_id or size_name data?
+            for i in res_:  # does the user need the size_id or size_name data?
                 result_order.append({
-                    "storage_order_id": res_[i][0],
-                    "start_date": res_[i][2],
-                    "stop_date": res_[i][3],
-                    "order cost": res_[i][5],
-                    "shelf_id": res_[i][6]
+                    "storage_order_id": i[0],
+                    "start_date": i[2],
+                    "stop_date": i[3],
+                    "order cost": i[5],
+                    "shelf_id": i[6]
                 })
 
         # collecting data about the user's vehicles from the user_vehicle, vehicle and sizes db's
@@ -405,11 +393,11 @@ def user_info():
             result_vehicle = 'You do not have any vehicles'
         else:
             result_vehicle = []
-            for i in range(len(res_)):
+            for i in res_:
                 result_vehicle.append({
-                    'vehicle_id': res_[i][0],
-                    'vehicle_name': res_[i][1],
-                    'size_name': res_[i][2]
+                    'vehicle_id': i[0],
+                    'vehicle_name': i[1],
+                    'size_name': i[2]
                 })
 
         sql_query = """CREATE OR REPLACE VIEW temp AS
@@ -447,8 +435,8 @@ def user_info():
             result_tire_service_order = 'You do not have any tire service orders'
         else:
             result_tire_service_order = []
-            for i in range(len(res_)):
-                service_order_id = res_[i][0]
+            for i in res_:
+                service_order_id = i[0]
 
                 sql_query = """SELECT SUM(task_cost) FROM temp 
                                 WHERE service_order_id = '{0}'""".format(service_order_id)
@@ -471,18 +459,18 @@ def user_info():
                     result_tire_service_order_tasks = 'You do not have any tasks in your tire service order.'
                 else:
                     result_tire_service_order_tasks = []
-                    for j in range(len(res_task)):
+                    for j in res_task:
                         result_tire_service_order_tasks.append({
-                            'task_name': res_task[j][0],
-                            'worker_id': res_task[j][1],
-                            'task cost': res_task[j][2]
+                            'task_name': j[0],
+                            'worker_id': j[1],
+                            'task cost': j[2]
                         })
 
                 result_tire_service_order.append({
                     'service_order_id': service_order_id,
-                    'serv_order_date': res_[i][1],
-                    'manager_id': res_[i][2],
-                    'vehicle_id': res_[i][3],
+                    'serv_order_date': i[1],
+                    'manager_id': i[2],
+                    'vehicle_id': i[3],
                     'tire service order cost': tire_service_order_cost,
                     'tasks': result_tire_service_order_tasks
                 })
@@ -525,24 +513,25 @@ def login():
         conn.commit()
         res = cursor.fetchone()
 
-        salt, password_db = res[0], res[4]
-        if password_is_valid(salt, password, password_db):  # если пароль верен
-            if r.exists(email) == 0:  # если токена нет в redis db
-                token = str(uuid.uuid4())  # генерация токена
-                r.set(email, token, ex=600)  # запись токена в redis bd, срок - 600 сек.
-            else:
-                token = r.get(email)  # возврат токена
-                r.expire(email, 600)  # пролонгация токена, срок - 600 сек.
+        salt, user_id, first_name, last_name, password_db = [data for data in res]
 
-            # генерация Hello message (For fun :)
+        if password_is_valid(salt, password, password_db):
+            if r.exists(email) == 0:
+                token = str(uuid.uuid4())
+                r.set(email, token, ex=600)
+            else:
+                token = r.get(email)
+                r.expire(email, 600)
+
+            # Hello message (For fun :)
             text = 'Hello, {{ name }}!'
             template = Template(text)
 
             result = {
-                        "hello_message": template.render(name=res[2]+" "+res[3]),
+                        "hello_message": template.render(name=first_name + " " + last_name),
                         "token": token,
                         "email": email,
-                        "user_id": res[1]
+                        "user_id": user_id
             }
             return jsonify(result)
         else:
@@ -583,10 +572,12 @@ def deactivate_user():
         conn.commit()
         res_ = cursor.fetchone()
 
+        first_name, last_name = [data for data in res_]
+
         text = 'User {{ name }} has been successfully deactivated'
         template = Template(text)
         result = {
-            'confirmation': template.render(name=res_[0] + ' ' + res_[1])
+            'confirmation': template.render(name=first_name + ' ' + last_name)
         }
 
         r.delete(email)
@@ -622,10 +613,12 @@ def activate_user():
         conn.commit()
         res_ = cursor.fetchone()
 
+        first_name, last_name = [data for data in res_]
+
         text = 'User {{ name }} has been successfully activated'
         template = Template(text)
         result = {
-            'confirmation': template.render(name=res_[0] + ' ' + res_[1])
+            'confirmation': template.render(name=first_name + ' ' + last_name)
         }
 
         return jsonify(result)
@@ -641,7 +634,7 @@ def users_vehicle():
         vehicle_name = request.form.get('vehicle_name')
         size_name = request.form.get('size_name')
 
-        if token is None or email is None or vehicle_name is None or size_name is None:
+        if not token or not email or not vehicle_name or not size_name:
             abort(400, description='The token, email, vehicle_name and size_name data are required')
 
         # get needed data
@@ -649,10 +642,10 @@ def users_vehicle():
         size_id = get_value_from_table('size_id', 'sizes', 'size_name', size_name)
         vehicle_id = get_value_from_table('vehicle_id', 'vehicle','vehicle_name', vehicle_name)
 
-        if size_id is None:
+        if not size_id:
             abort(400, description='Unknown tire size, add the tire size data to the sizes DB')
 
-        if vehicle_id is None:
+        if not vehicle_id:
             abort(400, description='Unknown type of the vehicle, add the vehicle type data to the vehicle DB')
 
         user_auth = user_authorization(email, token)
@@ -707,7 +700,7 @@ def users_vehicle():
         conn.commit()
         res_ = cursor.fetchone()
 
-        user_id_db, vehicle_id_db, size_id_db = res_[0], res_[1], res_[2]
+        user_id_db, vehicle_id_db, size_id_db = [data for data in res_]
 
         if user_id_db != get_user_id(email):
             abort(403, description='It is not your vehicle! Somebody call the police!')
@@ -829,12 +822,12 @@ def available_storage():
 
             if res_:
                 result = []
-                for i in range(len(res_)):
+                for i in res_:
                     result.append({
-                        'shelf_id': res_[i][0],
-                        'size_id': res_[i][1],
-                        'size_name': get_value_from_table('size_name', 'sizes', 'size_id', res_[i][1]),
-                        'available': res_[i][2]
+                        'shelf_id': i[0],
+                        'size_id': i[1],
+                        'size_name': get_value_from_table('size_name', 'sizes', 'size_id', i[1]),
+                        'available': i[2]
                     })
             else:
                 result = {
@@ -869,12 +862,12 @@ def available_storage():
 
             if res_:
                 result = []
-                for i in range(len(res_)):
+                for i in res_:
                     result.append({
-                        'shelf_id': res_[i][0],
-                        'size_id': res_[i][1],
+                        'shelf_id': i[0],
+                        'size_id': i[1],
                         'size_name': size_name,
-                        'available': res_[i][2]
+                        'available': i[2]
                     })
             else:
                 result = {
@@ -904,9 +897,9 @@ def storage_order():
         if start_date < str(datetime.datetime.now()):
             abort(400, description='The start_date can not be less than today')
 
-        if stop_date > str(date(datetime.datetime.now().year + 1, datetime.datetime.now().month,
+        if stop_date > str(date(datetime.datetime.now().year + 2, datetime.datetime.now().month,
                                 datetime.datetime.now().day)):
-            abort(400, description='The stop_date can not exceed +1 year from today')
+            abort(400, description='The stop_date can not exceed +2 year from today')
 
         if start_date > stop_date:
             abort(400, description='The start date can not be greater than the stop date')
@@ -926,11 +919,11 @@ def storage_order():
             if get_value_from_table('user_id', 'user_vehicle', 'user_vehicle_id', user_vehicle_id) != user_id:
                 abort(403, description='It is not your vehicle! Somebody call the police!')
             size_name = get_value_from_table('size_name', 'sizes', 'size_id',
-                                             get_value_from_table('size_id', 'user_vehicle','user_vehicle_id', user_vehicle_id))
+                                get_value_from_table('size_id', 'user_vehicle','user_vehicle_id', user_vehicle_id))
 
         size_id = get_value_from_table('size_id', 'sizes', 'size_name', size_name)
 
-        #set the storage order cost 1000, the calculation will be implemented after some time
+        #set the storage order cost 1000, the calculation will be implemented after some time. May be....
         storage_order_cost = 1000
 
         shelf_id = 0
@@ -943,11 +936,7 @@ def storage_order():
         # Если есть:
         if res:
             # Если таких несколько, выбираем меньшую по ИД
-            shelves = []
-            for i in res:
-                shelves.append(i[0])
-
-            shelf_id = min(shelves)
+            shelf_id = min(res)
 
             # create storage order
             sql_query = """INSERT INTO storage_orders (user_id, start_date, stop_date, size_id, shelf_id, 
@@ -970,24 +959,18 @@ def storage_order():
                                     OR
                                     '{1}' BETWEEN start_date AND stop_date
                                 )	
-                            AND
-                            size_id = {2})
+                            AND size_id = {2})
     
                             SELECT shelf_id FROM storage_orders WHERE shelf_id NOT IN 
-                            (SELECT shelf_id FROM dates_intersection) 
-                            AND 
-                            size_id = {2}""".format(start_date, stop_date, size_id)
+                            (SELECT shelf_id FROM dates_intersection) AND size_id = {2}""".\
+                            format(start_date, stop_date, size_id)
             cursor.execute(sql_query)
-            res = cursor.fetchall()
+            res_ = cursor.fetchall()
 
             # Если есть, то записываем заказ на нее
-            if res:
+            if res_:
                 # Если таких несколько, выбираем меньшую по ИД
-                shelves = []
-                for i in res:
-                    shelves.append(i[0])
-
-                shelf_id = min(shelves)
+                shelf_id = min(res_)
 
                 # create storage order
                 sql_query = """INSERT INTO storage_orders (user_id, start_date, stop_date, size_id, shelf_id, 
@@ -1011,8 +994,7 @@ def storage_order():
                             shelf_id = '{0}' AND
                             start_date = '{1}' AND
                             stop_date = '{2}' AND
-                            user_id = '{3}'
-                            ;""".format(shelf_id, start_date, stop_date, user_id)
+                            user_id = '{3}';""".format(shelf_id, start_date, stop_date, user_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
@@ -1165,22 +1147,18 @@ def storage_order():
         if not storage_order_exists(storage_order_id):
             abort(400, description='The storage order does not exist')
 
-        sql_query = """SELECT user_id, shelf_id FROM storage_orders WHERE storage_order_id = '{0}'""".format(storage_order_id)
+        sql_query = """SELECT user_id, shelf_id FROM storage_orders 
+                                    WHERE storage_order_id = '{0}'""".format(storage_order_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
 
-        shelf_id = res_[1]
+        user_id, shelf_id = [data for data in res_]
 
-        if get_user_id(email) != res_[0]:
+        if get_user_id(email) != user_id:
             abort(403, description='It is not your storage order!')
 
         sql_query = """DELETE FROM storage_orders WHERE storage_order_id = '{0}'""".format(storage_order_id)
-        cursor.execute(sql_query)
-        conn.commit()
-
-        # set the shelf_id as available
-        sql_query = """UPDATE warehouse SET available = True WHERE shelf_id = '{0}';""".format(shelf_id)
         cursor.execute(sql_query)
         conn.commit()
 
@@ -1200,7 +1178,7 @@ def tire_service_order():
         order_date = request.form.get('order_date')
         user_vehicle_id = request.form.get('user_vehicle_id')
 
-        if token is None or email is None or order_date is None or user_vehicle_id is None:
+        if not token or not email or not order_date or not user_vehicle_id:
             abort(400, description='The token, email, order_date and user_vehicle_id are required')
 
         user_auth = user_authorization(email, token)
@@ -1214,12 +1192,12 @@ def tire_service_order():
 
         # get the initial data about user's vehicle
         sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle 
-                        WHERE user_vehicle_id = '{0}';""".format(user_vehicle_id)
+                                    WHERE user_vehicle_id = '{0}';""".format(user_vehicle_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
 
-        user_id, vehicle_id, size_id = res_[0], res_[1], res_[2]
+        user_id, vehicle_id, size_id = [data for data in res_]
 
         if get_user_id(email) != user_id:
             abort(403, description='It is not your vehicle!')
@@ -1234,13 +1212,7 @@ def tire_service_order():
             abort(400, description='Sorry, all managers are busy')
 
         rand_id = random.randint(0, len(res_) - 1)
-
-        manager_id, manager_load = res_[rand_id][0], res_[rand_id][1]
-
-        if manager_load == 4:
-            sql_query = """UPDATE staff SET available = False WHERE worker_id = '{0}'""".format(manager_id)
-            cursor.execute(sql_query)
-            conn.commit()
+        manager_id = res_[rand_id][0]
 
         sql_query = """INSERT INTO tire_service_order (user_id, serv_order_date, user_vehicle_id, manager_id)
                         VALUES ('{0}', '{1}', '{2}', '{3}')""".format(user_id, order_date, user_vehicle_id, manager_id)
@@ -1255,12 +1227,12 @@ def tire_service_order():
         service_order_id = res_[0]
 
         sql_query = """SELECT first_name, last_name, phone, email FROM managers 
-                        WHERE manager_id = '{0}'""".format(manager_id)
+                                                WHERE manager_id = '{0}'""".format(manager_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
 
-        manager_first_name, manager_last_name, manager_phone, manager_email = res_[0], res_[1], res_[2], res_[3]
+        manager_first_name, manager_last_name, manager_phone, manager_email = [data for data in res_]
 
         result = {
             'service_order_id': service_order_id,
@@ -1296,15 +1268,13 @@ def tire_service_order():
 
         # get the initial data about the tire_service_order
         sql_query = """SELECT user_id, user_vehicle_id, serv_order_date FROM tire_service_order 
-                            WHERE service_order_id = '{0}';""".format(service_order_id)
+                                                WHERE service_order_id = '{0}';""".format(service_order_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
 
-        user_id_order, user_vehicle_id_db, serv_order_date_db = res_[0], res_[1], res_[2]
+        user_id_order, user_vehicle_id_db, serv_order_date_db = [data for data in res_]
         user_id = get_user_id(email)
-
-
 
         if user_id_order != user_id:
             abort(403, description='It is not your tire service order!')
@@ -1332,7 +1302,7 @@ def tire_service_order():
             user_vehicle_id_to_db = new_user_vehicle_id
 
         sql_query = """UPDATE tire_service_order SET serv_order_date = '{0}', user_vehicle_id = '{1}'
-                                WHERE service_order_id = '{2}'""".format(order_date_to_db, user_vehicle_id_to_db, service_order_id)
+                    WHERE service_order_id = '{2}'""".format(order_date_to_db, user_vehicle_id_to_db, service_order_id)
         cursor.execute(sql_query)
         conn.commit()
 
@@ -1350,7 +1320,7 @@ def tire_service_order():
         token = request.form.get('token')
         service_order_id = request.form.get('service_order_id')
 
-        if token is None or email is None or service_order_id is None:
+        if not token or not email or not service_order_id:
             abort(400, description='The token, email, service_order_id are required')
 
         user_auth = user_authorization(email, token)
@@ -1367,29 +1337,15 @@ def tire_service_order():
 
         # get the initial data about the tire_service_order
         sql_query = """SELECT user_id, user_vehicle_id, manager_id FROM tire_service_order 
-                        WHERE service_order_id = '{0}';""".format(service_order_id)
+                                        WHERE service_order_id = '{0}';""".format(service_order_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
 
-        user_id, user_vehicle_id, manager_id = res_[0], res_[1], res_[2]
+        user_id, user_vehicle_id, manager_id = [data for data in res_]
 
         if get_user_id(email) != user_id:
             abort(403, description='It is not your tire service order!')
-
-        sql_query = """SELECT manager_id, COUNT(manager_id) FROM managers JOIN tire_service_order
-                    USING (manager_id) WHERE manager_id = '{0}' GROUP BY manager_id""".format(manager_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-
-        manager_id, manager_load = res_[0], res_[1]
-
-        # if the manager's load becomes less than 5 when the order is deleted, mark it as available
-        if manager_load == 5:
-            sql_query = """UPDATE staff SET available = True WHERE worker_id = '{0}'""".format(manager_id)
-            cursor.execute(sql_query)
-            conn.commit()
 
         sql_query = """DELETE FROM tire_service_order WHERE service_order_id = '{0}'""".format(service_order_id)
         cursor.execute(sql_query)

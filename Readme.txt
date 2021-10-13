@@ -213,21 +213,24 @@ In memories:
 
 /users [GET]
 	input:
-			user_id				- optional	- format: int
+			user_id				- optional	- type: int
 			active				- optional  - format: 'yes', 'no', blank. Сase insensitive
 	output:
 			user_id				- type: int
-			f_name			
+			f_name				
 			l_name
 			email
 			phone
 	
 	if there is a user_id in params: output info about this user
 		if there is no params: output info about all users
+			if the active parameter is 'yes' - output info about active user(s) only
+			if the active parameter is 'no' - output info about inactive user(s) only
+			if the active parameter is blank or something except 'yes' or 'no' - output info about all users
 			if there are no users in the DB: note
 
 
-/users/user_info [POST]
+/users/user_info [POST]	
 	input: 
 			email				- required
 			token				- required
@@ -352,14 +355,15 @@ In memories:
 	input:	
 			email				- required
 			token				- required
-			ARE_YOU_SURE?		- required
+			ARE_YOU_SURE?		- required		- format: 'True' for deactivate
 	
 	output:
 			confirmaion message
 			
 	user_authorization
-			if the user has already been deactivated: return a message
-				if the "ARE_YOU_SURE?" value is not 'True': return a funny message
+		if the user has already been deactivated: return a message
+			if the "ARE_YOU_SURE?" value is not 'True': return a funny message
+				if the process was completed successfully - remove the user's token from redis db
 				
 /users/activate [POST]
 	input:	
