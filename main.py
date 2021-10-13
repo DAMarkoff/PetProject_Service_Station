@@ -513,7 +513,7 @@ def login():
         conn.commit()
         res = cursor.fetchone()
 
-        salt, user_id, first_name, last_name, password_db = [data for data in res]
+        salt, user_id, first_name, last_name, password_db = res
 
         if password_is_valid(salt, password, password_db):
             if r.exists(email) == 0:
@@ -781,41 +781,41 @@ def users_vehicle():
 
 
 @app.route("/warehouse", methods=['GET'])  # shows shelves in the warehouse (availability depends on the request params)
-def available_storage():
+def active_storage():
     if request.method == 'GET':
         size_name = request.args.get('size_name')
-        available_only = request.args.get('available_only')
+        active_only = request.args.get('active_only')
 
         # if size_name is None - show all sizes
-        # if available_only.lower() = 'yes' - show only free shelves
-        # if available_only.lower() = 'no' - show only occupied shelves
-        # if available_only.lower() != 'yes' and != 'no' - show all free shelves
-        if not available_only:
-            available_only = 'undefined'
+        # if active_only.lower() = 'yes' - show only free shelves
+        # if active_only.lower() = 'no' - show only occupied shelves
+        # if active_only.lower() != 'yes' and != 'no' - show all free shelves
+        if not active_only:
+            active_only = 'undefined'
 
         if not conn:
             abort(503, description='There is no connection to the database')
 
         if not size_name:
-            if available_only.lower() == 'yes':
+            if active_only.lower() == 'yes':
 
-                sql_query = """SELECT shelf_id, size_id, available FROM warehouse 
-                                WHERE available = 'True'"""
+                sql_query = """SELECT shelf_id, size_id, active FROM warehouse 
+                                WHERE active = 'True'"""
                 cursor.execute(sql_query)
                 conn.commit()
                 res_ = cursor.fetchall()
 
-            elif available_only.lower() == 'no':
+            elif active_only.lower() == 'no':
 
-                sql_query = """SELECT shelf_id, size_id, available FROM warehouse 
-                                                WHERE available = 'False'"""
+                sql_query = """SELECT shelf_id, size_id, active FROM warehouse 
+                                                WHERE active = 'False'"""
                 cursor.execute(sql_query)
                 conn.commit()
                 res_ = cursor.fetchall()
 
             else:
 
-                sql_query = """SELECT shelf_id, size_id, available FROM warehouse"""
+                sql_query = """SELECT shelf_id, size_id, active FROM warehouse"""
                 cursor.execute(sql_query)
                 conn.commit()
                 res_ = cursor.fetchall()
@@ -827,26 +827,26 @@ def available_storage():
                         'shelf_id': i[0],
                         'size_id': i[1],
                         'size_name': get_value_from_table('size_name', 'sizes', 'size_id', i[1]),
-                        'available': i[2]
+                        'active': i[2]
                     })
             else:
                 result = {
-                    'confirmation': 'Unfortunately, we do not have available storage shelves you need'
+                    'confirmation': 'Unfortunately, we do not have active storage shelves you need'
                 }
         else:
             size_id = get_value_from_table('size_id', 'sizes', 'size_name', size_name)
 
-            if available_only.lower() == 'yes':
+            if active_only.lower() == 'yes':
 
-                sql_query = """SELECT shelf_id, size_id, available FROM warehouse WHERE available = 'True'
+                sql_query = """SELECT shelf_id, size_id, active FROM warehouse WHERE active = 'True'
                                 AND size_id = '{0}'""".format(size_id)
                 cursor.execute(sql_query)
                 conn.commit()
                 res_ = cursor.fetchall()
 
-            elif available_only.lower() == 'no':
+            elif active_only.lower() == 'no':
 
-                sql_query = """SELECT shelf_id, size_id, available FROM warehouse WHERE available = 'False'
+                sql_query = """SELECT shelf_id, size_id, active FROM warehouse WHERE active = 'False'
                                                 AND size_id = '{0}'""".format(size_id)
                 cursor.execute(sql_query)
                 conn.commit()
@@ -854,7 +854,7 @@ def available_storage():
 
             else:
 
-                sql_query = """SELECT shelf_id, size_id, available FROM warehouse 
+                sql_query = """SELECT shelf_id, size_id, active FROM warehouse 
                                 WHERE size_id = '{0}'""".format(size_id)
                 cursor.execute(sql_query)
                 conn.commit()
@@ -867,7 +867,7 @@ def available_storage():
                         'shelf_id': i[0],
                         'size_id': i[1],
                         'size_name': size_name,
-                        'available': i[2]
+                        'active': i[2]
                     })
             else:
                 result = {
@@ -1175,11 +1175,22 @@ def tire_service_order():
     if request.method == 'POST':
         email = request.form.get('email')
         token = request.form.get('token')
+        order_type = request.form.get('order_type')
         order_date = request.form.get('order_date')
         user_vehicle_id = request.form.get('user_vehicle_id')
+        numbers_of_wheels = request.form.get('numbers_of_wheels')
+        removing_installing_wheels = request.form.get('removing_installing_wheels')
+        tubeless = request.form.get('tubeless')
+        balancing = request.form.get('balancing')
+        wheel_alignment = request.form.get('wheel_alignment')
 
-        if not token or not email or not order_date or not user_vehicle_id:
-            abort(400, description='The token, email, order_date and user_vehicle_id are required')
+        if not token or not email or not order_date or not user_vehicle_id or not order_type\
+                    or not numbers_of_wheels or not removing_installing_wheels \
+                    or not tubeless or not balancing or not wheel_alignment:
+            abort(400, description='All fields are required')
+
+        if order_type != 'tire change' or order_type != 'tire repair':
+            abort(400, description='The order_type must be "tire change" or "tire repair"')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
@@ -1189,6 +1200,15 @@ def tire_service_order():
 
         if not conn:
             abort(503, description='There is no connection to the database')
+
+
+
+
+
+
+
+
+
 
         # get the initial data about user's vehicle
         sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle 

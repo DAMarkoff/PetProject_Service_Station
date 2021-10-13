@@ -90,7 +90,7 @@ d		/user_info
 	
 ToDo Dmitrii:
 
-				- change back isinstance to isdigit
+				- validate required fields (not flield is not working) test: False, True, '   ' (spaces)
 
 		- user_vehicle_id in storage_order [PUT]?
 		- remove storage_order_cost from /storage_order [PUT] and add optional user_vehicle_id
