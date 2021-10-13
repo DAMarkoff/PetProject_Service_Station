@@ -1,12 +1,8 @@
-import random
 from flask import Flask, request, jsonify, abort
-from jinja2 import Template
 import psycopg2
-import uuid
 import re
 import redis
 import datetime
-# from flask_swagger_ui import get_swaggerui_blueprint
 import bcrypt
 import  git
 from git import Repo

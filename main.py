@@ -60,11 +60,18 @@ def users():
     # request a short data about all/one of the users
     if request.method == 'GET':
         user_id = request.args.get('user_id')
+        active = request.args.get('active')
+
         if not conn:
             abort(503, description='There is no connection to the database')
 
         if user_id is None:
-            sql_query = "SELECT user_id, first_name, last_name, phone, email, active FROM users"
+            if active.lower() == 'yes':
+                sql_query = "SELECT user_id, first_name, last_name, phone, email FROM users WHERE active = True"
+            elif active.lower() == 'no':
+                sql_query = "SELECT user_id, first_name, last_name, phone, email FROM users WHERE active = False"
+            else:
+                sql_query = "SELECT user_id, first_name, last_name, phone, email FROM users"
             cursor.execute(sql_query)
             conn.commit()
             res = cursor.fetchall()
@@ -85,11 +92,15 @@ def users():
                     'confirmation': 'There are no users in the DB'
                 }
         else:
-            if not str(user_id).isdigit():
+            if not isinstance(user_id, int):   #  str(user_id).isdigit():
                 abort(400, description='The user_id must contain only digits')
 
             if not user_exists('user_id', user_id):
                 abort(400, description='The user does not exist')
+
+            if active.lower() == 'yes' or active.lower() == 'no':
+                if not user_active(get_value_from_table('email', 'users', 'user_id', user_id)):
+                    abort(400, description='User is deactivated')
 
             sql_query = """SELECT user_id, first_name, last_name, phone, email, active FROM users
                             WHERE user_id = '{0}'""".format(user_id)
@@ -1410,7 +1421,7 @@ def task():
         if not token or not email or not service_order_id or not task_name or not numbers_of_task:
             abort(400, description='The token, email, service_order_id and task_name are required')
 
-        if not numbers_of_task.isdigit() or not service_order_id.isdigit():
+        if not isinstance(numbers_of_task, int) or not isinstance(service_order_id, int):
             abort(400, description='Please, provide a numbers of tasks and service_order_id in digits')
 
         user_auth = user_authorization(email, token)
@@ -1468,7 +1479,7 @@ def task():
         if not token or not email or not service_order_id:
             abort(400, description='The token, email, service_order_id are required')
 
-        if not service_order_id.isdigit():
+        if not isinstance(service_order_id, int):
             abort(400, description='Please, provide the service_order_id in digits')
 
         user_auth = user_authorization(email, token)
@@ -1518,7 +1529,7 @@ def task():
 
         else:
 
-            if not task_number.isdigit():
+            if not isinstance(task_number, int):
                 abort(400, description='Please, provide the task_number in digits')
 
             sql_query = """SELECT work_id FROM list_of_works WHERE service_order_id = {0}""".format(service_order_id)
