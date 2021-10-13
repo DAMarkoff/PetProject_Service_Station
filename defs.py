@@ -149,7 +149,7 @@ def user_active(email):
         conn.commit()
         res_ = cursor.fetchone()
 
-        if res_:
+        if res_[0]:
             return True
         return False
 

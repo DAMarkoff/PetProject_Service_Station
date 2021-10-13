@@ -209,16 +209,16 @@ In memories:
 		add new user to the DB and return info from the DB with user_id
 
 
-/all [GET]
+/users [GET]
 	input:
-			user_id				- optional
+			user_id				- optional	- format: int
+			active				- optional  - format: 'yes', 'no', blank. Сase insensitive
 	output:
-			user_id
+			user_id				- type: int
 			f_name			
 			l_name
 			email
 			phone
-			password
 	
 	if there is a user_id in params: output info about this user
 		if there is no params: output info about all users
