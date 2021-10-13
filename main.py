@@ -65,7 +65,10 @@ def users():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        if user_id is None:
+        if not active:
+            active = ''
+
+        if not user_id:
             if active.lower() == 'yes':
                 sql_query = "SELECT user_id, first_name, last_name, phone, email FROM users WHERE active = True"
             elif active.lower() == 'no':
