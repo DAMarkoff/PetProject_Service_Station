@@ -405,7 +405,7 @@ def user_info():
                                 SELECT 
                                     service_order_id,
                                     user_id,
-                                    service_order_date,
+                                    start_datetime,
                                     user_vehicle_id,
                                     tso.manager_id,
                                     task_id,
@@ -427,7 +427,7 @@ def user_info():
         cursor.execute(sql_query)
         conn.commit()
 
-        sql_query = """SELECT DISTINCT service_order_id, service_order_date, manager_id, user_vehicle_id FROM temp"""
+        sql_query = """SELECT DISTINCT service_order_id, start_datetime, manager_id, user_vehicle_id FROM temp"""
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchall()
@@ -469,7 +469,7 @@ def user_info():
 
                 result_tire_service_order.append({
                     'service_order_id': service_order_id,
-                    'service_order_date': i[1],
+                    'start_datetime': i[1],
                     'manager_id': i[2],
                     'vehicle_id': i[3],
                     'tire service order cost': tire_service_order_cost,
@@ -1213,13 +1213,12 @@ def tire_service_order():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle 
-                                            WHERE user_vehicle_id = '{0}';""".format(user_vehicle_id)
+        sql_query = """SELECT user_id FROM user_vehicle WHERE user_vehicle_id = '{0}';""".format(user_vehicle_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
 
-        user_id, vehicle_id, size_id = res_
+        user_id = res_
 
         if get_user_id(email) != user_id:
             abort(403, description='It is not your vehicle!')
@@ -1260,17 +1259,41 @@ def tire_service_order():
             start_time_to_query = str(start_hour) + ':' + str(start_minutes)
             stop_hour, stop_minutes = end_time.hour, end_time.minute
             stop_time_to_query = str(stop_hour) + ':' + str(stop_minutes)
-            return jsonify({
-                'order date': date_to_query,
-                'start time': start_time_to_query,
-                'stop time': stop_time_to_query
-            })
+            # return jsonify({
+            #     'order date': date_to_query,
+            #     'start time': start_time_to_query,
+            #     'stop time': stop_time_to_query
+            # })
+
+            # Запрос на свободных работяг в нужное время
+            sql_query = """WITH dates_intersection AS (
+                            SELECT DISTINCT worker_id FROM tire_service_order JOIN list_of_works USING (service_order_id) 
+                            WHERE 
+                                (
+                                    start_datetime BETWEEN '{0}' AND '{1}'
+                                    OR
+                                    stop_datetime BETWEEN '{0}' AND '{1}'
+                                    OR
+                                    '{0}' BETWEEN start_datetime AND stop_datetime 
+                                    OR
+                                    '{1}' BETWEEN start_datetime AND stop_datetime
+                                )
+                            )	
+                           
+                        SELECT worker_id FROM staff JOIN positions USING (position_id)
+                        WHERE worker_id NOT IN (SELECT worker_id FROM dates_intersection) 
+                        AND active = true AND position_name = 'worker'""".format(order_date, end_time)
+            cursor.execute(sql_query)
+            conn.commit()
+            res_ = cursor.fetchall()
+            return res_
+
 
             # =========================================================================================================
             # Select a manager
             # someone who does not have a service order on the required order date
             sql_query = """SELECT manager_id FROM managers WHERE manager_id NOT IN 
-            (SELECT DISTINCT manager_id FROM tire_service_order WHERE DATE(service_order_date) = '{0}')"""\
+            (SELECT DISTINCT manager_id FROM tire_service_order WHERE DATE(start_datetime) = '{0}')"""\
                 .format(date_to_query)
             cursor.execute(sql_query)
             conn.commit()
@@ -1283,7 +1306,7 @@ def tire_service_order():
                 # someone who has the minimum number of service orders on the required order date
                 sql_query = """WITH managers_load AS(
                         SELECT manager_id, count(manager_id) AS load_ FROM tire_service_order 
-                        WHERE date(service_order_date) = '{0}' GROUP BY manager_id)
+                        WHERE date(start_datetime) = '{0}' GROUP BY manager_id)
 
                         SELECT manager_id FROM managers_load
                         WHERE load_ in (SELECT MIN(load_) FROM managers_load)""".format(date_to_query)
@@ -1325,24 +1348,24 @@ def tire_service_order():
             abort(400, description='The tire service order does not exist')
 
         # get the initial data about the tire_service_order
-        sql_query = """SELECT user_id, user_vehicle_id, service_order_date FROM tire_service_order 
+        sql_query = """SELECT user_id, user_vehicle_id, start_datetime FROM tire_service_order 
                                                 WHERE service_order_id = '{0}';""".format(service_order_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
 
-        user_id_order, user_vehicle_id_db, service_order_date_db = res_
+        user_id_order, user_vehicle_id_db, start_datetime_db = res_
         user_id = get_user_id(email)
 
         if user_id_order != user_id:
             abort(403, description='It is not your tire service order!')
 
         if (new_order_date is None and new_user_vehicle_id is None) or \
-                (new_order_date == service_order_date_db and new_user_vehicle_id == user_vehicle_id_db):
+                (new_order_date == start_datetime_db and new_user_vehicle_id == user_vehicle_id_db):
             abort(400, description='Ok. Nothing needs to be changed :)')
 
-        if not new_order_date or new_order_date == service_order_date_db:
-            order_date_to_db = service_order_date_db
+        if not new_order_date or new_order_date == start_datetime_db:
+            order_date_to_db = start_datetime_db
             new_order_date = 'The tire service date has not been changed'
         else:
             if datetime.datetime.strptime(new_order_date[:10], '%Y-%m-%d') < \
@@ -1359,7 +1382,7 @@ def tire_service_order():
                 abort(403, description='It is not your vehicle! Somebody call the police!')
             user_vehicle_id_to_db = new_user_vehicle_id
 
-        sql_query = """UPDATE tire_service_order SET service_order_date = '{0}', user_vehicle_id = '{1}'
+        sql_query = """UPDATE tire_service_order SET start_datetime = '{0}', user_vehicle_id = '{1}'
                     WHERE service_order_id = '{2}'""".format(order_date_to_db, user_vehicle_id_to_db, service_order_id)
         cursor.execute(sql_query)
         conn.commit()
@@ -1368,7 +1391,7 @@ def tire_service_order():
             'tire service order': service_order_id,
             'old_vehicle_id': user_vehicle_id_db,
             'new_vehicle_id': new_user_vehicle_id,
-            'old_order_date': service_order_date_db,
+            'old_order_date': start_datetime_db,
             'new_order_date': new_order_date
         }
 

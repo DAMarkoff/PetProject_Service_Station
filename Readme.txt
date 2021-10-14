@@ -169,6 +169,9 @@ In memories:
 	- the u_veh_id in the user_vehicle has been renamed to user_vehicle_id
 	- the u_veh_id in the tire_service_order has been renamed to user_vehicle_id
 	- the serv_order__id in the tire_service_order has been renamed to service_order_id
+	- tso service_order_date to start_datetime
+	- staff availabe to active
+	- managers availabe to active
 
 /users/login [POST]
 	input:  
