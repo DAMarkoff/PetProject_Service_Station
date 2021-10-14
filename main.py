@@ -1193,8 +1193,8 @@ def tire_service_order():
         if order_type != 'tire change' and order_type != 'tire repair':
             abort(400, description='The order_type must be <tire change> or <tire repair>')
 
-        if not user_vehicle_id.isdigit() or not numbers_of_wheels.isdigit():
-            return 'The <user_vehicle_id> and <numbers_of_wheels> should be int'
+        # if not user_vehicle_id.isdigit() or not numbers_of_wheels.isdigit():
+        #     return 'The <user_vehicle_id> and <numbers_of_wheels> should be int'
 
         try:
             order_date = datetime.datetime.strptime(order_date_str, '%Y-%m-%d %H:%M')
