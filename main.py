@@ -219,7 +219,7 @@ def users():
         conn.commit()
         res_ = cursor.fetchone()
 
-        user_id_db, f_name_db, l_name_db, phone_db = [data for data in res_]
+        user_id_db, f_name_db, l_name_db, phone_db = res_
 
         if (f_name == f_name_db and l_name == l_name_db and phone == phone_db and not new_email) or \
                 (not f_name and not l_name and not phone and not new_email):
@@ -306,7 +306,7 @@ def users():
         conn.commit()
         res_ = cursor.fetchone()
 
-        first_name, last_name, user_id = [data for data in res_]
+        first_name, last_name, user_id = res_
 
         sql_query = """DELETE FROM users WHERE email = '{0}'""".format(email)
         cursor.execute(sql_query)
@@ -361,7 +361,8 @@ def user_info():
 
         user_id = get_user_id(email)
         # collecting the user's storage orders data from the storage_orders db
-        sql_query = "SELECT * FROM storage_orders WHERE user_id = '{0}'".format(user_id)
+        sql_query = """SELECT storage_order_id, start_date, stop_date, storage_order_cost, shelf_id 
+                                                FROM storage_orders WHERE user_id = '{0}'""".format(user_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchall()
@@ -374,10 +375,10 @@ def user_info():
             for i in res_:  # does the user need the size_id or size_name data?
                 result_order.append({
                     "storage_order_id": i[0],
-                    "start_date": i[2],
-                    "stop_date": i[3],
-                    "order cost": i[5],
-                    "shelf_id": i[6]
+                    "start_date": i[1],
+                    "stop_date": i[2],
+                    "order cost": i[3],
+                    "shelf_id": i[4]
                 })
 
         # collecting data about the user's vehicles from the user_vehicle, vehicle and sizes db's
@@ -572,7 +573,7 @@ def deactivate_user():
         conn.commit()
         res_ = cursor.fetchone()
 
-        first_name, last_name = [data for data in res_]
+        first_name, last_name = res_
 
         text = 'User {{ name }} has been successfully deactivated'
         template = Template(text)
@@ -613,7 +614,7 @@ def activate_user():
         conn.commit()
         res_ = cursor.fetchone()
 
-        first_name, last_name = [data for data in res_]
+        first_name, last_name = res_
 
         text = 'User {{ name }} has been successfully activated'
         template = Template(text)
@@ -700,7 +701,7 @@ def users_vehicle():
         conn.commit()
         res_ = cursor.fetchone()
 
-        user_id_db, vehicle_id_db, size_id_db = [data for data in res_]
+        user_id_db, vehicle_id_db, size_id_db = res_
 
         if user_id_db != get_user_id(email):
             abort(403, description='It is not your vehicle! Somebody call the police!')
@@ -1153,7 +1154,7 @@ def storage_order():
         conn.commit()
         res_ = cursor.fetchone()
 
-        user_id, shelf_id = [data for data in res_]
+        user_id, shelf_id = res_
 
         if get_user_id(email) != user_id:
             abort(403, description='It is not your storage order!')
@@ -1201,69 +1202,52 @@ def tire_service_order():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-
-
-
-
-
-
-
-
-
-        # get the initial data about user's vehicle
         sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle 
-                                    WHERE user_vehicle_id = '{0}';""".format(user_vehicle_id)
+                                            WHERE user_vehicle_id = '{0}';""".format(user_vehicle_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
 
-        user_id, vehicle_id, size_id = [data for data in res_]
+        user_id, vehicle_id, size_id = res_
 
         if get_user_id(email) != user_id:
             abort(403, description='It is not your vehicle!')
 
-        sql_query = """SELECT manager_id, COUNT(manager_id) FROM managers LEFT JOIN tire_service_order 
-                    USING (manager_id) WHERE available = True GROUP BY manager_id HAVING COUNT(manager_id) < 5"""
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchall()
+        if order_type == 'tire change':
 
-        if not res_:
-            abort(400, description='Sorry, all managers are busy')
+            tire_change = 'tire_change'
+            if removing_installing_wheels == 'yes':
+                removing_installing_wheels = 'wheel_removal_installation'
+            if balancing == 'yes':
+                balancing = 'wheel_balancing'
+            if wheel_alignment == 'yes':
+                wheel_alignment = 'wheel_alignment'
 
-        rand_id = random.randint(0, len(res_) - 1)
-        manager_id = res_[rand_id][0]
+            sql_query = """select sum
+                            (
+                                case 
+                                    when task_name = '{0}' then task_duration 
+                                    when task_name = '{1}' then task_duration 
+                                    when task_name = '{2}' then task_duration 
+                                    when task_name = '{3}' then task_duration 
+                                    else '00:00:00'
+                                end
+                            ) as duration
+                            from tasks""".format(tire_change, removing_installing_wheels, balancing, wheel_alignment)
+            cursor.execute(sql_query)
+            conn.commit()
+            res_ = cursor.fetchone()
+            service_duration = numbers_of_wheels * res_[0]
+            return('Service duration: ' + service_duration)
 
-        sql_query = """INSERT INTO tire_service_order (user_id, serv_order_date, user_vehicle_id, manager_id)
-                        VALUES ('{0}', '{1}', '{2}', '{3}')""".format(user_id, order_date, user_vehicle_id, manager_id)
-        cursor.execute(sql_query)
-        conn.commit()
 
-        sql_query = """SELECT MAX(service_order_id) FROM tire_service_order WHERE user_id = '{0}'""".format(user_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
 
-        service_order_id = res_[0]
 
-        sql_query = """SELECT first_name, last_name, phone, email FROM managers 
-                                                WHERE manager_id = '{0}'""".format(manager_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
 
-        manager_first_name, manager_last_name, manager_phone, manager_email = [data for data in res_]
 
-        result = {
-            'service_order_id': service_order_id,
-            'date': order_date,
-            'manager_id': manager_id,
-            'manager_first_name': manager_first_name,
-            'manager_last_name': manager_last_name,
-            'manager_phone': manager_phone,
-            'manager_email': manager_email
-        }
-        return jsonify(result)
+
+
+
     elif request.method == 'PUT':
         email = request.form.get('email')
         token = request.form.get('token')
@@ -1293,7 +1277,7 @@ def tire_service_order():
         conn.commit()
         res_ = cursor.fetchone()
 
-        user_id_order, user_vehicle_id_db, serv_order_date_db = [data for data in res_]
+        user_id_order, user_vehicle_id_db, serv_order_date_db = res_
         user_id = get_user_id(email)
 
         if user_id_order != user_id:
@@ -1362,7 +1346,7 @@ def tire_service_order():
         conn.commit()
         res_ = cursor.fetchone()
 
-        user_id, user_vehicle_id, manager_id = [data for data in res_]
+        user_id, user_vehicle_id, manager_id = res_
 
         if get_user_id(email) != user_id:
             abort(403, description='It is not your tire service order!')
