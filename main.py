@@ -1218,7 +1218,7 @@ def tire_service_order():
         conn.commit()
         res_ = cursor.fetchone()
 
-        user_id = res_
+        user_id = res_[0]
 
         if get_user_id(email) != user_id:
             abort(403, description='It is not your vehicle!')
