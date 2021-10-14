@@ -1177,7 +1177,7 @@ def tire_service_order():
         email = request.form.get('email')
         token = request.form.get('token')
         order_type = request.form.get('order_type')
-        order_date = request.form.get('order_date')
+        order_date_str = request.form.get('order_date')
         user_vehicle_id = request.form.get('user_vehicle_id')
         numbers_of_wheels = request.form.get('numbers_of_wheels')
         removing_installing_wheels = request.form.get('removing_installing_wheels')
@@ -1185,7 +1185,7 @@ def tire_service_order():
         balancing = request.form.get('balancing')
         wheel_alignment = request.form.get('wheel_alignment')
 
-        if not token or not email or not order_date or not user_vehicle_id or not order_type\
+        if not token or not email or not order_date_str or not user_vehicle_id or not order_type\
                     or not numbers_of_wheels or not removing_installing_wheels \
                     or not tubeless or not balancing or not wheel_alignment:
             abort(400, description='All fields are required')
@@ -1196,8 +1196,9 @@ def tire_service_order():
         if not user_vehicle_id.isdigit() or not numbers_of_wheels.isdigit():
             return 'The <user_vehicle_id> and <numbers_of_wheels> should be int'
 
+        order_date = datetime.datetime.strptime(order_date_str, '%y-%m-%d %H:%M')
         if type(order_date) is not datetime.datetime:
-            return 'The <order_date> should be int'
+            return 'The <order_date> should be in YYYY-MM-DD HH-MM format'
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
