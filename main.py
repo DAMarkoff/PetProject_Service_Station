@@ -1286,7 +1286,7 @@ def tire_service_order():
             cursor.execute(sql_query)
             conn.commit()
             res_ = cursor.fetchall()
-            return res_
+            return str(res_)
 
 
             # =========================================================================================================
