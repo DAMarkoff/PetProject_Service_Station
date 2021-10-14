@@ -1185,9 +1185,6 @@ def tire_service_order():
         balancing = request.form.get('balancing')
         wheel_alignment = request.form.get('wheel_alignment')
 
-        if not user_vehicle_id.isdigit():
-            return 'user_vehicle_id must be int'
-
         if not token or not email or not order_date or not user_vehicle_id or not order_type\
                     or not numbers_of_wheels or not removing_installing_wheels \
                     or not tubeless or not balancing or not wheel_alignment:
@@ -1195,6 +1192,12 @@ def tire_service_order():
 
         if order_type != 'tire change' and order_type != 'tire repair':
             abort(400, description='The order_type must be <tire change> or <tire repair>')
+
+        if not user_vehicle_id.isdigit() or not numbers_of_wheels.isdigit():
+            return 'The <user_vehicle_id> and <numbers_of_wheels> should be int'
+
+        if type(order_date) is not datetime.datetime:
+            return 'The <order_date> should be int'
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
@@ -1241,9 +1244,8 @@ def tire_service_order():
             conn.commit()
             res_ = cursor.fetchone()
             service_duration = int(numbers_of_wheels) * res_[0]
+            # return('Service duration: ' + str(service_duration) + str(type(vehicle_id)))
 
-
-            return('Service duration: ' + str(service_duration) + str(type(vehicle_id)))
 
 
 
