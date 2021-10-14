@@ -1196,7 +1196,13 @@ def tire_service_order():
         if not user_vehicle_id.isdigit() or not numbers_of_wheels.isdigit():
             return 'The <user_vehicle_id> and <numbers_of_wheels> should be int'
 
-        order_date = datetime.datetime.strptime(order_date_str, '%Y-%m-%d %H:%M')
+        try:
+            order_date = datetime.datetime.strptime(order_date_str, '%Y-%m-%d %H:%M')
+        except ValueError:
+            return 'The <order_date> should be in YYYY-MM-DD HH-MM format'
+        else:
+            return 'Ok'
+
         if type(order_date) is not datetime.datetime:
             return 'The <order_date> should be in YYYY-MM-DD HH-MM format'
 
