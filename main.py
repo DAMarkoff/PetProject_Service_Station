@@ -1201,10 +1201,8 @@ def tire_service_order():
         except ValueError:
             return 'The <order_date> should be in YYYY-MM-DD HH-MM format'
 
-        year = order_date.year
-        month = order_date.month
-        day = order_date.day
-        date = str(year) + '-' + str(month) + '-' + str(day)
+        year, month, day = order_date.year, order_date.month, order_date.day
+        date_to_query = str(year) + '-' + str(month) + '-' + str(day)
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
@@ -1236,6 +1234,7 @@ def tire_service_order():
             if wheel_alignment.lower() == 'yes':
                 wheel_alignment = 'wheel_alignment'
 
+            # =========================================================================================================
             # Calculate the expected duration of tire replacement
             sql_query = """select sum
                             (
@@ -1255,22 +1254,46 @@ def tire_service_order():
             end_time = order_date + service_duration
             # return('Service duration: ' + str(service_duration) + ' estimated end time: ' + str(end_time))
 
+            # =========================================================================================================
+            # Time
+            start_hour, start_minutes = order_date.hour, order_date.minute
+            start_time_to_query = str(start_hour) + ':' + str(start_minutes)
+            stop_hour, stop_minutes = end_time.hour, end_time.minute
+            stop_time_to_query = str(stop_hour) + ':' + str(stop_minutes)
+            return jsonify({
+                'order date': date_to_query,
+                'start time': start_time_to_query,
+                'stop time': stop_time_to_query
+            })
+
+            # =========================================================================================================
             # Select a manager
             # someone who does not have a service order on the required order date
             sql_query = """SELECT manager_id FROM managers WHERE manager_id NOT IN 
             (SELECT DISTINCT manager_id FROM tire_service_order WHERE DATE(service_order_date) = '{0}')"""\
-                .format(date)
+                .format(date_to_query)
             cursor.execute(sql_query)
             conn.commit()
             res_ = cursor.fetchall()
 
-            if not res_:
-                return 'No managers'
-            else:
+            if res_:
                 rand_id = random.randint(0, len(res_) - 1)
                 manager_id = res_[rand_id][0]
-                return jsonify({'manager_id': manager_id})
+            else:
+                # someone who has the minimum number of service orders on the required order date
+                sql_query = """WITH managers_load AS(
+                        SELECT manager_id, count(manager_id) AS load_ FROM tire_service_order 
+                        WHERE date(service_order_date) = '{0}' GROUP BY manager_id)
 
+                        SELECT manager_id FROM managers_load
+                        WHERE load_ in (SELECT MIN(load_) FROM managers_load)""".format(date_to_query)
+                cursor.execute(sql_query)
+                conn.commit()
+                res_ = cursor.fetchall()
+
+                if res_:
+                    rand_id = random.randint(0, len(res_) - 1)
+                    manager_id = res_[rand_id][0]
 
 
 
