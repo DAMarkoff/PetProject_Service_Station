@@ -1237,7 +1237,7 @@ def tire_service_order():
             cursor.execute(sql_query)
             conn.commit()
             res_ = cursor.fetchone()
-            service_duration = numbers_of_wheels * res_[0]
+            service_duration = int(numbers_of_wheels) * res_[0]
             return('Service duration: ' + service_duration)
 
 
