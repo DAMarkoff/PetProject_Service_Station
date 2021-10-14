@@ -1240,7 +1240,7 @@ def tire_service_order():
             service_duration = int(numbers_of_wheels) * res_[0]
 
 
-            return('Service duration: ' + str(service_duration) + type(vehicle_id))
+            return('Service duration: ' + str(service_duration) + str(type(vehicle_id)))
 
 
 
