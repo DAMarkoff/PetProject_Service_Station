@@ -1200,11 +1200,14 @@ def tire_service_order():
             order_date = datetime.datetime.strptime(order_date_str, '%Y-%m-%d %H:%M')
         except ValueError:
             return 'The <order_date> should be in YYYY-MM-DD HH-MM format'
-        else:
-            return 'Ok'
 
-        if type(order_date) is not datetime.datetime:
-            return 'The <order_date> should be in YYYY-MM-DD HH-MM format'
+        try:
+            numbers_of_wheels = int(numbers_of_wheels)
+        except ValueError:
+            abort(400, description='The numbers_of_wheels must be integer')
+
+        # if type(order_date) is not datetime.datetime:
+        #     return 'The <order_date> should be in YYYY-MM-DD HH-MM format'
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
@@ -1251,7 +1254,8 @@ def tire_service_order():
             conn.commit()
             res_ = cursor.fetchone()
             service_duration = int(numbers_of_wheels) * res_[0]
-            # return('Service duration: ' + str(service_duration) + str(type(vehicle_id)))
+            end_time = order_date + service_duration
+            return('Service duration: ' + str(service_duration) + ' estimated end time: ' + str(end_time))
 
 
 
