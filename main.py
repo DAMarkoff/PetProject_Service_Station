@@ -1185,8 +1185,8 @@ def tire_service_order():
         balancing = request.form.get('balancing')
         wheel_alignment = request.form.get('wheel_alignment')
 
-        # if type(user_vehicle_id) is not int:
-        #     return 'user_vehicle_id must be int'
+        if not user_vehicle_id.isdigit():
+            return 'user_vehicle_id must be int'
 
         if not token or not email or not order_date or not user_vehicle_id or not order_type\
                     or not numbers_of_wheels or not removing_installing_wheels \
