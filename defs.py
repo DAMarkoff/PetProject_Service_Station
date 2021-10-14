@@ -137,21 +137,17 @@ def validate_names(name_type, name):
     return return_val
 
 
-def validate(name: str)->bool:
+def validate(name: str) -> bool:
     valid_pattern = re.compile("^[a-z ,.'-]+$", re.I)
     return bool(valid_pattern.match(name))
 
 
-def user_active(email):
-    if conn:
-        sql_query = """SELECT active FROM users WHERE email = '{0}'""".format(email)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-
-        if res_[0]:
-            return True
-        return False
+def user_active(email: str) -> bool:
+    sql_query = """SELECT active FROM users WHERE email = '{0}'""".format(email)
+    cursor.execute(sql_query)
+    conn.commit()
+    res_ = cursor.fetchone()
+    return bool(res_)
 
 
 def get_value_from_table(select, from_db, where, what):

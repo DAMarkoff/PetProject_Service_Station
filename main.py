@@ -1204,7 +1204,7 @@ def tire_service_order():
         try:
             numbers_of_wheels = int(numbers_of_wheels)
         except ValueError:
-            abort(400, description='The numbers_of_wheels must be integer')
+            abort(400, description='The <numbers_of_wheels> must be integer')
 
         # if type(order_date) is not datetime.datetime:
         #     return 'The <order_date> should be in YYYY-MM-DD HH-MM format'
