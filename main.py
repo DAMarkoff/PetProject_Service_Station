@@ -1288,7 +1288,7 @@ def tire_service_order():
             res_ = cursor.fetchall()
             if res_:
                 worker_id = min(res_)
-            return str(worker_id)
+            return worker_id
 
 
             # =========================================================================================================
