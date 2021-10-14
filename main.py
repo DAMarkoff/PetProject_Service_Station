@@ -1205,7 +1205,6 @@ def tire_service_order():
         month = order_date.month
         day = order_date.day
         date = str(year) + '-' + str(month) + '-' + str(day)
-        return jsonify({'date': date})
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
@@ -1260,7 +1259,7 @@ def tire_service_order():
             # someone who does not have a service order on the required order date
             sql_query = """SELECT manager_id FROM managers WHERE manager_id NOT IN 
             (SELECT DISTINCT manager_id FROM tire_service_order WHERE DATE(service_order_date) = '{0}')"""\
-                .format(datetime.datetime(order_date).date())
+                .format(date)
             cursor.execute(sql_query)
             conn.commit()
             res_ = cursor.fetchall()
