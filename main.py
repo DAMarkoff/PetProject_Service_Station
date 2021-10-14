@@ -1201,7 +1201,11 @@ def tire_service_order():
         except ValueError:
             return 'The <order_date> should be in YYYY-MM-DD HH-MM format'
 
-        return jsonify({'date': order_date.date()})
+        year = order_date.year
+        month = order_date.month
+        day = order_date.day
+        date = str(year) + '-' + str(month) + '-' + str(day)
+        return jsonify({'date': date})
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
