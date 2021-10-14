@@ -401,6 +401,7 @@ def user_info():
                     'size_name': i[2]
                 })
 
+        # get all info about all user's service orders
         sql_query = """CREATE OR REPLACE VIEW temp AS
                                 SELECT 
                                     service_order_id,
@@ -1224,46 +1225,72 @@ def tire_service_order():
             abort(403, description='It is not your vehicle!')
 
         if order_type == 'tire change':
-
+            tasks = []
             tire_change = 'tire_change'
+            tasks.append('tire_change')
             if removing_installing_wheels.lower() == 'yes':
                 removing_installing_wheels = 'wheel_removal_installation'
+                tasks.append('wheel_removal_installation')
             if balancing.lower() == 'yes':
                 balancing = 'wheel_balancing'
+                tasks.append('wheel_balancing')
             if wheel_alignment.lower() == 'yes':
                 wheel_alignment = 'wheel_alignment'
+                tasks.append('wheel_alignment')
 
             # =========================================================================================================
             # Calculate the expected duration of tire replacement
-            sql_query = """select sum
+            sql_query = """SELECT SUM
                             (
-                                case 
-                                    when task_name = '{0}' then task_duration 
-                                    when task_name = '{1}' then task_duration 
-                                    when task_name = '{2}' then task_duration 
-                                    when task_name = '{3}' then task_duration 
-                                    else '00:00:00'
+                                CASE 
+                                    WHEN task_name = '{0}' THEN task_duration 
+                                    WHEN task_name = '{1}' THEN task_duration 
+                                    WHEN task_name = '{2}' THEN task_duration 
+                                    WHEN task_name = '{3}' THEN task_duration 
+                                    ELSE '00:00:00'
                                 end
-                            ) as duration
-                            from tasks""".format(tire_change, removing_installing_wheels, balancing, wheel_alignment)
+                            ) AS duration
+                            FROM tasks""".format(tire_change, removing_installing_wheels, balancing, wheel_alignment)
             cursor.execute(sql_query)
             conn.commit()
             res_ = cursor.fetchone()
             service_duration = int(numbers_of_wheels) * res_[0]
             end_time = order_date + service_duration
-            # return('Service duration: ' + str(service_duration) + ' estimated end time: ' + str(end_time))
+
+            # =========================================================================================================
+            # Select a manager
+            # someone who does not have a service order on the required order date
+            sql_query = """SELECT manager_id FROM managers WHERE manager_id NOT IN 
+                        (SELECT DISTINCT manager_id FROM tire_service_order WHERE DATE(start_datetime) = '{0}')""" \
+                .format(date_to_query)
+            cursor.execute(sql_query)
+            conn.commit()
+            res_ = cursor.fetchall()
+
+            if res_:
+                rand_id = random.randint(0, len(res_) - 1)
+                manager_id = res_[rand_id][0]
+            else:
+                # someone who has the minimum number of service orders on the required order date
+                sql_query = """WITH managers_load AS(
+                                    SELECT manager_id, count(manager_id) AS load_ FROM tire_service_order 
+                                    WHERE date(start_datetime) = '{0}' GROUP BY manager_id)
+
+                                    SELECT manager_id FROM managers_load
+                                    WHERE load_ in (SELECT MIN(load_) FROM managers_load)""".format(date_to_query)
+                cursor.execute(sql_query)
+                conn.commit()
+                res_ = cursor.fetchall()
+
+                if res_:
+                    rand_id = random.randint(0, len(res_) - 1)
+                    manager_id = res_[rand_id][0]
+                else:
+                    return jsonify({'confirmation': 'There are no managers for the required time'})
+
 
             # =========================================================================================================
             # Time
-            start_hour, start_minutes = order_date.hour, order_date.minute
-            start_time_to_query = str(start_hour) + ':' + str(start_minutes)
-            stop_hour, stop_minutes = end_time.hour, end_time.minute
-            stop_time_to_query = str(stop_hour) + ':' + str(stop_minutes)
-            # return jsonify({
-            #     'order date': date_to_query,
-            #     'start time': start_time_to_query,
-            #     'stop time': stop_time_to_query
-            # })
 
             # Запрос на свободных работяг в нужное время
             sql_query = """WITH dates_intersection AS (
@@ -1287,38 +1314,93 @@ def tire_service_order():
             conn.commit()
             res_ = cursor.fetchall()
             if res_:
-                worker_id = min(res_)
-            return jsonify({'worker_id': worker_id})
-
-
-            # =========================================================================================================
-            # Select a manager
-            # someone who does not have a service order on the required order date
-            sql_query = """SELECT manager_id FROM managers WHERE manager_id NOT IN 
-            (SELECT DISTINCT manager_id FROM tire_service_order WHERE DATE(start_datetime) = '{0}')"""\
-                .format(date_to_query)
-            cursor.execute(sql_query)
-            conn.commit()
-            res_ = cursor.fetchall()
-
-            if res_:
                 rand_id = random.randint(0, len(res_) - 1)
-                manager_id = res_[rand_id][0]
-            else:
-                # someone who has the minimum number of service orders on the required order date
-                sql_query = """WITH managers_load AS(
-                        SELECT manager_id, count(manager_id) AS load_ FROM tire_service_order 
-                        WHERE date(start_datetime) = '{0}' GROUP BY manager_id)
+                worker_id = res_[rand_id][0]
 
-                        SELECT manager_id FROM managers_load
-                        WHERE load_ in (SELECT MIN(load_) FROM managers_load)""".format(date_to_query)
+                sql_query = """INSERT INTO tire_service_order 
+                                    (user_id, start_datetime, stop_datetime, user_vehicle_id, manager_id)
+                                VALUES ('{0}', '{1}', '{2}', '{3}', '{4}');""".\
+                                format(user_id, order_date, end_time, user_vehicle_id, manager_id)
                 cursor.execute(sql_query)
                 conn.commit()
-                res_ = cursor.fetchall()
 
-                if res_:
-                    rand_id = random.randint(0, len(res_) - 1)
-                    manager_id = res_[rand_id][0]
+                sql_query = """SELECT service_order_id FROM tire_service_order WHERE
+                                    user_id = '{0}' AND
+                                    start_datetime = '{1}' AND
+                                    stop_datetime = '{2}' AND
+                                    user_vehicle_id = '{3}' AND
+                                    manager_id = '{4}';""".\
+                                format(user_id, order_date, end_time, user_vehicle_id, manager_id)
+                cursor.execute(sql_query)
+                conn.commit()
+                res_ = cursor.fetchone()
+                service_order_id = res_[0]
+
+                service_order_tasks, service_order_cost = [], 0
+                for task in tasks:
+
+                    task_id = get_value_from_table('task_id', 'tasks', 'task_name', task)
+
+                    sql_query = """INSERT INTO list_of_works
+                                        (service_order_id, task_id, worker_id)
+                                    VALUES ('{0}', '{1}', '{2}');""".format(service_order_id, task_id, worker_id)
+                    cursor.execute(sql_query)
+                    conn.commit()
+
+                    task_name = get_value_from_table('task_name', 'tasks', 'task_id', task_id)
+                    task_cost = get_value_from_table('task_cost', 'tasks', 'task_id', task_id)
+                    service_order_cost += int(task_cost)
+                    service_order_tasks.append({
+                        'task_name': task_name,
+                        'task cost': task_cost,
+                        'worker_id': worker_id
+                    })
+
+                # get the manager's first and last names
+                manager_first_name = get_value_from_table('first_name', 'managers', 'manager_id', manager_id)
+                manager_last_name = get_value_from_table('last_name', 'managers', 'manager_id', manager_id)
+
+                # get service order cost
+                if service_order_tasks == []:
+                    service_order_tasks.append({'confirmation': 'really strange situation, no tasks in order'})
+
+                if service_order_tasks == 0:
+                    service_order_cost = 'Error! Sum is None!'
+
+                # sql_query = """SELECT SUM(task_cost) FROM tire_service_order
+                #                     JOIN list_of_works USING (service_order_id)
+                #                     JOIN tasks USING (task_id)
+                #                 WHERE service_order_id = '{0}';""".format(service_order_id)
+                # cursor.execute(sql_query)
+                # conn.commit()
+                # res_ = cursor.fetchone()
+                #
+                # if not res_:
+                #     service_order_cost = 'Error! Sum is None!'
+                # else:
+                #     service_order_cost = res_[0]
+
+                result = ({
+                    'service_order_id': service_order_id,
+                    'user_vehicle_id': user_vehicle_id,
+                    'manager:': manager_first_name + ' ' + manager_last_name,
+                    'vehicle_id': user_vehicle_id,
+                    'service order type': order_type,
+                    'order datetime': order_date,
+                    'estimated duration': service_duration,
+                    'estimated end datetime': end_time,
+                    'service order cost': service_order_cost,
+                    'tasks': service_order_tasks
+                })
+
+                return jsonify(result)
+
+
+            else:
+                return jsonify({'confirmation': 'There are no workers for the required time'})
+
+
+
 
 
 

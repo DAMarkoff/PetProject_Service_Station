@@ -192,3 +192,7 @@ def push_user_auth():
     repository.git.add('user_auth.txt')
     repository.git.commit(m='update user_auth.txt')
     repository.git.push()
+
+
+def get_tire_service_order():
+    """Get all data on user's """

@@ -90,6 +90,11 @@ d		/user_info
 	
 ToDo Dmitrii:
 
+				- replace fetchone() to get_value_from_table()
+				- add a state vehicle number column to the user_vehicle table and in the output info in the user_info and [PUT] service order insetead of user_vehicle_id
+				- update user_info (service_order)
+				- add some time between service orders
+				- add service_order types
 				- validate required fields (not flield is not working) test: False, True, '   ' (spaces)
 				- change the user_info - tire_service_order - add sum of duration
 
