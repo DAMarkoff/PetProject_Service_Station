@@ -80,17 +80,6 @@ def get_user_id(email):
 #     return False
 
 
-# def shelf_id_by_size(size_name):
-#     if conn:
-#         sql_query = """SELECT MIN(shelf_id) FROM warehouse WHERE size_id = '{0}'
-#                         AND available = 'True'""".format(size_one_by_var('size_id', 'size_name', size_name))
-#         cursor.execute(sql_query)
-#         conn.commit()
-#         shelf_id_ = cursor.fetchone()
-#
-#         return shelf_id_[0]
-
-
 def validate_password(password):
     special_sym = ['$', '@', '#', '!', '%']
     return_val = {'result': True, 'text': ''}
@@ -123,7 +112,10 @@ def validate_email(email):
     return return_val
 
 
-def validate_names(name_type, name):
+def validate_names(name_type: str, name: str) -> dict:
+    """Validate name - returns dict with bool(result) of validation and str(text) with error message if exists
+    :rtype: object
+    """
     return_val = {'result': True, 'text': ''}
     if len(name) < 1:
         return_val['text'] = 'The {0} must be at least 1 characters long'.format(name_type)
@@ -138,6 +130,7 @@ def validate_names(name_type, name):
 
 
 def validate(name: str) -> bool:
+    """Validate name - match name to pattern"""
     valid_pattern = re.compile("^[a-z ,.'-]+$", re.I)
     return bool(valid_pattern.match(name))
 

@@ -140,7 +140,7 @@ def users():
             abort(400, description="The user with this email already exists")
 
         #The names can only include the ' '(space) and '.,- chars
-        #The {0} must be at least 1 characters long and not exceed 30 chars
+        #The names must be at least 1 characters long and not exceed 30 chars
         check_first_name = validate_names('first name', f_name)
         if not check_first_name['result']:
             abort(400, description=check_first_name['text'])
@@ -1193,21 +1193,13 @@ def tire_service_order():
         if order_type != 'tire change' and order_type != 'tire repair':
             abort(400, description='The order_type must be <tire change> or <tire repair>')
 
-        # if not user_vehicle_id.isdigit() or not numbers_of_wheels.isdigit():
-        #     return 'The <user_vehicle_id> and <numbers_of_wheels> should be int'
+        if not user_vehicle_id.isdigit() or not numbers_of_wheels.isdigit():
+            return 'The <user_vehicle_id> and <numbers_of_wheels> should be int'
 
         try:
             order_date = datetime.datetime.strptime(order_date_str, '%Y-%m-%d %H:%M')
         except ValueError:
             return 'The <order_date> should be in YYYY-MM-DD HH-MM format'
-
-        try:
-            numbers_of_wheels = int(numbers_of_wheels)
-        except ValueError:
-            abort(400, description='The <numbers_of_wheels> must be integer')
-
-        # if type(order_date) is not datetime.datetime:
-        #     return 'The <order_date> should be in YYYY-MM-DD HH-MM format'
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
@@ -1239,6 +1231,7 @@ def tire_service_order():
             if wheel_alignment.lower() == 'yes':
                 wheel_alignment = 'wheel_alignment'
 
+            # Calculate the expected duration of tire replacement
             sql_query = """select sum
                             (
                                 case 
@@ -1255,8 +1248,22 @@ def tire_service_order():
             res_ = cursor.fetchone()
             service_duration = int(numbers_of_wheels) * res_[0]
             end_time = order_date + service_duration
-            return('Service duration: ' + str(service_duration) + ' estimated end time: ' + str(end_time))
+            # return('Service duration: ' + str(service_duration) + ' estimated end time: ' + str(end_time))
 
+            # Select a manager
+            # someone who does not have a service order on the required order date
+            sql_query = """SELECT manager_id FROM managers WHERE manager_id NOT IN 
+            (SELECT DISTINCT manager_id FROM tire_service_order WHERE DATE(service_order_date) = '{0}')"""\
+                .format(datetime.datetime(order_date).date())
+            cursor.execute(sql_query)
+            conn.commit()
+            res_ = cursor.fetchall()
+            if not res_:
+                return 'No managers'
+            else:
+                rand_id = random.randint(0, len(res_) - 1)
+                manager_id = res_[rand_id][0]
+                return manager_id
 
 
 
