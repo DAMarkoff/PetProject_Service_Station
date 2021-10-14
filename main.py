@@ -1286,7 +1286,9 @@ def tire_service_order():
             cursor.execute(sql_query)
             conn.commit()
             res_ = cursor.fetchall()
-            return str(res_)
+            if res_:
+                worker_id = min(res_)
+            return str(str(worker_id))
 
 
             # =========================================================================================================
