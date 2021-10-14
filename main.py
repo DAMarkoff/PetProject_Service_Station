@@ -1178,7 +1178,7 @@ def tire_service_order():
         token = request.form.get('token')
         order_type = request.form.get('order_type')
         order_date = request.form.get('order_date')
-        user_vehicle_id = request.form.get('user_vehicle_id')
+        user_vehicle_id = str(request.form.get('user_vehicle_id'))
         numbers_of_wheels = request.form.get('numbers_of_wheels')
         removing_installing_wheels = request.form.get('removing_installing_wheels')
         tubeless = request.form.get('tubeless')
