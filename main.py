@@ -1190,8 +1190,8 @@ def tire_service_order():
                     or not tubeless or not balancing or not wheel_alignment:
             abort(400, description='All fields are required')
 
-        if order_type != 'tire change' or order_type != 'tire repair':
-            abort(400, description='The order_type must be "tire change" or "tire repair"')
+        if order_type != 'tire change' and order_type != 'tire repair':
+            abort(400, description='The order_type must be <tire change> or <tire repair>')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
@@ -1216,11 +1216,11 @@ def tire_service_order():
         if order_type == 'tire change':
 
             tire_change = 'tire_change'
-            if removing_installing_wheels == 'yes':
+            if removing_installing_wheels.lower() == 'yes':
                 removing_installing_wheels = 'wheel_removal_installation'
-            if balancing == 'yes':
+            if balancing.lower() == 'yes':
                 balancing = 'wheel_balancing'
-            if wheel_alignment == 'yes':
+            if wheel_alignment.lower() == 'yes':
                 wheel_alignment = 'wheel_alignment'
 
             sql_query = """select sum

@@ -91,6 +91,7 @@ d		/user_info
 ToDo Dmitrii:
 
 				- validate required fields (not flield is not working) test: False, True, '   ' (spaces)
+				- change the user_info - tire_service_order - add sum of duration
 
 		- user_vehicle_id in storage_order [PUT]?
 		- remove storage_order_cost from /storage_order [PUT] and add optional user_vehicle_id
