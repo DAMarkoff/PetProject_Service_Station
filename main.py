@@ -405,20 +405,20 @@ def user_info():
                                 SELECT 
                                     service_order_id,
                                     user_id,
-                                    serv_order_date,
+                                    service_order_date,
                                     user_vehicle_id,
                                     tso.manager_id,
                                     task_id,
                                     task_name,
                                     task_cost,
                                     task_duration,
-                                    t.worker_id,
+                                    low.worker_id,
                                     p.position_id,
                                     position_name,
                                     s.first_name,
                                     s.last_name
                                 FROM tire_service_order AS tso
-                                LEFT JOIN list_of_works USING (service_order_id)
+                                LEFT JOIN list_of_works AS low USING (service_order_id)
                                 LEFT JOIN tasks AS t USING (task_id)
                                 LEFT JOIN staff AS s USING (worker_id)
                                 LEFT JOIN positions AS p USING (position_id)
@@ -427,7 +427,7 @@ def user_info():
         cursor.execute(sql_query)
         conn.commit()
 
-        sql_query = """SELECT DISTINCT service_order_id, serv_order_date, manager_id, user_vehicle_id FROM temp"""
+        sql_query = """SELECT DISTINCT service_order_id, service_order_date, manager_id, user_vehicle_id FROM temp"""
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchall()
@@ -469,7 +469,7 @@ def user_info():
 
                 result_tire_service_order.append({
                     'service_order_id': service_order_id,
-                    'serv_order_date': i[1],
+                    'service_order_date': i[1],
                     'manager_id': i[2],
                     'vehicle_id': i[3],
                     'tire service order cost': tire_service_order_cost,
@@ -1271,24 +1271,24 @@ def tire_service_order():
             abort(400, description='The tire service order does not exist')
 
         # get the initial data about the tire_service_order
-        sql_query = """SELECT user_id, user_vehicle_id, serv_order_date FROM tire_service_order 
+        sql_query = """SELECT user_id, user_vehicle_id, service_order_date FROM tire_service_order 
                                                 WHERE service_order_id = '{0}';""".format(service_order_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
 
-        user_id_order, user_vehicle_id_db, serv_order_date_db = res_
+        user_id_order, user_vehicle_id_db, service_order_date_db = res_
         user_id = get_user_id(email)
 
         if user_id_order != user_id:
             abort(403, description='It is not your tire service order!')
 
         if (new_order_date is None and new_user_vehicle_id is None) or \
-                (new_order_date == serv_order_date_db and new_user_vehicle_id == user_vehicle_id_db):
+                (new_order_date == service_order_date_db and new_user_vehicle_id == user_vehicle_id_db):
             abort(400, description='Ok. Nothing needs to be changed :)')
 
-        if not new_order_date or new_order_date == serv_order_date_db:
-            order_date_to_db = serv_order_date_db
+        if not new_order_date or new_order_date == service_order_date_db:
+            order_date_to_db = service_order_date_db
             new_order_date = 'The tire service date has not been changed'
         else:
             if datetime.datetime.strptime(new_order_date[:10], '%Y-%m-%d') < \
@@ -1305,7 +1305,7 @@ def tire_service_order():
                 abort(403, description='It is not your vehicle! Somebody call the police!')
             user_vehicle_id_to_db = new_user_vehicle_id
 
-        sql_query = """UPDATE tire_service_order SET serv_order_date = '{0}', user_vehicle_id = '{1}'
+        sql_query = """UPDATE tire_service_order SET service_order_date = '{0}', user_vehicle_id = '{1}'
                     WHERE service_order_id = '{2}'""".format(order_date_to_db, user_vehicle_id_to_db, service_order_id)
         cursor.execute(sql_query)
         conn.commit()
@@ -1314,7 +1314,7 @@ def tire_service_order():
             'tire service order': service_order_id,
             'old_vehicle_id': user_vehicle_id_db,
             'new_vehicle_id': new_user_vehicle_id,
-            'old_order_date': serv_order_date_db,
+            'old_order_date': service_order_date_db,
             'new_order_date': new_order_date
         }
 
