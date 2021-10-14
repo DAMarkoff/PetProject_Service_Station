@@ -1263,12 +1263,13 @@ def tire_service_order():
             cursor.execute(sql_query)
             conn.commit()
             res_ = cursor.fetchall()
+
             if not res_:
                 return 'No managers'
             else:
                 rand_id = random.randint(0, len(res_) - 1)
                 manager_id = res_[rand_id][0]
-                return manager_id
+                return jsonify({'manager_id': manager_id})
 
 
 
