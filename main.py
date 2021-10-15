@@ -563,15 +563,8 @@ def deactivate_user():
         cursor.execute(sql_query)
         conn.commit()
 
-        # sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
-        # cursor.execute(sql_query)
-        # conn.commit()
-        # res_ = cursor.fetchone()
-
-        # first_name, last_name = res_
-        res_ = get_value_from_table('first_name, last_name', 'users', 'email', email)
-        return res_
-        first_name, last_name = res_
+        first_name = get_value_from_table('first_name', 'users', 'email', email)
+        last_name = get_value_from_table('last_name', 'users', 'email', email)
 
         text = 'User {{ name }} has been successfully deactivated'
         template = Template(text)
@@ -607,12 +600,8 @@ def activate_user():
         cursor.execute(sql_query)
         conn.commit()
 
-        sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-
-        first_name, last_name = res_
+        first_name = get_value_from_table('first_name', 'users', 'email', email)
+        last_name = get_value_from_table('last_name', 'users', 'email', email)
 
         text = 'User {{ name }} has been successfully activated'
         template = Template(text)
@@ -660,14 +649,15 @@ def users_vehicle():
                         VALUES ('{0}', '{1}', '{2}');""".format(user_id, vehicle_id, size_id)
         cursor.execute(sql_query)
         conn.commit()
-
-        sql_query = """SELECT MAX(user_vehicle_id) FROM user_vehicle WHERE user_id = '{0}'""".format(user_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
+        # to delete if ok
+        # sql_query = """SELECT MAX(user_vehicle_id) FROM user_vehicle WHERE user_id = '{0}'""".format(user_id)
+        # cursor.execute(sql_query)
+        # conn.commit()
+        # res_ = cursor.fetchone()
+        vehicle_id_new = get_value_from_table('MAX(user_vehicle_id)', 'user_vehicle', 'user_id', user_id)
 
         result = {
-            'new_vehicle_id': res_[0],
+            'new_vehicle_id': vehicle_id_new,
             'vehicle_name': vehicle_name,
             'size_name': size_name
         }
@@ -694,7 +684,8 @@ def users_vehicle():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE user_vehicle_id = '{0}'""".format(user_vehicle_id)
+        sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE user_vehicle_id = '{0}'""".\
+                                                                                            format(user_vehicle_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
@@ -1210,13 +1201,13 @@ def tire_service_order():
 
         if not conn:
             abort(503, description='There is no connection to the database')
+        # to delete if ok
+        # sql_query = """SELECT user_id FROM user_vehicle WHERE user_vehicle_id = '{0}';""".format(user_vehicle_id)
+        # cursor.execute(sql_query)
+        # conn.commit()
+        # res_ = cursor.fetchone()
 
-        sql_query = """SELECT user_id FROM user_vehicle WHERE user_vehicle_id = '{0}';""".format(user_vehicle_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-
-        user_id = res_[0]
+        user_id = get_value_from_table('user_id', 'user_vehicle', 'user_vehicle_id', user_vehicle_id)
 
         if get_user_id(email) != user_id:
             abort(403, description='It is not your vehicle!')
@@ -1551,24 +1542,23 @@ def task():
 
         if not conn:
             abort(503, description='There is no connection to the database')
+        # to delete if ok
+        # sql_query = """SELECT user_id FROM tire_service_order WHERE service_order_id = '{0}';""".format(service_order_id)
+        # cursor.execute(sql_query)
+        # conn.commit()
+        # res_ = cursor.fetchone()
 
-        sql_query = """SELECT user_id FROM tire_service_order WHERE service_order_id = '{0}';""".format(service_order_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-
-        if get_user_id(email) != res_[0]:
+        if get_user_id(email) != get_value_from_table('user_id', 'tire_service_order', 'service_order_id', service_order_id):
             abort(403, description='It is not your tire service order!')
+        # to delete if ok
+        # sql_query = """SELECT task_id FROM tasks WHERE task_name = '{0}';""".format(task_name)
+        # cursor.execute(sql_query)
+        # conn.commit()
+        # res_ = cursor.fetchone()
+        task_id = get_value_from_table('task_id', 'tasks', 'task_name', task_name)
 
-        sql_query = """SELECT task_id FROM tasks WHERE task_name = '{0}';""".format(task_name)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-
-        if not res_:
+        if not task_id:
             abort(400, description='Sorry, we do not offer this service')
-
-        task_id = res_[0]
 
         for _ in range(int(numbers_of_task)):
 
@@ -1609,13 +1599,13 @@ def task():
 
         if not conn:
             abort(503, description='There is no connection to the database')
+        # to delete if ok
+        # sql_query = """SELECT user_id FROM tire_service_order WHERE service_order_id = '{0}';""".format(service_order_id)
+        # cursor.execute(sql_query)
+        # conn.commit()
+        # res_ = cursor.fetchone()
 
-        sql_query = """SELECT user_id FROM tire_service_order WHERE service_order_id = '{0}';""".format(service_order_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-
-        if get_user_id(email) != res_[0]:
+        if get_user_id(email) != get_value_from_table('user_id', 'tire_service_order', 'service_order_id', service_order_id):
             abort(403, description='It is not your tire service order!')
 
         if not task_number:
