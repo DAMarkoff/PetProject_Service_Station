@@ -1386,9 +1386,9 @@ def tire_service_order():
                     'manager:': manager_first_name + ' ' + manager_last_name,
                     'vehicle_id': user_vehicle_id,
                     'service order type': order_type,
-                    'order datetime': order_date,
-                    'estimated duration': service_duration,
-                    'estimated end datetime': end_time,
+                    'order datetime': str(order_date),
+                    'estimated duration': str(service_duration),
+                    'estimated end datetime': str(end_time),
                     'service order cost': service_order_cost,
                     'tasks': service_order_tasks
                 })
