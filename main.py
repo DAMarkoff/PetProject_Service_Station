@@ -570,6 +570,7 @@ def deactivate_user():
 
         # first_name, last_name = res_
         res_ = get_value_from_table('first_name, last_name', 'users', 'email', email)
+        return res_
         first_name, last_name = res_
 
         text = 'User {{ name }} has been successfully deactivated'
