@@ -569,7 +569,8 @@ def deactivate_user():
         # res_ = cursor.fetchone()
 
         # first_name, last_name = res_
-        first_name, last_name = get_value_from_table('first_name, last_name', 'users', 'email', email)
+        res_ = get_value_from_table('first_name, last_name', 'users', 'email', email)
+        first_name, last_name = res_
 
         text = 'User {{ name }} has been successfully deactivated'
         template = Template(text)
