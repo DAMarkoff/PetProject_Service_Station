@@ -172,13 +172,7 @@ def users():
         cursor.execute(sql_query)
         conn.commit()
 
-        sql_query = """SELECT user_id FROM users WHERE email = '{0}'""".format(email)
-        cursor.execute(sql_query)
-        res = cursor.fetchone()
-        conn.commit()
-
-        user_id = res[0]
-
+        user_id = get_value_from_table('user_id', 'users', 'email', email)
         save_to_file(user_id, email, password, 'user-registered')
 
         result = {
@@ -439,17 +433,17 @@ def user_info():
             result_tire_service_order = []
             for i in res_:
                 service_order_id = i[0]
-
-                sql_query = """SELECT SUM(task_cost) FROM temp 
-                                WHERE service_order_id = '{0}'""".format(service_order_id)
-                cursor.execute(sql_query)
-                conn.commit()
-                res_cost = cursor.fetchone()
-
-                if not res_cost[0]:
+                # to delete if ok
+                # sql_query = """SELECT SUM(task_cost) FROM temp
+                #                 WHERE service_order_id = '{0}'""".format(service_order_id)
+                # cursor.execute(sql_query)
+                # conn.commit()
+                # res_cost = cursor.fetchone()
+                res_cost = get_value_from_table('SUM(task_cost', 'temp', 'service_order_id', 22)
+                if not res_cost:
                     tire_service_order_cost = 'Error! Sum is None!'
                 else:
-                    tire_service_order_cost = res_cost[0]
+                    tire_service_order_cost = res_cost
 
                 sql_query = """SELECT task_name, worker_id, task_cost FROM temp 
                                 WHERE service_order_id = '{0}'""".format(service_order_id)
@@ -569,12 +563,13 @@ def deactivate_user():
         cursor.execute(sql_query)
         conn.commit()
 
-        sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
+        # sql_query = """SELECT first_name, last_name FROM users WHERE email = '{0}'""".format(email)
+        # cursor.execute(sql_query)
+        # conn.commit()
+        # res_ = cursor.fetchone()
 
-        first_name, last_name = res_
+        # first_name, last_name = res_
+        first_name, last_name = get_value_from_table('first_name, last_name', 'users', 'email', email)
 
         text = 'User {{ name }} has been successfully deactivated'
         template = Template(text)
