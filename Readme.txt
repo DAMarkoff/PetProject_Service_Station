@@ -90,7 +90,7 @@ d		/user_info
 	
 ToDo Dmitrii:
 
-				- replace fetchone() to get_value_from_table()
+				- replace fetchone() to get_value_from_table() - if more than one?
 				- add a state vehicle number column to the user_vehicle table and in the output info in the user_info and [PUT] service order insetead of user_vehicle_id
 				- update user_info (service_order)
 				- add some time between service orders
