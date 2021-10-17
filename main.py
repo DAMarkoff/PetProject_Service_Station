@@ -494,7 +494,7 @@ def login():
         password = request.form.get('password')
 
         if not password or not email:
-            abort(400, description='The pass and email data are required')
+            abort(400, description='The password and email are required')
 
         if not user_exists('email', email):
             abort(400, description="The user does not exist. Please, register")

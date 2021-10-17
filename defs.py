@@ -130,7 +130,9 @@ def user_active(email: str) -> bool:
     cursor.execute(sql_query)
     conn.commit()
     res_ = cursor.fetchone()
-    return bool(res_)
+    if res_[0]:
+        return True
+    return False
 
 
 def get_value_from_table(select: str, from_db: str, where: str, what):
