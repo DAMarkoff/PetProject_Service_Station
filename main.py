@@ -1327,7 +1327,7 @@ def tire_service_order():
                 service_order_tasks, service_order_cost = [], 0
                 for task in tasks:
                     if task in ('tire_change', 'wheel_removal_installation', 'wheel_balancing'):
-                        count_tasks = numbers_of_wheels
+                        count_tasks = int(numbers_of_wheels)
                     else:
                         count_tasks = 1
                     for _ in range(count_tasks):
