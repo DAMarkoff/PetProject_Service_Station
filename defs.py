@@ -68,19 +68,6 @@ def get_user_id(email):
         return usr_id_[0]
 
 
-# def shelf_avail(size_name):
-#     if conn:
-#         sql_query = """SELECT shelf_id FROM warehouse WHERE size_id = '{0}'
-#                         AND available = 'True'""".format(size_one_by_var('size_id', 'size_name', size_name))
-#         cursor.execute(sql_query)
-#         conn.commit()
-#         avail = cursor.fetchone()
-#
-#         if avail:
-#             return True
-#     return False
-
-
 def validate_password(password):
     special_sym = ['$', '@', '#', '!', '%']
     return_val = {'result': True, 'text': ''}
@@ -195,9 +182,6 @@ def push_user_auth():
     repository.git.push()
 
 
-def get_tire_service_order():
-    """Get all data on user's """
-
 def choose_a_manager(date_to_query):
     return_val = {'result': True, 'manager_id': ''}
     # =========================================================================================================
@@ -258,13 +242,13 @@ def duration_of_service(tire_repair, tire_change, removing_installing_wheels, ba
     service_duration = numbers_of_wheels * res_[0]
 
     sql_query = """SELECT SUM
-                                            (
-                                                CASE 
-                                                    WHEN task_name = '{0}' THEN task_duration 
-                                                    ELSE '00:00:00'
-                                                end
-                                            ) AS duration
-                                            FROM tasks""".format(wheel_alignment)
+                    (
+                        CASE 
+                            WHEN task_name = '{0}' THEN task_duration 
+                            ELSE '00:00:00'
+                        END
+                    ) AS duration
+                    FROM tasks""".format(wheel_alignment)
     cursor.execute(sql_query)
     conn.commit()
     res_ = cursor.fetchone()
@@ -279,22 +263,22 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
     return_val = {'result': True, 'value': ''}
     # Запрос на свободных работяг в нужное время
     sql_query = """WITH dates_intersection AS (
-                                SELECT DISTINCT worker_id FROM tire_service_order JOIN list_of_works USING (service_order_id) 
-                                WHERE 
-                                    (
-                                        start_datetime BETWEEN '{0}' AND '{1}'
-                                        OR
-                                        stop_datetime BETWEEN '{0}' AND '{1}'
-                                        OR
-                                        '{0}' BETWEEN start_datetime AND stop_datetime 
-                                        OR
-                                        '{1}' BETWEEN start_datetime AND stop_datetime
-                                    )
-                                )	
+                        SELECT DISTINCT worker_id FROM tire_service_order JOIN list_of_works USING (service_order_id) 
+                        WHERE 
+                            (
+                                start_datetime BETWEEN '{0}' AND '{1}'
+                                OR
+                                stop_datetime BETWEEN '{0}' AND '{1}'
+                                OR
+                                '{0}' BETWEEN start_datetime AND stop_datetime 
+                                OR
+                                '{1}' BETWEEN start_datetime AND stop_datetime
+                            )
+                        )	
 
-                            SELECT worker_id FROM staff JOIN positions USING (position_id)
-                            WHERE worker_id NOT IN (SELECT worker_id FROM dates_intersection) 
-                            AND active = true AND position_name = 'worker'""".format(order_date, end_time)
+                    SELECT worker_id FROM staff JOIN positions USING (position_id)
+                    WHERE worker_id NOT IN (SELECT worker_id FROM dates_intersection) 
+                    AND active = true AND position_name = 'worker'""".format(order_date, end_time)
     cursor.execute(sql_query)
     conn.commit()
     res_ = cursor.fetchall()
@@ -303,9 +287,9 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
         worker_id = res_[rand_id][0]
 
         sql_query = """INSERT INTO tire_service_order 
-                                        (user_id, start_datetime, stop_datetime, user_vehicle_id, manager_id)
-                                    VALUES ('{0}', '{1}', '{2}', '{3}', '{4}');""". \
-            format(user_id, order_date, end_time, user_vehicle_id, manager_id)
+                                (user_id, start_datetime, stop_datetime, user_vehicle_id, manager_id)
+                                VALUES ('{0}', '{1}', '{2}', '{3}', '{4}');""".\
+                                format(user_id, order_date, end_time, user_vehicle_id, manager_id)
         cursor.execute(sql_query)
         conn.commit()
 
@@ -315,7 +299,7 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
                                         stop_datetime = '{2}' AND
                                         user_vehicle_id = '{3}' AND
                                         manager_id = '{4}';""". \
-            format(user_id, order_date, end_time, user_vehicle_id, manager_id)
+                                        format(user_id, order_date, end_time, user_vehicle_id, manager_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
@@ -323,17 +307,15 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
 
         service_order_tasks, service_order_cost = [], 0
         for task in tasks:
-            if task in ('tire_change', 'wheel_removal_installation', 'wheel_balancing'):
+            if task in ('tire_repair', 'camera_repair', 'tire_change', 'wheel_removal_installation', 'wheel_balancing'):
                 count_tasks = numbers_of_wheels
             else:
                 count_tasks = 1
             for _ in range(count_tasks):
                 task_id = get_value_from_table('task_id', 'tasks', 'task_name', task)
 
-                sql_query = """INSERT INTO list_of_works
-                                                (service_order_id, task_id, worker_id)
-                                            VALUES ('{0}', '{1}', '{2}');""".format(service_order_id, task_id,
-                                                                                    worker_id)
+                sql_query = """INSERT INTO list_of_works (service_order_id, task_id, worker_id)
+                                VALUES ('{0}', '{1}', '{2}');""".format(service_order_id, task_id, worker_id)
                 cursor.execute(sql_query)
                 conn.commit()
 
