@@ -1407,13 +1407,16 @@ def tire_service_order():
             abort(400, description='The tire service order does not exist')
 
         # get the initial data about the tire_service_order
-        sql_query = """SELECT user_id, user_vehicle_id, manager_id FROM tire_service_order 
+        sql_query = """SELECT user_id, user_vehicle_id, manager_id, start_datetime FROM tire_service_order 
                                         WHERE service_order_id = '{0}';""".format(service_order_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
 
-        user_id, user_vehicle_id, manager_id = res_
+        user_id, user_vehicle_id, manager_id, start_datetime = res_
+
+        if start_datetime < datetime.datetime.now():
+            abort(400, description='You cannot delete a completed service order')
 
         if get_user_id(email) != user_id:
             abort(403, description='It is not your tire service order!')
