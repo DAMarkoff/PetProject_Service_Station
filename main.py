@@ -921,7 +921,7 @@ def storage_order():
         shelf_id = 0
         # Проверяем, вдруг есть полка нужного размера вообще без заказов
         sql_query = """SELECT w.shelf_id FROM storage_orders RIGHT JOIN warehouse AS w USING(shelf_id) WHERE
-                        storage_order_id IS NULL AND w.size_id = {0}""".format(size_id)
+                        storage_order_id IS NULL AND active = True AND w.size_id = {0};""".format(size_id)
         cursor.execute(sql_query)
         res = cursor.fetchall()
 
@@ -954,7 +954,7 @@ def storage_order():
                             AND size_id = {2})
     
                             SELECT shelf_id FROM storage_orders WHERE shelf_id NOT IN 
-                            (SELECT shelf_id FROM dates_intersection) AND size_id = {2}""".\
+                            (SELECT shelf_id FROM dates_intersection) AND active = True AND size_id = {2};""".\
                             format(start_date, stop_date, size_id)
             cursor.execute(sql_query)
             res_ = cursor.fetchall()
@@ -975,7 +975,7 @@ def storage_order():
             else:
                 # Если пересекаются, отправляем контакты менеджера
                 # Внедрить: рекомендации по ближайшим свободным датам
-                abort(400, description='We do not have storage place on the dates you need')
+                abort(400, description='We do not have available storage place on the dates you need')
                 # Если незанятых полок нужного размера нет, сверяем даты
                 # Выбираем полки с необходимым размером и минимальной дельтой от необходимых дат
                 # предоставляем информацию о дельтах дат и перенаправляем на ресепшн
@@ -983,16 +983,7 @@ def storage_order():
         if shelf_id == 0:
             abort(400, description='Shelf_id is undefined')
         # get the new storage order id
-        sql_query = """SELECT storage_order_id FROM storage_orders WHERE 
-                            shelf_id = '{0}' AND
-                            start_date = '{1}' AND
-                            stop_date = '{2}' AND
-                            user_id = '{3}';""".format(shelf_id, start_date, stop_date, user_id)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-
-        new_storage_order_id = res_[0]
+        new_storage_order_id = get_value_from_table('storage_order_id', 'storage_orders', 'shelf_id', shelf_id)
 
         result = {
             'storage order id': new_storage_order_id,
@@ -1141,7 +1132,7 @@ def storage_order():
             abort(400, description='The storage order does not exist')
 
         sql_query = """SELECT user_id, shelf_id, start_date FROM storage_orders 
-                                    WHERE storage_order_id = '{0}'""".format(storage_order_id)
+                                    WHERE storage_order_id = '{0}';""".format(storage_order_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
@@ -1154,12 +1145,12 @@ def storage_order():
         if start_date < datetime.datetime.now():
             abort(400, description='You cannot delete a completed service order')
 
-        sql_query = """DELETE FROM storage_orders WHERE storage_order_id = '{0}'""".format(storage_order_id)
+        sql_query = """DELETE FROM storage_orders WHERE storage_order_id = '{0}';""".format(storage_order_id)
         cursor.execute(sql_query)
         conn.commit()
 
         result = {
-            'confirmation': 'Storage order ID ' + storage_order_id + ' has been deleted'
+            'confirmation': 'Storage order ID ' + storage_order_id + ' has been successfully deleted'
         }
         return jsonify(result)
     else:
