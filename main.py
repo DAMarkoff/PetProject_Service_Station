@@ -1274,13 +1274,13 @@ def tire_service_order():
                 wheel_alignment = 'wheel_alignment'
                 tasks.append('wheel_alignment')
 
-            return jsonify(tasks)
             # =========================================================================================================
             # Calculate the expected duration of tire replacement
             service_duration = duration_of_service(tire_repair, tire_change, removing_installing_wheels, balancing,
                                                             wheel_alignment, camera_repair, numbers_of_wheels)
             end_time = order_date + service_duration
 
+            return str(end_time)
             # =========================================================================================================
             # Select a manager
             manager = choose_a_manager(date_to_query)
