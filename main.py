@@ -1192,8 +1192,11 @@ def tire_service_order():
         except ValueError:
             return 'The <order_date> should be in YYYY-MM-DD HH-MM format'
 
-        year, month, day = order_date.year, order_date.month, order_date.day
+        year, month, day, hour = order_date.year, order_date.month, order_date.day, order_date.hour
         date_to_query = str(year) + '-' + str(month) + '-' + str(day)
+
+        if int(hour) < 8:
+            abort(400, description='Sorry, we open at 08:00 am')
 
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
@@ -1234,6 +1237,9 @@ def tire_service_order():
             service_duration = duration_of_service(tire_repair, tire_change, removing_installing_wheels, balancing,
                                                             wheel_alignment, camera_repair, numbers_of_wheels)
             end_time = order_date + service_duration
+            end_hour = end_time.hour
+            if int(end_hour) > 20:
+                abort(400, description='Sorry, we close at 08:00 pm')
 
             # =========================================================================================================
             # Select a manager
