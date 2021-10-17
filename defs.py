@@ -288,7 +288,7 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
 
         sql_query = """INSERT INTO tire_service_order 
                                 (user_id, start_datetime, stop_datetime, user_vehicle_id, manager_id, service_type_id)
-                                VALUES ('{0}', '{1}', '{2}', '{3}', '{4}');""".\
+                                VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}');""".\
                                 format(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id)
         cursor.execute(sql_query)
         conn.commit()
