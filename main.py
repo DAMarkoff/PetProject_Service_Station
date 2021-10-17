@@ -10,7 +10,7 @@ from datetime import date
 from flask_swagger_ui import get_swaggerui_blueprint
 from defs import *
 import bcrypt
-import  git
+import git
 from git import Repo
 
 
@@ -18,12 +18,12 @@ app = Flask(__name__)
 
 SWAGGER_URL = '/swagger'
 API_URL = '/static/swagger.yaml'
-swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name':"Service_Station"})
+swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "Service_Station"})
 
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
 repository = Repo('~/server/Course')
-#log
+# logging
 
 r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode_responses=True)
 conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', host='159.69.151.133', port='5056')
@@ -110,7 +110,6 @@ def users():
             conn.commit()
             res = cursor.fetchone()
 
-
             if res is not None:
                 result = []
                 result.append({
@@ -139,8 +138,8 @@ def users():
         if user_exists('email', email):
             abort(400, description="The user with this email already exists")
 
-        #The names can only include the ' '(space) and '.,- chars
-        #The names must be at least 1 characters long and not exceed 30 chars
+        # The names can only include the ' '(space) and '.,- chars
+        # The names must be at least 1 characters long and not exceed 30 chars
         check_first_name = validate_names('first name', f_name)
         if not check_first_name['result']:
             abort(400, description=check_first_name['text'])
@@ -168,7 +167,7 @@ def users():
 
         sql_query = """INSERT INTO users (first_name, last_name, password, phone, email, active, salt) VALUES ('{0}', 
                 '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')""".format(f_name, l_name, hash_password,
-                                                                  phone, email, active, salt)
+                                                            phone, email, active, salt)
         cursor.execute(sql_query)
         conn.commit()
 
@@ -628,7 +627,7 @@ def users_vehicle():
         # get needed data
         user_id = get_user_id(email)
         size_id = get_value_from_table('size_id', 'sizes', 'size_name', size_name)
-        vehicle_id = get_value_from_table('vehicle_id', 'vehicle','vehicle_name', vehicle_name)
+        vehicle_id = get_value_from_table('vehicle_id', 'vehicle', 'vehicle_name', vehicle_name)
 
         if not size_id:
             abort(400, description='Unknown tire size, add the tire size data to the sizes DB')
@@ -706,7 +705,7 @@ def users_vehicle():
             new_vehicle_id = vehicle_id_db
             new_vehicle_name = 'The vehicle name has not been changed'
         else:
-            new_vehicle_id = get_value_from_table('vehicle_id', 'vehicle','vehicle_name', new_vehicle_name)
+            new_vehicle_id = get_value_from_table('vehicle_id', 'vehicle', 'vehicle_name', new_vehicle_name)
             if not new_vehicle_id:
                 abort(400, description='Unknown vehicle_name')
 
@@ -752,7 +751,7 @@ def users_vehicle():
         if not vehicle_exists(user_vehicle_id):
             abort(400, description='The vehicle does not exist')
 
-        user_id = get_value_from_table('user_id', 'user_vehicle','user_vehicle_id', user_vehicle_id)
+        user_id = get_value_from_table('user_id', 'user_vehicle', 'user_vehicle_id', user_vehicle_id)
 
         if get_user_id(email) != user_id:
             abort(403, description='It is not your vehicle! Somebody call the police!')
@@ -909,11 +908,11 @@ def storage_order():
             if get_value_from_table('user_id', 'user_vehicle', 'user_vehicle_id', user_vehicle_id) != user_id:
                 abort(403, description='It is not your vehicle! Somebody call the police!')
             size_name = get_value_from_table('size_name', 'sizes', 'size_id',
-                                get_value_from_table('size_id', 'user_vehicle','user_vehicle_id', user_vehicle_id))
+                                get_value_from_table('size_id', 'user_vehicle', 'user_vehicle_id', user_vehicle_id))
 
         size_id = get_value_from_table('size_id', 'sizes', 'size_name', size_name)
 
-        #set the storage order cost 1000, the calculation will be implemented after some time. May be....
+        # set the storage order cost 1000, the calculation will be implemented after some time. May be....
         storage_order_cost = 1000
 
         shelf_id = 0
@@ -937,7 +936,7 @@ def storage_order():
 
         # Если нет, проверить что даты не пересекаются с существующими:
         else:
-                # Запрос на полки, у которых нет пересечений по датам
+            # Запрос на полки, у которых нет пересечений по датам
             sql_query = """WITH dates_intersection AS (
                             SELECT DISTINCT shelf_id FROM storage_orders WHERE 
                                 (
@@ -1001,9 +1000,9 @@ def storage_order():
         return jsonify(result)
     elif request.method == 'PUT':
         return 'Temporarily closed for maintenance'
-#======================================================================================================================
+# ======================================================================================================================
 #                                           ON MAINTENANCE
-#======================================================================================================================
+# ======================================================================================================================
 
         # storage_order_id = request.form.get('storage_order_id')
         # token = request.form.get('token')
@@ -1180,17 +1179,20 @@ def tire_service_order():
             abort(400, description='All fields are required')
 
         if not user_vehicle_id.isdigit():
-            return 'The <user_vehicle_id> should be int'
+            abort(400, description='The <user_vehicle_id> should be int')
 
         try:
             numbers_of_wheels = int(numbers_of_wheels)
-        except:
-            return 'The <numbers_of_wheels> should be int'
+        except ValueError:
+            abort(400, description='The <numbers_of_wheels> should be int')
 
         try:
             order_date = datetime.datetime.strptime(order_date_str, '%Y-%m-%d %H:%M')
         except ValueError:
-            return 'The <order_date> should be in YYYY-MM-DD HH-MM format'
+            abort(400, description='The <order_date> should be in YYYY-MM-DD HH-MM format')
+
+        if order_date_str < str(datetime.datetime.now()):
+            abort(400, description='The start_date can not be less than today')
 
         delta_db = get_value_from_table('delta_minutes', 'positions', 'position_name', 'worker')
         delta = datetime.timedelta(minutes=int(delta_db))
@@ -1432,7 +1434,7 @@ def tire_service_order():
         abort(405)
 
 
-@app.route("/tire_service_order/task", methods=['GET', 'POST', 'DELETE']) # add new/change/delete a task to the user's service order
+@app.route("/tire_service_order/task", methods=['GET', 'POST', 'DELETE'])  # add new/change/delete a task to the user's service order
 def task():
     if request.method == 'GET':
         return 'Temporarily closed for maintenance'
@@ -1593,6 +1595,7 @@ def push():
         admin_password = request.form.get('admin password')
         if admin_password == 'push':
             push_user_auth()
+
 
 if __name__ == '__main__':
     app.run()
