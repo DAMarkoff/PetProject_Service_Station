@@ -439,7 +439,7 @@ def user_info():
                 # cursor.execute(sql_query)
                 # conn.commit()
                 # res_cost = cursor.fetchone()
-                res_cost = get_value_from_table('SUM(task_cost)', 'temp', 'service_order_id', 22)
+                res_cost = get_value_from_table('SUM(task_cost)', 'temp', 'service_order_id', service_order_id)
                 if not res_cost:
                     tire_service_order_cost = 'Error! Sum is None!'
                 else:
@@ -1382,8 +1382,6 @@ def tire_service_order():
                 })
 
                 return jsonify(result)
-
-
             else:
                 return jsonify({'confirmation': 'There are no workers for the required time'})
 
