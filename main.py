@@ -1312,7 +1312,7 @@ def tire_service_order():
                 cursor.execute(sql_query)
                 conn.commit()
 
-                sql_query = """SELECT service_order_id FROM tire_service_order WHERE
+                sql_query = """SELECT MAX(service_order_id) FROM tire_service_order WHERE
                                     user_id = '{0}' AND
                                     start_datetime = '{1}' AND
                                     stop_datetime = '{2}' AND
