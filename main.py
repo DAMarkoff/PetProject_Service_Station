@@ -1296,16 +1296,6 @@ def tire_service_order():
             return result['value']
         else:
             return jsonify({'confirmation': 'we only provide the <tire change> and <tire repair> services by now'})
-
-
-
-
-
-
-
-
-
-
     elif request.method == 'PUT':
         return 'Temporarily closed for maintenance'
 # ======================================================================================================================
@@ -1432,152 +1422,154 @@ def tire_service_order():
 @app.route("/tire_service_order/task", methods=['GET', 'POST', 'DELETE']) # add new/change/delete a task to the user's service order
 def task():
     if request.method == 'GET':
-        pass
+        return 'Temporarily closed for maintenance'
     # add a task to the list_of_works
     elif request.method == 'POST':
-        email = request.form.get('email')
-        token = request.form.get('token')
-        service_order_id = request.form.get('service_order_id')
-        task_name = request.form.get('task_name')
-        numbers_of_task = request.form.get('numbers_of_tasks')
-
-        if not token or not email or not service_order_id or not task_name or not numbers_of_task:
-            abort(400, description='The token, email, service_order_id and task_name are required')
-
-        if not str(numbers_of_task).isdigit() or not str(service_order_id).isdigit():
-            abort(400, description='Please, provide a numbers of tasks and service_order_id in digits')
-
-        user_auth = user_authorization(email, token)
-        if not user_auth['result']:
-            abort(401, description=user_auth['text'])
-
-        r.expire(email, 600)
-
-        if not conn:
-            abort(503, description='There is no connection to the database')
-        # to delete if ok
-        # sql_query = """SELECT user_id FROM tire_service_order WHERE service_order_id = '{0}';""".format(service_order_id)
-        # cursor.execute(sql_query)
-        # conn.commit()
-        # res_ = cursor.fetchone()
-
-        if get_user_id(email) != get_value_from_table('user_id', 'tire_service_order', 'service_order_id', service_order_id):
-            abort(403, description='It is not your tire service order!')
-        # to delete if ok
-        # sql_query = """SELECT task_id FROM tasks WHERE task_name = '{0}';""".format(task_name)
-        # cursor.execute(sql_query)
-        # conn.commit()
-        # res_ = cursor.fetchone()
-        task_id = get_value_from_table('task_id', 'tasks', 'task_name', task_name)
-
-        if not task_id:
-            abort(400, description='Sorry, we do not offer this service')
-
-        for _ in range(int(numbers_of_task)):
-
-            sql_query = """INSERT INTO list_of_works (service_order_id, task_id)
-                            VALUES ('{0}', '{1}');""".format(service_order_id, task_id)
-            cursor.execute(sql_query)
-            conn.commit()
-
-        if int(numbers_of_task) == 1:
-            result = {
-                'confirmation': 'The ' + task_name + ' task is successfully added to your tire_service_order ID ' \
-                                + service_order_id
-            }
-        else:
-            result = {
-                'confirmation': 'tasks for ' + task_name + ' in the amount of ' + numbers_of_task + \
-                     ' have been successfully added to your tire_service_order ID ' + service_order_id
-            }
-
-        return jsonify(result)
+        return 'Temporarily closed for maintenance'
+        # email = request.form.get('email')
+        # token = request.form.get('token')
+        # service_order_id = request.form.get('service_order_id')
+        # task_name = request.form.get('task_name')
+        # numbers_of_task = request.form.get('numbers_of_tasks')
+        #
+        # if not token or not email or not service_order_id or not task_name or not numbers_of_task:
+        #     abort(400, description='The token, email, service_order_id and task_name are required')
+        #
+        # if not str(numbers_of_task).isdigit() or not str(service_order_id).isdigit():
+        #     abort(400, description='Please, provide a numbers of tasks and service_order_id in digits')
+        #
+        # user_auth = user_authorization(email, token)
+        # if not user_auth['result']:
+        #     abort(401, description=user_auth['text'])
+        #
+        # r.expire(email, 600)
+        #
+        # if not conn:
+        #     abort(503, description='There is no connection to the database')
+        # # to delete if ok
+        # # sql_query = """SELECT user_id FROM tire_service_order WHERE service_order_id = '{0}';""".format(service_order_id)
+        # # cursor.execute(sql_query)
+        # # conn.commit()
+        # # res_ = cursor.fetchone()
+        #
+        # if get_user_id(email) != get_value_from_table('user_id', 'tire_service_order', 'service_order_id', service_order_id):
+        #     abort(403, description='It is not your tire service order!')
+        # # to delete if ok
+        # # sql_query = """SELECT task_id FROM tasks WHERE task_name = '{0}';""".format(task_name)
+        # # cursor.execute(sql_query)
+        # # conn.commit()
+        # # res_ = cursor.fetchone()
+        # task_id = get_value_from_table('task_id', 'tasks', 'task_name', task_name)
+        #
+        # if not task_id:
+        #     abort(400, description='Sorry, we do not offer this service')
+        #
+        # for _ in range(int(numbers_of_task)):
+        #
+        #     sql_query = """INSERT INTO list_of_works (service_order_id, task_id)
+        #                     VALUES ('{0}', '{1}');""".format(service_order_id, task_id)
+        #     cursor.execute(sql_query)
+        #     conn.commit()
+        #
+        # if int(numbers_of_task) == 1:
+        #     result = {
+        #         'confirmation': 'The ' + task_name + ' task is successfully added to your tire_service_order ID ' \
+        #                         + service_order_id
+        #     }
+        # else:
+        #     result = {
+        #         'confirmation': 'tasks for ' + task_name + ' in the amount of ' + numbers_of_task + \
+        #              ' have been successfully added to your tire_service_order ID ' + service_order_id
+        #     }
+        #
+        # return jsonify(result)
     elif request.method == 'DELETE':
-        email = request.form.get('email')
-        token = request.form.get('token')
-        service_order_id = request.form.get('service_order_id')
-        task_number = request.form.get('task_number')
-
-        if not token or not email or not service_order_id:
-            abort(400, description='The token, email, service_order_id are required')
-
-        if not str(service_order_id).isdigit():
-            abort(400, description='Please, provide the service_order_id in digits')
-
-        user_auth = user_authorization(email, token)
-        if not user_auth['result']:
-            abort(401, description=user_auth['text'])
-
-        r.expire(email, 600)
-
-        if not conn:
-            abort(503, description='There is no connection to the database')
-        # to delete if ok
-        # sql_query = """SELECT user_id FROM tire_service_order WHERE service_order_id = '{0}';""".format(service_order_id)
-        # cursor.execute(sql_query)
-        # conn.commit()
-        # res_ = cursor.fetchone()
-
-        if get_user_id(email) != get_value_from_table('user_id', 'tire_service_order', 'service_order_id', service_order_id):
-            abort(403, description='It is not your tire service order!')
-
-        if not task_number:
-
-            sql_query = """SELECT task_name, task_duration, task_cost, s.first_name, s.last_name, 
-                        m.first_name, m.last_name, work_id 
-                        FROM list_of_works 
-                        JOIN tasks USING (task_id) 
-                        JOIN staff as s USING (worker_id)
-                        JOIN tire_service_order USING (service_order_id)
-                        JOIN managers as m USING (manager_id)
-                        WHERE service_order_id  = {0}""".format(service_order_id)
-            cursor.execute(sql_query)
-            conn.commit()
-            res = cursor.fetchall()
-
-            result = {}
-            for i in res:
-                name = 'task № ' + str(i[7])
-                result[name] = {
-                    'task name': i[0],
-                    'task duration': str(i[1]),
-                    'task cost': i[2],
-                    'worker first name': i[3],
-                    'worker last name': i[4],
-                    'manager first name': i[5],
-                    'manager last name': i[6]
-                }
-            return jsonify(result)
-
-        else:
-
-            if not str(task_number).isdigit():
-                abort(400, description='Please, provide the task_number in digits')
-
-            sql_query = """SELECT work_id FROM list_of_works WHERE service_order_id = {0}""".format(service_order_id)
-            cursor.execute(sql_query)
-            res = cursor.fetchall()
-
-            flag = False
-            for i in res:
-                if int(task_number) == i[0]:
-                    flag = True
-                    break
-
-            if not flag:
-                abort(400, description='Incorrect task number')
-
-            sql_query = """DELETE FROM list_of_works WHERE work_id = {0}""". format(task_number)
-            cursor.execute(sql_query)
-            conn.commit()
-
-            text = 'The task number {{ name }} has been deleted'
-            template = Template(text)
-
-            result = {
-                "confirmation": template.render(name=task_number),
-            }
-            return jsonify(result)
+        return 'Temporarily closed for maintenance'
+        # email = request.form.get('email')
+        # token = request.form.get('token')
+        # service_order_id = request.form.get('service_order_id')
+        # task_number = request.form.get('task_number')
+        #
+        # if not token or not email or not service_order_id:
+        #     abort(400, description='The token, email, service_order_id are required')
+        #
+        # if not str(service_order_id).isdigit():
+        #     abort(400, description='Please, provide the service_order_id in digits')
+        #
+        # user_auth = user_authorization(email, token)
+        # if not user_auth['result']:
+        #     abort(401, description=user_auth['text'])
+        #
+        # r.expire(email, 600)
+        #
+        # if not conn:
+        #     abort(503, description='There is no connection to the database')
+        # # to delete if ok
+        # # sql_query = """SELECT user_id FROM tire_service_order WHERE service_order_id = '{0}';""".format(service_order_id)
+        # # cursor.execute(sql_query)
+        # # conn.commit()
+        # # res_ = cursor.fetchone()
+        #
+        # if get_user_id(email) != get_value_from_table('user_id', 'tire_service_order', 'service_order_id', service_order_id):
+        #     abort(403, description='It is not your tire service order!')
+        #
+        # if not task_number:
+        #
+        #     sql_query = """SELECT task_name, task_duration, task_cost, s.first_name, s.last_name,
+        #                 m.first_name, m.last_name, work_id
+        #                 FROM list_of_works
+        #                 JOIN tasks USING (task_id)
+        #                 JOIN staff as s USING (worker_id)
+        #                 JOIN tire_service_order USING (service_order_id)
+        #                 JOIN managers as m USING (manager_id)
+        #                 WHERE service_order_id  = {0}""".format(service_order_id)
+        #     cursor.execute(sql_query)
+        #     conn.commit()
+        #     res = cursor.fetchall()
+        #
+        #     result = {}
+        #     for i in res:
+        #         name = 'task № ' + str(i[7])
+        #         result[name] = {
+        #             'task name': i[0],
+        #             'task duration': str(i[1]),
+        #             'task cost': i[2],
+        #             'worker first name': i[3],
+        #             'worker last name': i[4],
+        #             'manager first name': i[5],
+        #             'manager last name': i[6]
+        #         }
+        #     return jsonify(result)
+        #
+        # else:
+        #
+        #     if not str(task_number).isdigit():
+        #         abort(400, description='Please, provide the task_number in digits')
+        #
+        #     sql_query = """SELECT work_id FROM list_of_works WHERE service_order_id = {0}""".format(service_order_id)
+        #     cursor.execute(sql_query)
+        #     res = cursor.fetchall()
+        #
+        #     flag = False
+        #     for i in res:
+        #         if int(task_number) == i[0]:
+        #             flag = True
+        #             break
+        #
+        #     if not flag:
+        #         abort(400, description='Incorrect task number')
+        #
+        #     sql_query = """DELETE FROM list_of_works WHERE work_id = {0}""". format(task_number)
+        #     cursor.execute(sql_query)
+        #     conn.commit()
+        #
+        #     text = 'The task number {{ name }} has been deleted'
+        #     template = Template(text)
+        #
+        #     result = {
+        #         "confirmation": template.render(name=task_number),
+        #     }
+        #     return jsonify(result)
     else:
         abort(405)
 
