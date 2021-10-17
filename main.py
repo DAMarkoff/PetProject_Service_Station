@@ -1136,8 +1136,8 @@ def storage_order():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        # if not storage_order_exists(storage_order_id):
-        #     abort(400, description='The storage order does not exist')
+        if not storage_order_exists(storage_order_id):
+            abort(400, description='The storage order does not exist')
 
         sql_query = """SELECT user_id, shelf_id, start_date FROM storage_orders 
                                     WHERE storage_order_id = '{0}'""".format(storage_order_id)
