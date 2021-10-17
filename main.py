@@ -1280,7 +1280,6 @@ def tire_service_order():
                                                             wheel_alignment, camera_repair, numbers_of_wheels)
             end_time = order_date + service_duration
 
-            return str(end_time)
             # =========================================================================================================
             # Select a manager
             manager = choose_a_manager(date_to_query)
@@ -1290,6 +1289,7 @@ def tire_service_order():
                 manager_id = manager['manager_id']
                 abort(400, description=manager_id)
 
+            return str(manager_id)
             # =========================================================================================================
             # Time
             result = choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_vehicle_id, manager_id,
