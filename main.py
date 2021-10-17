@@ -165,9 +165,10 @@ def users():
 
         hash_password, salt = generate_password_hash(password)
 
-        sql_query = """INSERT INTO users (first_name, last_name, password, phone, email, active, salt) VALUES ('{0}', 
-                '{1}', '{2}', '{3}', '{4}', '{5}', '{6}')""".format(f_name, l_name, hash_password,
-                                                            phone, email, active, salt)
+        created = datetime.datetime.now()
+        sql_query = """INSERT INTO users (first_name, last_name, password, phone, email, active, salt, created) 
+        VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}')""".format(f_name, l_name, hash_password,
+                                                            phone, email, active, salt, created)
         cursor.execute(sql_query)
         conn.commit()
 
@@ -644,8 +645,9 @@ def users_vehicle():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        sql_query = """INSERT INTO user_vehicle (user_id, vehicle_id, size_id) 
-                        VALUES ('{0}', '{1}', '{2}');""".format(user_id, vehicle_id, size_id)
+        created = datetime.datetime.now()
+        sql_query = """INSERT INTO user_vehicle (user_id, vehicle_id, size_id, created) 
+                        VALUES ('{0}', '{1}', '{2}', '{3}');""".format(user_id, vehicle_id, size_id, created)
         cursor.execute(sql_query)
         conn.commit()
         # to delete if ok
@@ -961,10 +963,11 @@ def storage_order():
                 # Если таких несколько, выбираем меньшую по ИД
                 shelf_id = min(res_)
 
+                created = datetime.datetime.now()
                 # create storage order
                 sql_query = """INSERT INTO storage_orders (user_id, start_date, stop_date, size_id, shelf_id, 
-                                    storage_order_cost) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}');""". \
-                    format(user_id, start_date, stop_date, size_id, shelf_id, storage_order_cost)
+                            storage_order_cost, created) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}');""". \
+                    format(user_id, start_date, stop_date, size_id, shelf_id, storage_order_cost, created)
                 cursor.execute(sql_query)
                 conn.commit()
 
@@ -977,7 +980,7 @@ def storage_order():
                 # предоставляем информацию о дельтах дат и перенаправляем на ресепшн
 
         if shelf_id == 0:
-            abort(400, description='Shef_id is undefined')
+            abort(400, description='Shelf_id is undefined')
         # get the new storage order id
         sql_query = """SELECT storage_order_id FROM storage_orders WHERE 
                             shelf_id = '{0}' AND
@@ -1133,19 +1136,22 @@ def storage_order():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        if not storage_order_exists(storage_order_id):
-            abort(400, description='The storage order does not exist')
+        # if not storage_order_exists(storage_order_id):
+        #     abort(400, description='The storage order does not exist')
 
-        sql_query = """SELECT user_id, shelf_id FROM storage_orders 
+        sql_query = """SELECT user_id, shelf_id, start_date FROM storage_orders 
                                     WHERE storage_order_id = '{0}'""".format(storage_order_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
 
-        user_id, shelf_id = res_
+        user_id, shelf_id, start_date = res_
 
         if get_user_id(email) != user_id:
             abort(403, description='It is not your storage order!')
+
+        if start_date < datetime.datetime.now():
+            abort(400, description='You cannot delete a completed service order')
 
         sql_query = """DELETE FROM storage_orders WHERE storage_order_id = '{0}'""".format(storage_order_id)
         cursor.execute(sql_query)

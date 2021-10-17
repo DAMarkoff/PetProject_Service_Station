@@ -13,7 +13,8 @@ r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode
 conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', host='159.69.151.133', port='5056')
 cursor = conn.cursor()
 
-def user_exists(where, email):
+def user_exists(where: str, email: str) -> bool:
+    """Checks that the user with this email is already registered"""
     if conn:
         sql_query = "SELECT user_id FROM users WHERE {0} = '{1}'".format(where, email)
         cursor.execute(sql_query)
@@ -25,7 +26,8 @@ def user_exists(where, email):
     return True
 
 
-def vehicle_exists(user_vehicle_id):
+def vehicle_exists(user_vehicle_id: str) -> bool:
+    """Checks if the vehicle with this vehicle_id exists"""
     sql_query = """SELECT user_id FROM user_vehicle WHERE user_vehicle_id = '{0}'""".format(user_vehicle_id)
     cursor.execute(sql_query)
     conn.commit()
@@ -285,11 +287,11 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
     if res_:
         rand_id = random.randint(0, len(res_) - 1)
         worker_id = res_[rand_id][0]
-
+        created = datetime.datetime.now()
         sql_query = """INSERT INTO tire_service_order 
-                                (user_id, start_datetime, stop_datetime, user_vehicle_id, manager_id, service_type_id)
-                                VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}');""".\
-                                format(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id)
+                    (user_id, start_datetime, stop_datetime, user_vehicle_id, manager_id, service_type_id, created)
+                    VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}');""".\
+                    format(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id, created)
         cursor.execute(sql_query)
         conn.commit()
 

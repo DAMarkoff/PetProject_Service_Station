@@ -85,44 +85,26 @@ d		/user_info
 		/users/user_info		
 		/warehouse
 		/vehicle
-		/storage_order			
-		/tire_service_order		
+		/storage_order			- update			
+		/tire_service_order		- update
 	
 ToDo Dmitrii:
 
-				- replace fetchone() to get_value_from_table() - if more than one?
 				- add a state vehicle number column to the user_vehicle table and in the output info in the user_info and [PUT] service order insetead of user_vehicle_id
-				- update user_info (service_order)
-				- add service_order types
-				- validate required fields (not flield is not working) test: False, True, '   ' (spaces)
-				- change the user_info - tire_service_order - add sum of duration
+				- validate required fields (not filleld is not working) test: False, True, '   ' (spaces)
 
 		- user_vehicle_id in storage_order [PUT]?
-		- remove storage_order_cost from /storage_order [PUT] and add optional user_vehicle_id
-		- using conn.close()?
 	
 	In progress: 
 		- swagger
-		- dates when workers are selected
-		- put the timestamp in the DB as result of [POST]
 	
-	- vehicle.name in /vehicle	[POST] - ok, but in [PUT]?
-	- dates: change the storage_order dates
-    - hello message when the user has been registered
+	- vehicle.name in /vehicle	[POST] - ok, but in [PUT]?	
     - 401 status code when the email or token does not exist?
     - change password
     - restore password
-	
-    - estimate the service time and store it in the tire_service_order
-!check!   - when the user deletes the tasks - delete them from the tire_service_order ON CASCADE
 
-    - rename the DB field's names and def's names to full
+	- drop pass column from users?
 
-	- drop pass column from users
-	- warehouse:
-		- create an on demand summary JSON report 
-
-	- the user can delete a tire_service_order with an expired date
 	- the user can create two tire_service_orders for the same vehicle on the same date and time 
 	- schedule (for workers)
 	- add to list_of_works how to choose a worker 
@@ -161,6 +143,17 @@ DrawSQL DB:
 	table Payment (payment_id, user_id, card_number, exp_date, owner_name, cvv_cvc)
 	
 DISCLAIMER:
+	Условности:
+		Сервис работает 7 дней в неделю, так же и все работники.
+		Рабочее время - 08:00 - 20:00
+		Перерыв между заказами - 10 минут
+		Все виды работ выполняются рабочими (дополнительные должности и виды работ планируются к реализации позже)
+		Планируемое время окончания работ не может превышать 20:15
+		При создании заказа на хранение не учитывается время - только дата (при пересечении времени подразумевается использование полки другого размера, или еще чего.. :)
+		Ценообразование заказов и продолжительность работ
+		Назначение менеджеров: в первую очередь - рандомный менеджер без заказов; во вторую очередь - рандомный менеджер с наименьшим количеством заказов
+		Назначение работяг: рандомный работяга, не занятый в необходимый промежуток времени
+
 user_authorization checks: 	
 	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: The token is invalid, please log in
@@ -173,9 +166,9 @@ In memories:
 	- the u_veh_id in the user_vehicle has been renamed to user_vehicle_id
 	- the u_veh_id in the tire_service_order has been renamed to user_vehicle_id
 	- the serv_order__id in the tire_service_order has been renamed to service_order_id
-	- tso service_order_date to start_datetime
-	- staff availabe to active
-	- managers availabe to active
+	- the service_order_date in the tire_service_order has been renamed to start_datetime
+	- the availabe in the staff has been renamed to active
+	- the availabe in the managers has been renamed to active
 
 /users/login [POST]
 	input:  
