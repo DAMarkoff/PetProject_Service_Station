@@ -1274,7 +1274,7 @@ def tire_service_order():
                 wheel_alignment = 'wheel_alignment'
                 tasks.append('wheel_alignment')
 
-            return tasks
+            return jsonify(tasks)
             # =========================================================================================================
             # Calculate the expected duration of tire replacement
             service_duration = duration_of_service(tire_repair, tire_change, removing_installing_wheels, balancing,
