@@ -1212,7 +1212,7 @@ def tire_service_order():
         if get_user_id(email) != user_id:
             abort(403, description='It is not your vehicle!')
 
-        if order_type == 'tire change':
+        if order_type.lower() == 'tire change':
             tasks = []
             tire_change = 'tire_change'
             tasks.append('tire_change')
@@ -1326,25 +1326,30 @@ def tire_service_order():
 
                 service_order_tasks, service_order_cost = [], 0
                 for task in tasks:
+                    if task in ('tire_change', 'wheel_removal_installation', 'wheel_balancing'):
+                        count_tasks = numbers_of_wheels
+                    else:
+                        count_tasks = 1
+                    for _ in range(count_tasks):
+                        task_id = get_value_from_table('task_id', 'tasks', 'task_name', task)
 
-                    task_id = get_value_from_table('task_id', 'tasks', 'task_name', task)
+                        sql_query = """INSERT INTO list_of_works
+                                            (service_order_id, task_id, worker_id)
+                                        VALUES ('{0}', '{1}', '{2}');""".format(service_order_id, task_id, worker_id)
+                        cursor.execute(sql_query)
+                        conn.commit()
 
-                    sql_query = """INSERT INTO list_of_works
-                                        (service_order_id, task_id, worker_id)
-                                    VALUES ('{0}', '{1}', '{2}');""".format(service_order_id, task_id, worker_id)
-                    cursor.execute(sql_query)
-                    conn.commit()
+                        task_name = get_value_from_table('task_name', 'tasks', 'task_id', task_id)
+                        task_cost = get_value_from_table('task_cost', 'tasks', 'task_id', task_id)
+                        service_order_cost += int(task_cost)
+                        service_order_tasks.append({
+                            'task_name': task_name,
+                            'task cost': task_cost
+                        })
 
-                    task_name = get_value_from_table('task_name', 'tasks', 'task_id', task_id)
-                    task_cost = get_value_from_table('task_cost', 'tasks', 'task_id', task_id)
-                    service_order_cost += int(task_cost)
-                    service_order_tasks.append({
-                        'task_name': task_name,
-                        'task cost': task_cost,
-                        'worker_id': worker_id
-                    })
-
-                # get the manager's first and last names
+                # get the manager's and worker's first and last names
+                worker_first_name = get_value_from_table('first_name', 'staff', 'worker_id', worker_id)
+                worker_last_name = get_value_from_table('last_name', 'staff', 'worker_id', worker_id)
                 manager_first_name = get_value_from_table('first_name', 'managers', 'manager_id', manager_id)
                 manager_last_name = get_value_from_table('last_name', 'managers', 'manager_id', manager_id)
 
@@ -1371,7 +1376,10 @@ def tire_service_order():
                 result = ({
                     'service_order_id': service_order_id,
                     'user_vehicle_id': user_vehicle_id,
+                    'manager_id': manager_id,
                     'manager:': manager_first_name + ' ' + manager_last_name,
+                    'worker_id': worker_id,
+                    'worker:': worker_first_name + ' ' + worker_last_name,
                     'vehicle_id': user_vehicle_id,
                     'service order type': order_type,
                     'order datetime': str(order_date),
