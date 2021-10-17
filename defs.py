@@ -381,3 +381,5 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
     else:
         return_val['result'] = False
         return_val['value'] = jsonify({'confirmation': 'There are no workers for the required time'})
+
+    return return_val
