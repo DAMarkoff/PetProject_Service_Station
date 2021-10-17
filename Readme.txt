@@ -26,14 +26,13 @@ DB diagram: https://drawsql.app/myowncompany/diagrams/cto
 Done:
 	endpoints:
 		/users:
-			[GET] - get the short user_info (one/all)
+			[GET] - get the short user_info (one/all, active/inactive)
 			[POST] - register a new user
 			[PUT] - change the user_info
 			[DELETE] - delete the user by itsels (WARNING! ON DELETE CASCADE! (suicide :(
 
 		/users/user_info
 			[POST] - get the full user_info 
-			(include: short user_info; user's vehicle; user's storage_orders; user's tire_service_orders with tasks and costs)
 			
 		/users/login:
 			[POST]
@@ -62,14 +61,14 @@ Done:
 		/tire_service_order:
 			*[GET] - request a user tire_service_order 	- not implemented (the info is provided in user_info. there will be another endpoint for managers)
 			[POST] - create new user's tire_service_order
-			[PUT] - change a user's tire_service_order
+			*[PUT] - change a user's tire_service_order	- closed. on maintenance
 			[DELETE] - delete a user's tire_service_order
 			
 		/tire_service_order/task:
 			*[GET] - request the task 					- not implemented (the info is provided in user_info. there will be another endpoint for managers)
-			[POST] - create new task
+			*[POST] - create new task					- tasks are created when creating a service order
 			*[PUT] - change the task 					- not implemented (the user can delete or add tasks in the tire service order. only the manager can change workers)
-			[DELETE] - delete the task
+			*[DELETE] - delete the task					- closed. on maintenance
 		
 	block-diagram:
 *		/reg
@@ -85,8 +84,8 @@ d		/user_info
 		/users/user_info		
 		/warehouse
 		/vehicle
-		/storage_order			- update			
-		/tire_service_order		- update
+		/storage_order			- needs updating			
+		/tire_service_order		- needs updating
 	
 ToDo Dmitrii:
 
@@ -103,13 +102,10 @@ ToDo Dmitrii:
     - change password
     - restore password
 
-	- drop pass column from users?
+	- drop the pass column from the users table?
 
 	- the user can create two tire_service_orders for the same vehicle on the same date and time 
 	- schedule (for workers)
-	- add to list_of_works how to choose a worker 
-	- new storage order dates validate (start before today)
-	- update the token's TTL in the redis db after each user action
 	
 	- staff: add other working professions
 	- distribution of workers by type of work
@@ -118,13 +114,10 @@ ToDo Dmitrii:
 	    - can change the managers in the tire_service_order
 	    - can change the worker in the list_of_works
 	    - can restore the user's password
-		- form a reports:
+		- generate reports:
 		    - staff: all/available/unavailable (by position or all)
 		    - costs: all/storage_orders/tire_service_oreders
 		    - costs: on staff
-
-
-	- /tire_service_order/task [PUT], [DELETE]
 	
 	- swagger
 	- design
@@ -143,20 +136,25 @@ DrawSQL DB:
 	table Payment (payment_id, user_id, card_number, exp_date, owner_name, cvv_cvc)
 	
 DISCLAIMER:
-	Условности:
-		Сервис работает 7 дней в неделю, так же и все работники.
-		Рабочее время - 08:00 - 20:00
-		Перерыв между заказами - 10 минут
-		Все виды работ выполняются рабочими (дополнительные должности и виды работ планируются к реализации позже)
-		Планируемое время окончания работ не может превышать 20:15
-		При создании заказа на хранение не учитывается время - только дата (при пересечении времени подразумевается использование полки другого размера, или еще чего.. :)
-		Ценообразование заказов и продолжительность работ
-		Назначение менеджеров: в первую очередь - рандомный менеджер без заказов; во вторую очередь - рандомный менеджер с наименьшим количеством заказов
-		Назначение работяг: рандомный работяга, не занятый в необходимый промежуток времени
+Условности:
+	Сервис работает 7 дней в неделю, так же и все работники.
+	Рабочее время - 08:00 - 20:00
+	Перерыв между заказами - 10 минут
+	Все виды работ выполняются рабочими (дополнительные должности и виды работ планируются к реализации позже)
+	Планируемое время окончания работ не может превышать 20:15
+	При создании заказа на хранение не учитывается время - только дата (при пересечении времени подразумевается использование полки другого размера, или еще чего.. :)
+	Ценообразование заказов и продолжительность работ взяты с потолка :)
+	Назначение менеджеров: в первую очередь - рандомный менеджер без заказов; во вторую очередь - рандомный менеджер с наименьшим количеством заказов
+	Назначение работяг: рандомный работяга, не занятый в необходимый промежуток времени
+	Возможности изменения заказов не реализованы (пока?)
+	Не рализована логика размещения шин на складе на полке большего размера при пересечении дат.
 
 user_authorization checks: 	
 	if email does not exist in the DB: return "The user does not exist. Please, register" and redirect to /reg
 		if the token does not exist in redis db: The token is invalid, please log in
+
+make sure that all the required fields are filled in
+
 		
 In memories:
 	- the name of the availabe column in the warehouse has been changed to active - need to be tested
@@ -181,12 +179,11 @@ In memories:
 			token
 			user_id
 
-    make sure that all the required fields are filled in
 	if email does not exist in DB: 400 - note
-		if pass does not valid: 401 - note
-			if token exists in the redis db: set new ex time and return the token
-			else: 
-				generate new token, add to the redis db and return it
+	if pass does not valid: 401 - note
+	if token exists in the redis db: set new ex time and return the token
+		else: 
+			generate new token, add to the redis db and return it
 
 
 /users [POST]
@@ -206,7 +203,6 @@ In memories:
 			salt
 			hash_password
 
-	make sure that all the required fields are filled in
 	if email exists in the DB: 400 - note
 	else: 
 		add new user to the DB and return info from the DB with user_id
@@ -248,7 +244,7 @@ In memories:
 			return info
 
 	
-/storage_orders [POST]
+/storage_orders [POST] ========================================== NEEDS UPDATING ==================================================
 	input:
 			token				- required
 			email				- required
@@ -345,6 +341,7 @@ In memories:
 			email				- required
 			token				- required
 			ARE_YOU_SURE?		- required
+			admin				- required - admin password
 			
 	output:
 			sad message
@@ -435,7 +432,7 @@ In memories:
 			if there is a availabe only 'yes' in params: show only free shelf(s) for this size_name
 				if there is a availabe only 'no' in params: show only occupied shelf(s) for this size_name
 
-/tire_service_order [POST]
+/tire_service_order [POST] ========================================== NEEDS UPDATING ==================================================
 	input:
 			email				- required
 			token				- required
@@ -461,7 +458,7 @@ In memories:
 		add delta (10 mins) for workers to the end_time
 
 
-/tire_service_order [PUT]
+/tire_service_order [PUT] =========================================== ON MAINTENANCE ===============================================
     input:
 			email				- required
 			token				- required
@@ -498,7 +495,7 @@ In memories:
 		delete the tasks on delete tire_service_order - DB settings ON DELETE CASCADE
 
 
-/tire_service_order/task [POST]
+/tire_service_order/task [POST] =========================================== ON MAINTENANCE ===============================================
 	input:
 			email				- required
 			token				- required
@@ -513,7 +510,7 @@ In memories:
 		if it is not user's order: :)
 			if numbers_of_tasks is none or not isdigit: return warning message
 				
-/tire_service_order/task [DELETE]
+/tire_service_order/task [DELETE] =========================================== ON MAINTENANCE ===============================================
 	input:
 			email				- required
 			token				- required
