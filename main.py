@@ -1238,6 +1238,7 @@ def tire_service_order():
                                                             wheel_alignment, camera_repair, numbers_of_wheels)
             end_time = order_date + service_duration
             end_hour = end_time.hour
+            return str(end_time), str(end_hour)
             if int(end_hour) > 20:
                 abort(400, description='Sorry, we close at 08:00 pm')
 
