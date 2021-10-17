@@ -1289,7 +1289,6 @@ def tire_service_order():
                 manager_id = manager['manager_id']
                 abort(400, description=manager_id)
 
-            return str(manager_id)
             # =========================================================================================================
             # Time
             result = choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_vehicle_id, manager_id,
