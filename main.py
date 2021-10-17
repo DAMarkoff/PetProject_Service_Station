@@ -70,24 +70,25 @@ def users():
 
         if not user_id:
             if active.lower() == 'yes':
-                sql_query = "SELECT user_id, first_name, last_name, phone, email FROM users WHERE active = True"
+                sql_query = "SELECT user_id, first_name, last_name, phone, email, active FROM users WHERE active = True"
             elif active.lower() == 'no':
-                sql_query = "SELECT user_id, first_name, last_name, phone, email FROM users WHERE active = False"
+                sql_query = "SELECT user_id, first_name, last_name, phone, email, active FROM users WHERE active = False"
             else:
-                sql_query = "SELECT user_id, first_name, last_name, phone, email FROM users"
+                sql_query = "SELECT user_id, first_name, last_name, phone, email, active FROM users"
             cursor.execute(sql_query)
             conn.commit()
             res = cursor.fetchall()
 
             if res:
                 result = []
-                for i in range(len(res)):
+                for i in res:
                     result.append({
-                        "ID": res[i][0],
-                        "f_name": res[i][1],
-                        "l_name": res[i][2],
-                        "phone": res[i][3],
-                        "email": res[i][4]
+                        "ID": i[0],
+                        "f_name": i[1],
+                        "l_name": i[2],
+                        "phone": i[3],
+                        "email": i[4],
+                        "active": i[5]
                     })
             else:
                 result = {
