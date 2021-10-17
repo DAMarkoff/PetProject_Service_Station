@@ -1192,10 +1192,12 @@ def tire_service_order():
         except ValueError:
             return 'The <order_date> should be in YYYY-MM-DD HH-MM format'
 
-        year, month, day, hour = order_date.year, order_date.month, order_date.day, order_date.hour
-        date_to_query = str(year) + '-' + str(month) + '-' + str(day)
+        delta_db = get_value_from_table('delta_minutes', 'positions', 'position_name', 'worker')
+        delta = datetime.timedelta(minutes=int(delta_db))
 
-        if int(hour) < 8:
+        date_to_query = str(order_date.year) + '-' + str(order_date.month) + '-' + str(order_date.day)
+
+        if int(order_date.hour) < 8:
             abort(400, description='Sorry, we open at 08:00 am')
 
         user_auth = user_authorization(email, token)
@@ -1213,7 +1215,8 @@ def tire_service_order():
             abort(403, description='It is not your vehicle!')
 
         if order_type.lower() == 'tire change':
-
+            service_type_id = get_value_from_table('service_type_id', 'tire_service_order_type',
+                                                                            'service_type_name', order_type)
             tasks = []
             tire_change = 'tire_change'
             tire_repair = 'no'
@@ -1236,9 +1239,9 @@ def tire_service_order():
             # Calculate the expected duration of tire replacement
             service_duration = duration_of_service(tire_repair, tire_change, removing_installing_wheels, balancing,
                                                             wheel_alignment, camera_repair, numbers_of_wheels)
-            end_time = order_date + service_duration
+            end_time = order_date + service_duration + delta
             if int(end_time.hour) >= 20 and int(end_time.minute) >= 15:
-                abort(400, description='Sorry, we close at 08:00 pm. Estimated end time of your order is '
+                abort(400, description='Sorry, we close at 08:00 pm. The estimated end time of your order is '
                                                                 + str(end_time.hour) + ':' + str(end_time.minute))
 
             # =========================================================================================================
@@ -1253,10 +1256,11 @@ def tire_service_order():
             # =========================================================================================================
             # Time
             result = choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_vehicle_id, manager_id,
-                                         tasks, numbers_of_wheels, order_type, service_duration)
+                                         tasks, numbers_of_wheels, order_type, service_duration, service_type_id)
             return result['value']
         elif order_type.lower() == 'tire repair':
-
+            service_type_id = get_value_from_table('service_type_id', 'tire_service_order_type',
+                                                   'service_type_name', order_type)
             tasks = []
             tire_change = 'no'
             tire_repair = 'tire_repair'
@@ -1284,7 +1288,10 @@ def tire_service_order():
             # Calculate the expected duration of tire replacement
             service_duration = duration_of_service(tire_repair, tire_change, removing_installing_wheels, balancing,
                                                             wheel_alignment, camera_repair, numbers_of_wheels)
-            end_time = order_date + service_duration
+            end_time = order_date + service_duration + delta
+            if int(end_time.hour) >= 20 and int(end_time.minute) >= 15:
+                abort(400, description='Sorry, we close at 08:00 pm. The estimated end time of your order is '
+                                                                + str(end_time.hour) + ':' + str(end_time.minute))
 
             # =========================================================================================================
             # Select a manager
@@ -1298,7 +1305,7 @@ def tire_service_order():
             # =========================================================================================================
             # Time
             result = choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_vehicle_id, manager_id,
-                                                          tasks, numbers_of_wheels, order_type, service_duration)
+                                            tasks, numbers_of_wheels, order_type, service_duration, service_type_id)
             return result['value']
         else:
             return jsonify({'confirmation': 'we only provide the <tire change> and <tire repair> services by now'})

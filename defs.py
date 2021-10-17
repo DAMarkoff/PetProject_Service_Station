@@ -259,7 +259,7 @@ def duration_of_service(tire_repair, tire_change, removing_installing_wheels, ba
 
 
 def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_vehicle_id, manager_id,
-                                         tasks, numbers_of_wheels, order_type, service_duration):
+                                         tasks, numbers_of_wheels, order_type, service_duration, service_type_id):
     return_val = {'result': True, 'value': ''}
     # Запрос на свободных работяг в нужное время
     sql_query = """WITH dates_intersection AS (
@@ -287,9 +287,9 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
         worker_id = res_[rand_id][0]
 
         sql_query = """INSERT INTO tire_service_order 
-                                (user_id, start_datetime, stop_datetime, user_vehicle_id, manager_id)
+                                (user_id, start_datetime, stop_datetime, user_vehicle_id, manager_id, service_type_id)
                                 VALUES ('{0}', '{1}', '{2}', '{3}', '{4}');""".\
-                                format(user_id, order_date, end_time, user_vehicle_id, manager_id)
+                                format(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id)
         cursor.execute(sql_query)
         conn.commit()
 
@@ -298,8 +298,9 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
                                         start_datetime = '{1}' AND
                                         stop_datetime = '{2}' AND
                                         user_vehicle_id = '{3}' AND
-                                        manager_id = '{4}';""". \
-                                        format(user_id, order_date, end_time, user_vehicle_id, manager_id)
+                                        manager_id = '{4}' AND
+                                        service_type_id = '{5}';""". \
+                                    format(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
