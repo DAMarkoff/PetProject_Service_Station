@@ -1387,7 +1387,7 @@ def tire_service_order():
             #     return jsonify({'confirmation': 'There are no workers for the required time'})
 
             result = choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_vehicle_id, manager_id,
-                                                 tasks, numbers_of_wheels)
+                                         tasks, numbers_of_wheels, order_type, service_duration)
             return result['value']
         elif order_type.lower() == 'tire repair':
 

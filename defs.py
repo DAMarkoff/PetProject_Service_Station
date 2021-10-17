@@ -275,7 +275,7 @@ def duration_of_service(tire_repair, tire_change, removing_installing_wheels, ba
 
 
 def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_vehicle_id, manager_id,
-                                         tasks, numbers_of_wheels):
+                                         tasks, numbers_of_wheels, order_type, service_duration):
     return_val = {'result': True, 'value': ''}
     # Запрос на свободных работяг в нужное время
     sql_query = """WITH dates_intersection AS (
