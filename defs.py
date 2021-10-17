@@ -6,6 +6,7 @@ import datetime
 import bcrypt
 import  git
 from git import Repo
+import random
 
 repository = Repo('~/server/Course')
 r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode_responses=True)
@@ -113,8 +114,8 @@ def validate_email(email):
 
 
 def validate_names(name_type: str, name: str) -> dict:
-    """Validate name - returns dict with bool(result) of validation and str(text) with error message if exists
-    :rtype: object
+    """Validate name - returns a dict with a bool(result) of validation and a str(text) with an error message if exists
+    :type: object
     """
     return_val = {'result': True, 'text': ''}
     if len(name) < 1:
@@ -130,7 +131,7 @@ def validate_names(name_type: str, name: str) -> dict:
 
 
 def validate(name: str) -> bool:
-    """Validate name - match name to pattern"""
+    """Validate name - match the name to the pattern"""
     valid_pattern = re.compile("^[a-z ,.'-]+$", re.I)
     return bool(valid_pattern.match(name))
 
@@ -143,7 +144,7 @@ def user_active(email: str) -> bool:
     return bool(res_)
 
 
-def get_value_from_table(select, from_db, where, what):
+def get_value_from_table(select: str, from_db: str, where: str, what):
     if conn:
         sql_query = """SELECT {0} FROM {1} WHERE {2} = '{3}'""".format(select, from_db, where, what)
         cursor.execute(sql_query)
@@ -196,3 +197,42 @@ def push_user_auth():
 
 def get_tire_service_order():
     """Get all data on user's """
+
+def choose_a_manager(date_to_query):
+    return_val = {'result': True, 'manager_id': ''}
+    # =========================================================================================================
+    # Select a manager
+    # someone who does not have a service order on the required order date
+    sql_query = """SELECT manager_id FROM managers WHERE manager_id NOT IN 
+                (SELECT DISTINCT manager_id FROM tire_service_order WHERE DATE(start_datetime) = '{0}')""" \
+                    .format(date_to_query)
+    cursor.execute(sql_query)
+    conn.commit()
+    res_ = cursor.fetchall()
+
+    if res_:
+        rand_id = random.randint(0, len(res_) - 1)
+        manager_id = res_[rand_id][0]
+        return_val['result'] = True
+        return_val['manager_id'] = manager_id
+    else:
+        # someone who has the minimum number of service orders on the required order date
+        sql_query = """WITH managers_load AS(
+                            SELECT manager_id, count(manager_id) AS load_ FROM tire_service_order 
+                            WHERE date(start_datetime) = '{0}' GROUP BY manager_id)
+
+                            SELECT manager_id FROM managers_load
+                            WHERE load_ in (SELECT MIN(load_) FROM managers_load)""".format(date_to_query)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchall()
+
+        if res_:
+            rand_id = random.randint(0, len(res_) - 1)
+            manager_id = res_[rand_id][0]
+            return_val['result'] = True
+            return_val['manager_id'] = manager_id
+        else:
+            return_val['result'] = False
+            return_val['manager_id'] = {'confirmation': 'There are no managers for the required time'}
+    return return_val

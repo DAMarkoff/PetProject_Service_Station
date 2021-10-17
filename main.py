@@ -1179,11 +1179,16 @@ def tire_service_order():
                     or not tubeless or not balancing or not wheel_alignment:
             abort(400, description='All fields are required')
 
-        if order_type != 'tire change' and order_type != 'tire repair':
-            abort(400, description='The order_type must be <tire change> or <tire repair>')
+        # if order_type != 'tire change' and order_type != 'tire repair':
+        #     abort(400, description='The order_type must be <tire change> or <tire repair>')
 
-        if not user_vehicle_id.isdigit() or not numbers_of_wheels.isdigit():
-            return 'The <user_vehicle_id> and <numbers_of_wheels> should be int'
+        if not user_vehicle_id.isdigit():
+            return 'The <user_vehicle_id> should be int'
+
+        try:
+            numbers_of_wheels = int(numbers_of_wheels)
+        except:
+            return 'The <numbers_of_wheels> should be int'
 
         try:
             order_date = datetime.datetime.strptime(order_date_str, '%Y-%m-%d %H:%M')
@@ -1216,12 +1221,15 @@ def tire_service_order():
             tasks = []
             tire_change = 'tire_change'
             tasks.append('tire_change')
+
             if removing_installing_wheels.lower() == 'yes':
                 removing_installing_wheels = 'wheel_removal_installation'
                 tasks.append('wheel_removal_installation')
+
             if balancing.lower() == 'yes':
                 balancing = 'wheel_balancing'
                 tasks.append('wheel_balancing')
+
             if wheel_alignment.lower() == 'yes':
                 wheel_alignment = 'wheel_alignment'
                 tasks.append('wheel_alignment')
@@ -1234,47 +1242,67 @@ def tire_service_order():
                                     WHEN task_name = '{0}' THEN task_duration 
                                     WHEN task_name = '{1}' THEN task_duration 
                                     WHEN task_name = '{2}' THEN task_duration 
-                                    WHEN task_name = '{3}' THEN task_duration 
                                     ELSE '00:00:00'
                                 end
                             ) AS duration
-                            FROM tasks""".format(tire_change, removing_installing_wheels, balancing, wheel_alignment)
+                            FROM tasks""".format(tire_change, removing_installing_wheels, balancing)
             cursor.execute(sql_query)
             conn.commit()
             res_ = cursor.fetchone()
-            service_duration = int(numbers_of_wheels) * res_[0]
-            end_time = order_date + service_duration
+            service_duration = numbers_of_wheels * res_[0]
 
-            # =========================================================================================================
-            # Select a manager
-            # someone who does not have a service order on the required order date
-            sql_query = """SELECT manager_id FROM managers WHERE manager_id NOT IN 
-                        (SELECT DISTINCT manager_id FROM tire_service_order WHERE DATE(start_datetime) = '{0}')""" \
-                .format(date_to_query)
+            sql_query = """SELECT SUM
+                                        (
+                                            CASE 
+                                                WHEN task_name = '{0}' THEN task_duration 
+                                                ELSE '00:00:00'
+                                            end
+                                        ) AS duration
+                                        FROM tasks""".format(wheel_alignment)
             cursor.execute(sql_query)
             conn.commit()
-            res_ = cursor.fetchall()
+            res_ = cursor.fetchone()
 
-            if res_:
-                rand_id = random.randint(0, len(res_) - 1)
-                manager_id = res_[rand_id][0]
+            service_duration += res_[0]
+            end_time = order_date + service_duration
+
+            # # =========================================================================================================
+            # # Select a manager
+            # # someone who does not have a service order on the required order date
+            # sql_query = """SELECT manager_id FROM managers WHERE manager_id NOT IN
+            #             (SELECT DISTINCT manager_id FROM tire_service_order WHERE DATE(start_datetime) = '{0}')""" \
+            #                 .format(date_to_query)
+            # cursor.execute(sql_query)
+            # conn.commit()
+            # res_ = cursor.fetchall()
+            #
+            # if res_:
+            #     rand_id = random.randint(0, len(res_) - 1)
+            #     manager_id = res_[rand_id][0]
+            # else:
+            #     # someone who has the minimum number of service orders on the required order date
+            #     sql_query = """WITH managers_load AS(
+            #                         SELECT manager_id, count(manager_id) AS load_ FROM tire_service_order
+            #                         WHERE date(start_datetime) = '{0}' GROUP BY manager_id)
+            #
+            #                         SELECT manager_id FROM managers_load
+            #                         WHERE load_ in (SELECT MIN(load_) FROM managers_load)""".format(date_to_query)
+            #     cursor.execute(sql_query)
+            #     conn.commit()
+            #     res_ = cursor.fetchall()
+            #
+            #     if res_:
+            #         rand_id = random.randint(0, len(res_) - 1)
+            #         manager_id = res_[rand_id][0]
+            #     else:
+            #         return jsonify({'confirmation': 'There are no managers for the required time'})
+
+            manager = choose_a_manager(date_to_query)
+            if manager['result']:
+                manager_id = manager['manager_id']
             else:
-                # someone who has the minimum number of service orders on the required order date
-                sql_query = """WITH managers_load AS(
-                                    SELECT manager_id, count(manager_id) AS load_ FROM tire_service_order 
-                                    WHERE date(start_datetime) = '{0}' GROUP BY manager_id)
+                abort(400, description=manager['manager_id'])
 
-                                    SELECT manager_id FROM managers_load
-                                    WHERE load_ in (SELECT MIN(load_) FROM managers_load)""".format(date_to_query)
-                cursor.execute(sql_query)
-                conn.commit()
-                res_ = cursor.fetchall()
-
-                if res_:
-                    rand_id = random.randint(0, len(res_) - 1)
-                    manager_id = res_[rand_id][0]
-                else:
-                    return jsonify({'confirmation': 'There are no managers for the required time'})
 
 
             # =========================================================================================================
@@ -1327,7 +1355,7 @@ def tire_service_order():
                 service_order_tasks, service_order_cost = [], 0
                 for task in tasks:
                     if task in ('tire_change', 'wheel_removal_installation', 'wheel_balancing'):
-                        count_tasks = int(numbers_of_wheels)
+                        count_tasks = numbers_of_wheels
                     else:
                         count_tasks = 1
                     for _ in range(count_tasks):
@@ -1360,31 +1388,21 @@ def tire_service_order():
                 if service_order_tasks == 0:
                     service_order_cost = 'Error! Sum is None!'
 
-                # sql_query = """SELECT SUM(task_cost) FROM tire_service_order
-                #                     JOIN list_of_works USING (service_order_id)
-                #                     JOIN tasks USING (task_id)
-                #                 WHERE service_order_id = '{0}';""".format(service_order_id)
-                # cursor.execute(sql_query)
-                # conn.commit()
-                # res_ = cursor.fetchone()
-                #
-                # if not res_:
-                #     service_order_cost = 'Error! Sum is None!'
-                # else:
-                #     service_order_cost = res_[0]
-
                 result = ({
                     'service_order_id': service_order_id,
                     'user_vehicle_id': user_vehicle_id,
-                    'manager_id': manager_id,
-                    'manager:': manager_first_name + ' ' + manager_last_name,
-                    'worker_id': worker_id,
-                    'worker:': worker_first_name + ' ' + worker_last_name,
-                    'vehicle_id': user_vehicle_id,
+                    'manager:': {
+                        'manager_id': manager_id,
+                        'manager name': manager_first_name + ' ' + manager_last_name
+                    },
+                    'worker:': {
+                        'worker_id': worker_id,
+                        'worker name': worker_first_name + ' ' + worker_last_name
+                    },
                     'service order type': order_type,
                     'order datetime': str(order_date),
-                    'estimated duration': str(service_duration),
-                    'estimated end datetime': str(end_time),
+                    'estimated service duration': str(service_duration),
+                    'estimated end of service datetime': str(end_time),
                     'service order cost': service_order_cost,
                     'tasks': service_order_tasks
                 })
@@ -1392,7 +1410,67 @@ def tire_service_order():
                 return jsonify(result)
             else:
                 return jsonify({'confirmation': 'There are no workers for the required time'})
+        elif order_type.lower() == 'tire repair':
 
+            tasks = []
+            tire_repair = 'tire_repair'
+            tasks.append('tire_repair')
+
+            if tubeless.lower() == 'no':
+                camera_repair = 'camera_repair'
+                tasks.append('camera_repair')
+            else:
+                camera_repair = 'no'
+
+            if removing_installing_wheels.lower() == 'yes':
+                removing_installing_wheels = 'wheel_removal_installation'
+                tasks.append('wheel_removal_installation')
+
+            if balancing.lower() == 'yes':
+                balancing = 'wheel_balancing'
+                tasks.append('wheel_balancing')
+
+            if wheel_alignment.lower() == 'yes':
+                wheel_alignment = 'wheel_alignment'
+                tasks.append('wheel_alignment')
+
+            # =========================================================================================================
+            # Calculate the expected duration of tire replacement
+            sql_query = """SELECT SUM
+                                        (
+                                            CASE 
+                                                WHEN task_name = '{0}' THEN task_duration 
+                                                WHEN task_name = '{1}' THEN task_duration 
+                                                WHEN task_name = '{2}' THEN task_duration 
+                                                WHEN task_name = '{3}' THEN task_duration 
+                                                ELSE '00:00:00'
+                                            end
+                                        ) AS duration FROM tasks""".\
+                                        format(tire_repair, removing_installing_wheels, balancing, camera_repair)
+            cursor.execute(sql_query)
+            conn.commit()
+            res_ = cursor.fetchone()
+            service_duration = numbers_of_wheels * res_[0]
+
+            sql_query = """SELECT SUM
+                                                    (
+                                                        CASE 
+                                                            WHEN task_name = '{0}' THEN task_duration 
+                                                            ELSE '00:00:00'
+                                                        end
+                                                    ) AS duration
+                                                    FROM tasks""".format(wheel_alignment)
+            cursor.execute(sql_query)
+            conn.commit()
+            res_ = cursor.fetchone()
+
+            service_duration += res_[0]
+            end_time = order_date + service_duration
+
+
+
+        else:
+            return jsonify({'confirmation': 'we only provide the <tire change> and <tire repair> services by now'})
 
 
 
