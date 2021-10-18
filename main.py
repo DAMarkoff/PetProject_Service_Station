@@ -1636,7 +1636,9 @@ def push():
         if admin_password == 'push':
             repository.git.add('user_auth.txt')
             repository.git.commit(m='update user_auth.txt')
-            repository.git.push()
+            origin = repository.remote(name='origin')
+            origin.push()
+            # repository.git.push()
             return 'pushed'
 
 
