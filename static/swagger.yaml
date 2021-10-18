@@ -45,18 +45,18 @@ paths:
         - If the 'user_id' is not provided, returns short info about all users
         - If the 'active' parameter is 'yes' - output info about active user(s) only
         - If the 'active' parameter is 'no' - output info about inactive user(s) only
-        - If the 'active' parameter is blank or something except 'yes' or 'no' - output info about all users
+        - If the 'active' parameter is blank - output info about both active and inactive users
       parameters:
       - name: user_id
         in: query
         required: false
-        description: '*optional* - the user_id must consist only of digits'
+        description: '- *optional* - the user_id must consist only of digits'
         schema:
           type: integer
       - name: active
         in: query
         required: false
-        description: '*optional* - you can fill in "yes", "no", leave blank or something other :)'
+        description: '- *optional* - you can fill in "yes", "no" or leave blank'
         schema:
           type: string
       responses:
@@ -100,23 +100,23 @@ paths:
                 first_name:
                   type: string
                   description: |
-                      ***required*** - 1 - 30 chars, can include the space and the .,'- chars
+                      - ***required*** - 1 - 30 chars, can include the space and the .,'- chars
                 last_name:
                   type: string
                   description: |
-                      ***required*** - 1 - 30 chars, can include the space and the .,'- chars
+                      - ***required*** - 1 - 30 chars, can include the space and the .,'- chars
                 email:
                   type: string
                   description: |
-                      ***required*** - The email must contain @ and . chars
+                      - ***required*** - The email must contain @ and . chars
                 password:
                   type: string
                   description: |
-                      ***required*** - 8 - 32 chars, must contain at least one digit, one uppercase letter, one lowercase letter, one of the symbols $@#!%'
+                      - ***required*** - 8 - 32 chars, must contain at least one digit, one uppercase letter, one lowercase letter, one of the symbols $@#!%'
                 phone:
                   type: string
                   description: |
-                      ***required*** - Validation has not been implemented yet
+                      - ***required*** - Validation has not been implemented yet
       responses:
         '200':
           description: Successful operation
@@ -157,28 +157,28 @@ paths:
                 email:
                   type: string
                   description: |
-                      ***required*** - Enter your email
+                      - ***required*** - Enter your email
                 token:
                   type: string
                   description: |
                     - ***required*** - Enter your token
                     - example - faf353cd-2e44-46c5-9864-7c53426eb58a
-                New first_name:
+                new_first_name:
                   type: string
                   description: |
-                      *optional* - 1 - 30 chars, can include the space and the .,'- chars
-                New last_name:
+                      - *optional* - 1 - 30 chars, can include the space and the .,'- chars
+                new_last_name:
                   type: string
                   description: |
-                      *optional* - 1 - 30 chars, can include the space and the .,'- chars
-                New email:
+                      - *optional* - 1 - 30 chars, can include the space and the .,'- chars
+                new_email:
                   type: string
                   description: |
-                      *optional* - The email must contain @ and . chars
-                New phone:
+                      - *optional* - The email must contain @ and . chars
+                new_phone:
                   type: string
                   description: |
-                      *optional* - Validation has not been implemented yet
+                      - *optional* - Validation has not been implemented yet
       responses:
         '200':
           description: Successful operation
@@ -416,11 +416,11 @@ paths:
                 email:
                   type: string
                   description: |
-                      ***required*** - Enter your email
+                      - ***required*** - Enter your email
                 password:
                   type: string
                   description: |
-                      ***required*** - Enter your password. In case you forgot your password, please feel free to contact the admin
+                      - ***required*** - Enter your password. If you have forgotten your password, feel free to contact me.
       responses:
         '200':
           description: Successful operation
@@ -605,7 +605,7 @@ paths:
                 email:
                   type: string
                   description: |
-                      ***required*** - Enter your email
+                    - ***required*** - Enter your email
                 token:
                   type: string
                   description: |
@@ -1290,14 +1290,14 @@ components:
           type: integer
         email:
           type: string
-        f_name:
+        first_name:
           type: string
-        l_name:
+        last_name:
           type: string
         phone:
           type: string
-        avtive:
-          type: string
+        active:
+          type: boolean
     user_changed:
       type: object
       properties:
@@ -1364,7 +1364,7 @@ components:
     error:
       type: object
       properties:
-        confirmation:
+        error:
           type: string
   # requestBodies:
   #   User_Info:
