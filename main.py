@@ -671,6 +671,11 @@ def users_vehicle():
         if not token or not email or not vehicle_name or not size_name:
             abort(400, description='The token, email, vehicle_name and size_name data are required')
 
+        if size_name.isdigit():
+            abort(400, description='The <size_name> should be int')
+        else:
+            size_name = int(size_name)
+
         # get needed data
         user_id = get_user_id(email)
         size_id = get_value_from_table('size_id', 'sizes', 'size_name', size_name)
@@ -696,11 +701,7 @@ def users_vehicle():
                         VALUES ('{0}', '{1}', '{2}', '{3}');""".format(user_id, vehicle_id, size_id, created)
         cursor.execute(sql_query)
         conn.commit()
-        # to delete if ok
-        # sql_query = """SELECT MAX(user_vehicle_id) FROM user_vehicle WHERE user_id = '{0}'""".format(user_id)
-        # cursor.execute(sql_query)
-        # conn.commit()
-        # res_ = cursor.fetchone()
+
         vehicle_id_new = get_value_from_table('MAX(user_vehicle_id)', 'user_vehicle', 'user_id', user_id)
 
         result = {
