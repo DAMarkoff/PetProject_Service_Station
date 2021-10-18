@@ -194,9 +194,9 @@ def users():
     elif request.method == 'PUT':
         token = request.form.get('token')
         email = request.form.get('email')
-        f_name = request.form.get('f_name')
-        l_name = request.form.get('l_name')
-        phone = request.form.get('phone')
+        f_name = request.form.get('new_first_name')
+        l_name = request.form.get('new_last_name')
+        phone = request.form.get('new_phone')
         new_email = request.form.get('new_email')
 
         if not token or not email:
@@ -229,12 +229,18 @@ def users():
             f_name = 'The first name has not been changed'
             f_name_to_db = f_name_db
         else:
+            check_first_name = validate_names('first name', f_name)
+            if not check_first_name['result']:
+                abort(400, description=check_first_name['text'])
             f_name_to_db = f_name
 
         if not l_name or l_name == l_name_db:
             l_name = 'The last name has not been changed'
             l_name_to_db = l_name_db
         else:
+            check_last_name = validate_names('last name', l_name)
+            if not check_last_name['result']:
+                abort(400, description=check_last_name['text'])
             l_name_to_db = l_name
 
         if not phone or phone == phone_db:
@@ -1638,7 +1644,6 @@ def push():
             repository.git.commit(m='update user_auth.txt')
             origin = repository.remote(name='origin')
             origin.push()
-            # repository.git.push()
             return 'pushed'
 
 
