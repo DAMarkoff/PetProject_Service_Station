@@ -66,15 +66,18 @@ def users():
             abort(503, description='There is no connection to the database')
 
         if not active:
-            active = ''
+            active = 'all'
 
         if not user_id:
             if active.lower() == 'yes':
                 sql_query = "SELECT user_id, first_name, last_name, phone, email, active FROM users WHERE active = True"
             elif active.lower() == 'no':
                 sql_query = "SELECT user_id, first_name, last_name, phone, email, active FROM users WHERE active = False"
-            else:
+            elif active.lower() == 'all':
                 sql_query = "SELECT user_id, first_name, last_name, phone, email, active FROM users"
+            else:
+                abort(400, description='The <active> should be <yes>, <no> or blank')
+
             cursor.execute(sql_query)
             conn.commit()
             res = cursor.fetchall()

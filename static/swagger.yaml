@@ -1,5 +1,8 @@
 openapi: 3.0.0
 servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/DAMarkoff/CTO/0.0.1
   - description: PetProgect
     url: http://23.88.52.139:5006
 info:
@@ -17,18 +20,18 @@ info:
     email: dmitri.markoff@gmail.com
 
 #----------------------------------------------------------------------------------------------
-    
+
 tags:
-  - name: users
-    description: This suit contains API methods for operations with a user account and requests for information about user data
-  - name: warehouse
-    description: storage reports
-  - name: vehicle
-    description: user's vehicle(s)
-  - name: storage order
-    description: create/edit/delete user's tire storage order(s)
-  - name: tire service order
-    description: create/edit/delete user's tire service order(s)
+  - name: "Users"
+    description: "This suit contains API methods for operations with a user account and requests for information about user data"
+  - name: "Warehouse"
+    description: "shelf reports"
+  - name: "Vehicle"
+    description: "user's vehicle(s)"
+  - name: "Storage order"
+    description: "create/edit/delete user's tire storage order(s)"
+  - name: "Tire service order"
+    description: "create/edit/delete user's tire service order(s)"
 
 #----------------------------------------------------------------------------------------------
 
@@ -36,13 +39,13 @@ paths:
   /users:
     get:
       tags:
-      - users
+      - "Users"
       summary: A JSON array of user(s) data
       description: |
-        - If the <user_id> is not provided, returns short info about all users
-        - If the active parameter is 'yes' - output info about active user(s) only
-        - If the active parameter is 'no' - output info about inactive user(s) only
-        - If the active parameter is blank or something except 'yes' or 'no' - output info about all users
+        - If the 'user_id' is not provided, returns short info about all users
+        - If the 'active' parameter is 'yes' - output info about active user(s) only
+        - If the 'active' parameter is 'no' - output info about inactive user(s) only
+        - If the 'active' parameter is blank or something except 'yes' or 'no' - output info about all users
       parameters:
       - name: user_id
         in: query
@@ -85,7 +88,7 @@ paths:
                 $ref: '#/components/schemas/error'
     post:
       tags:
-      - users
+      - "Users"
       summary: Register a new user
       description: Please, remember your password.
       requestBody:
@@ -141,7 +144,7 @@ paths:
                 $ref: '#/components/schemas/error'
     put:
       tags:
-      - users
+      - "Users"
       summary: Change the user info.
       description: |
                 *This can only be done by the logged in user.*
@@ -153,12 +156,10 @@ paths:
               properties:
                 email:
                   type: string
-                  format: email
                   description: |
                       ***required*** - Enter your email
                 token:
                   type: string
-                  format: uuid
                   description: |
                     - ***required*** - Enter your token
                     - example - faf353cd-2e44-46c5-9864-7c53426eb58a
@@ -213,7 +214,7 @@ paths:
                  $ref: '#/components/schemas/error'
     delete:
       tags:
-      - users
+      - "Users"
       summary: Delete the current user.
       description: |
         The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see [there](github.com/OAI/OpenAPI-Specification/pull/2117). ***This can only be done with an admin password.***
@@ -230,7 +231,7 @@ paths:
   /vehicle:
     post:
       tags:
-      - vehicle
+      - "Vehicle"
       summary: Register a new user's vehicle.
       description: |
                 *This can only be done by the logged in user.*
@@ -243,15 +244,13 @@ paths:
               properties:
                 email:
                   type: string
-                  format: email
                   description: |
                       ***required*** - Enter your email
                 token:
                   type: string
-                  format: uuid
                   description: |
-                      ***required*** - Enter your token
-                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
                 vehicle_name:
                   type: string
                   description: |
@@ -308,7 +307,7 @@ paths:
                  $ref: '#/components/schemas/error'
     put:
       tags:
-      - vehicle
+      - "Vehicle"
       summary: Change your vehicle type or tire size
       description: You can fill in only one of the new_vehicle_name or new_size_name. Or both.
                 The email, token and vehicle_id are required. New_vehicle_name and new_size_name are optional.
@@ -328,8 +327,8 @@ paths:
                   type: string
                   format: uuid
                   description: |
-                      ***required*** - Enter your token
-                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
                 vehicle_id:
                   type: string
                   description: |
@@ -390,7 +389,7 @@ paths:
                  $ref: '#/components/schemas/error'
     delete:
       tags:
-      - vehicle
+      - "Vehicle"
       summary: Delete your vehicle
       description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
       responses:
@@ -406,7 +405,7 @@ paths:
   /users/login:
     post:
       tags:
-      - users
+      - "Users"
       requestBody:
         required: true
         content:
@@ -461,7 +460,7 @@ paths:
   /users/deactivate:
     post:
       tags:
-      - users
+      - "Users"
       summary: Mark yourself as an inactive user
       description: WARNING! Only the admin can mark you as an active user again. *This can only be done by the logged in user.*
       requestBody:
@@ -480,8 +479,8 @@ paths:
                   type: string
                   format: uuid
                   description: |
-                      ***required*** - Enter your token
-                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
                 sure:
                   type: string
                   description: |
@@ -529,7 +528,7 @@ paths:
   /users/activate:
     post:
       tags:
-      - users
+      - "Users"
       summary: Mark the user as active
       description: 'Note: Only the admin can mark you as an active user'
       requestBody:
@@ -592,8 +591,8 @@ paths:
   /users/user_info:
     post:
       tags:
-      - users
-      summary: Provides complete information about the user
+      - "Users"
+      summary: Provides complete information about the logged in user
       description: |
           *This can only be done by the logged in user.*
       requestBody:
@@ -605,15 +604,13 @@ paths:
               properties:
                 email:
                   type: string
-                  format: email
                   description: |
                       ***required*** - Enter your email
                 token:
                   type: string
-                  format: uuid
                   description: |
-                      ***required*** - Enter your token
-                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
       responses:
         '200':
           description: Successful operation
@@ -653,7 +650,7 @@ paths:
   /storage_order:
     post:
       tags:
-      - storage order
+      - "Storage order"
       summary: Create new storage order
       description: |
             The size_name OR user_vehicle_id is required. Not both of those.
@@ -674,8 +671,8 @@ paths:
                   type: string
                   format: uuid
                   description: |
-                      ***required*** - Enter your token
-                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
                 start_date:
                   type: string
                   description: |
@@ -733,9 +730,9 @@ paths:
                 type: array
                 items:
                  $ref: '#/components/schemas/error'
-#======================================================================================================================
+#====================================================================================================
 #                                           ON MAINTENANCE
-#======================================================================================================================
+#====================================================================================================
 #    put:
 #      tags:
 #      - storage order
@@ -823,7 +820,7 @@ paths:
 #                 $ref: '#/components/schemas/error'
     delete:
       tags:
-      - storage order
+      - "Storage order"
       summary: Delete your storage order
       description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
       responses:
@@ -839,7 +836,7 @@ paths:
   /tire_service_order:
     post:
       tags:
-      - tire service order
+      - "Tire service order"
       summary: Create a new tire service order
       description: |
             *This can only be done by the logged in user.*
@@ -859,8 +856,8 @@ paths:
                   type: string
                   format: uuid
                   description: |
-                      ***required*** - Enter your token
-                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
                 order_date:
                   type: string
                   description: |
@@ -904,8 +901,8 @@ paths:
                  $ref: '#/components/schemas/error'
     put:
       tags:
-      - tire service order
-      summary: Create new storage order
+      - "Tire service order"
+      summary: Create new tire service order
       description: |
             You can change the date and time, as well as the vehicle in your tire order
             *This can only be done by the logged in user.*
@@ -925,8 +922,8 @@ paths:
                   type: string
                   format: uuid
                   description: |
-                      ***required*** - Enter your token
-                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
                 serv_order_id:
                   type: string
                   description: |
@@ -974,8 +971,8 @@ paths:
                  $ref: '#/components/schemas/error'
     delete:
       tags:
-      - tire service order
-      summary: Delete your storage order
+      - "Tire service order"
+      summary: Delete your tire service order
       description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
       responses:
         '200':
@@ -985,88 +982,90 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
 
-#----------------------------------------------------------------------------------------------
+#====================================================================================================
+#                                           ON MAINTENANCE
+#====================================================================================================
 
-  /tire_service_order/task:
-    post:
-      tags:
-      - tire service order
-      summary: You can add, update and delete a tasks in your tire service order
-      description: |
-            *This can only be done by the logged in user.*
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-                  description: |
-                      ***required*** - Enter your email
-                token:
-                  type: string
-                  format: uuid
-                  description: |
-                      ***required*** - Enter your token
-                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
-                service_order_id:
-                  type: string
-                  description: |
-                      ***required*** - The id of your tire service order that will be updated
-                task_name:
-                  type: string
-                  description: |
-                      ***required*** - The task, that will be added to your tire service order
-                numbers_of_task:
-                  type: string
-                  description: |
-                      ***required*** - The number of the tasks, that will be added to your tire service order
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  confirmation:
-                    type: string
-        '400':
-          description: bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-        '405':
-          description: method not allowed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-        '401':
-          description: unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-        '503':
-          description: Could not connect to the database
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                 $ref: '#/components/schemas/error'
+  # /tire_service_order/task:
+  #   post:
+  #     tags:
+  #     - "Tire service order"
+  #     summary: You can add, update and delete a tasks in your tire service order
+  #     description: |
+  #           *This can only be done by the logged in user.*
+  #     requestBody:
+  #       required: true
+  #       content:
+  #         multipart/form-data:
+  #           schema:
+  #             type: object
+  #             properties:
+  #               email:
+  #                 type: string
+  #                 format: email
+  #                 description: |
+  #                     ***required*** - Enter your email
+  #               token:
+  #                 type: string
+  #                 format: uuid
+  #                 description: |
+  #                   - ***required*** - Enter your token
+  #                   - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+  #               service_order_id:
+  #                 type: string
+  #                 description: |
+  #                     ***required*** - The id of your tire service order that will be updated
+  #               task_name:
+  #                 type: string
+  #                 description: |
+  #                     ***required*** - The task, that will be added to your tire service order
+  #               numbers_of_task:
+  #                 type: string
+  #                 description: |
+  #                     ***required*** - The number of the tasks, that will be added to your tire service order
+  #     responses:
+  #       '200':
+  #         description: Successful operation
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               properties:
+  #                 confirmation:
+  #                   type: string
+  #       '400':
+  #         description: bad request
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/error'
+  #       '405':
+  #         description: method not allowed
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/error'
+  #       '401':
+  #         description: unauthorized
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/error'
+  #       '503':
+  #         description: Could not connect to the database
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: array
+  #               items:
+  #               $ref: '#/components/schemas/error'
 
 #----------------------------------------------------------------------------------------------
 
   /warehouse:
     get:
       tags:
-        - warehouse
+        - "Warehouse"
       summary: Shows info about storage shelves
       description: |
                    - if size_name is not filled in, it shows all tire sizes
@@ -1163,16 +1162,95 @@ components:
           type: integer
         storage order id:
           type: integer
+    storage_orders_info:
+      type: array
+      items:
+        type: object
+        properties:
+          storage_order_id:
+            type: integer
+          start_date:
+            type: string
+          stop_date:
+            type: string
+          order cost:
+            type: integer
+          shelf_id:
+            type: integer
+    your_vehicles:
+      type: array
+      items:
+        type: object
+        properties:
+          vehicle_id:
+            type: integer
+          vehicle_name:
+            type: string
+          size_name:
+            type: integer
+    tire_service_orders:
+      type: array
+      items:
+        type: object
+        properties:
+          service_order_id:
+            type: integer
+          service_order_type:
+            type: string
+          start_datetime:
+           type: string
+          stop_datetime:
+           type: string
+          manager:
+            type: object
+            properties:
+              manager_id:
+                type: integer
+              manager_name:
+                type: string
+          vehicle:
+            type: object
+            properties:
+              user_vehicle_id:
+                type: integer
+              vehicle_name:
+                type: string
+              size_name:
+                type: string
+          tire service order cost:
+            type: integer
+          tasks:
+            oneOf:
+            - type: string
+            - type: object
+              properties:
+                tasks:
+                  type: string
+            - type: array
+              items:
+                type: object
+                properties:
+                  task_name:
+                    type: string
+                  mworker:
+                    type: object
+                    properties:
+                      worker_id:
+                        type: integer
+                      worker_name:
+                        type: string
+                  task cost:
+                    type: integer
     user_info:
-      type: object
-      properties:
-        your info:
-          type: array
-          items:
+      type: array
+      items:
+        type: object
+        properties:
+          your info:
             type: object
             properties:
               id:
-                type: string
+                type: integer
               first_name:
                 type: string
               last_name:
@@ -1181,82 +1259,30 @@ components:
                 type: string
               phone:
                 type: string
-        storage orders info:
-          oneOf:
-            - type: string
-            - type: object
-              properties:
-                storage orders info:
-                  type: string
-            - type: array
-              items:
-                type: object
+          storage orders info:
+            oneOf:
+              - type: string
+              - type: object
                 properties:
-                  storage_order_id:
+                  storage orders info:
                     type: string
-                  start_date:
-                    type: string
-                  stop_date:
-                    type: string
-                  order cost:
-                    type: string
-                  shelf_id:
-                    type: string
-        your vehicle(s):
-          oneOf:
-            - type: string
-            - type: object
-              properties:
-                your vehicle(s):
-                  type: string
-            - type: array
-              items:
-                type: object
+              - $ref: '#/components/schemas/storage_orders_info'
+          your_vehicle(s):
+            oneOf:
+              - type: string
+              - type: object
                 properties:
-                  vehicle_id:
+                  your vehicle(s):
                     type: string
-                  vehicle_name:
-                    type: string
-                  size_name:
-                    type: string
-        tire service order(s):
-           oneOf:
-            - type: string
-            - type: object
-              properties:
-                tire service order(s):
-                  type: string
-            - type: array
-              items:
-                type: object
+              - $ref: '#/components/schemas/your_vehicles'
+          tire_service_order(s):
+            oneOf:
+              - type: string
+              - type: object
                 properties:
-                  serv_order_id:
+                  tire service order(s):
                     type: string
-                  serv_order_date:
-                   type: string
-                  manager_id:
-                    type: string
-                  vehicle_id:
-                    type: string
-                  service order cost:
-                    type: string
-                  tasks:
-                    oneOf:
-                    - type: string
-                    - type: object
-                      properties:
-                        tasks:
-                          type: string
-                    - type: array
-                      items:
-                        type: object
-                        properties:
-                          task_name:
-                            type: string
-                          worker_id:
-                           type: string
-                          task cost:
-                            type: string
+              - $ref: '#/components/schemas/tire_service_orders'
     users:
       type: object
       properties:
@@ -1340,3 +1366,9 @@ components:
       properties:
         confirmation:
           type: string
+  # requestBodies:
+  #   User_Info:
+  #     content:
+  #       application/json:
+  #         schema:
+  #           $ref: '#/components/schemas/ToDos'
