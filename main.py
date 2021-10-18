@@ -671,7 +671,7 @@ def users_vehicle():
         if not token or not email or not vehicle_name or not size_name:
             abort(400, description='The token, email, vehicle_name and size_name data are required')
 
-        if size_name.isdigit():
+        if not size_name.isdigit():
             abort(400, description='The <size_name> should be int')
         else:
             size_name = int(size_name)
