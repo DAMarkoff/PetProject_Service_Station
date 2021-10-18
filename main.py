@@ -181,8 +181,8 @@ def users():
 
         result = {
             "ID": user_id,
-            "f_name": f_name,
-            "l_name": l_name,
+            "first_name": f_name,
+            "last_name": l_name,
             "phone": phone,
             "email": email,
             "active": active
