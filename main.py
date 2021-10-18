@@ -485,10 +485,9 @@ def user_info():
                                     format(service_order_id)
                     cursor.execute(sql_query)
                     conn.commit()
-                    res_info = cursor.fetchall()
+                    res_info = cursor.fetchone()
 
-                    start_datetime, stop_datetime, manager_id, manager_name, manager_surname, \
-                    user_vehicle_id, vehicle_name, size_name = res_info
+                    start_datetime, stop_datetime, manager_id, manager_name, manager_surname, user_vehicle_id, vehicle_name, size_name = res_info
 
                     result_tire_service_order.append({
                         'service_order_id': service_order_id,
