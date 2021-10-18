@@ -413,6 +413,7 @@ def user_info():
                                     task_cost,
                                     task_duration,
                                     position_name,
+                                    low.worker_id
                                     s.first_name AS worker_name,
                                     s.last_name AS worker_surname,
                                     m.first_name AS manager_name,
