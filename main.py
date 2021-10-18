@@ -671,6 +671,10 @@ def users_vehicle():
         if not token or not email or not vehicle_name or not size_name:
             abort(400, description='The token, email, vehicle_name and size_name data are required')
 
+        user_auth = user_authorization(email, token)
+        if not user_auth['result']:
+            abort(401, description=user_auth['text'])
+
         if not size_name.isdigit():
             abort(400, description='The <size_name> should be int')
         else:
@@ -686,10 +690,6 @@ def users_vehicle():
 
         if not vehicle_id:
             abort(400, description='Unknown type of the vehicle, add the vehicle type data to the vehicle DB')
-
-        user_auth = user_authorization(email, token)
-        if not user_auth['result']:
-            abort(401, description=user_auth['text'])
 
         r.expire(email, 600)
 
