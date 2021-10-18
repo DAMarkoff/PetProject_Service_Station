@@ -29,3 +29,4 @@
 2021-10-13 16:13:07.41+02:00/31/test@test5.test/user-registered/PassWord1$
 2021-10-17 21:37:18.21+02:00/32/test@test77.test/user-registered/PassWord1$
 2021-10-18 19:24:57.40+02:00/33/test_sw@test_sw.sw/user-registered/Test!SW#1
+2021-10-18 20:09:05.54+02:00/33/test_sw@test_sw.sw->test_sw_changed@test_sw.sw/user-changed-email/!password!
