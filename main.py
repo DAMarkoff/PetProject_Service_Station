@@ -181,7 +181,8 @@ def users():
             "f_name": f_name,
             "l_name": l_name,
             "phone": phone,
-            "email": email
+            "email": email,
+            "active": active
         }
 
         # push_user_auth()
@@ -400,77 +401,112 @@ def user_info():
         sql_query = """CREATE OR REPLACE VIEW temp AS
                                 SELECT 
                                     service_order_id,
-                                    user_id,
+                                    tso.user_id,
                                     start_datetime,
+                                    stop_datetime,
                                     user_vehicle_id,
+                                    vehicle_name,
+                                    size_name,
                                     tso.manager_id,
-                                    task_id,
+                                    tso.created,
                                     task_name,
                                     task_cost,
                                     task_duration,
-                                    low.worker_id,
-                                    p.position_id,
                                     position_name,
-                                    s.first_name,
-                                    s.last_name
+                                    s.first_name AS worker_name,
+                                    s.last_name AS worker_surname,
+                                    m.first_name AS manager_name,
+                                    m.last_name AS manager_surname,
+                                    service_type_name
                                 FROM tire_service_order AS tso
                                 LEFT JOIN list_of_works AS low USING (service_order_id)
                                 LEFT JOIN tasks AS t USING (task_id)
                                 LEFT JOIN staff AS s USING (worker_id)
                                 LEFT JOIN positions AS p USING (position_id)
-                                LEFT JOIN staff AS st ON st.worker_id = tso.manager_id
-                                WHERE user_id = '{0}';""".format(user_id)
+                                LEFT JOIN managers AS m USING (manager_id)
+                                LEFT JOIN tire_service_order_type USING (service_type_id)
+                                LEFT JOIN user_vehicle USING (user_vehicle_id)
+                                LEFT JOIN vehicle USING (vehicle_id)
+                                LEFT JOIN sizes USING (size_id)
+                                WHERE tso.user_id = '{0}';""".format(user_id)
         cursor.execute(sql_query)
         conn.commit()
 
-        sql_query = """SELECT DISTINCT service_order_id, start_datetime, manager_id, user_vehicle_id FROM temp"""
+        sql_query = """SELECT DISTINCT service_type_name FROM temp"""
         cursor.execute(sql_query)
         conn.commit()
-        res_ = cursor.fetchall()
+        res = cursor.fetchall()
 
-        if not res_:
+        if not res:
             result_tire_service_order = 'You do not have any tire service orders'
         else:
             result_tire_service_order = []
-            for i in res_:
-                service_order_id = i[0]
-                # to delete if ok
-                # sql_query = """SELECT SUM(task_cost) FROM temp
-                #                 WHERE service_order_id = '{0}'""".format(service_order_id)
-                # cursor.execute(sql_query)
-                # conn.commit()
-                # res_cost = cursor.fetchone()
-                res_cost = get_value_from_table('SUM(task_cost)', 'temp', 'service_order_id', service_order_id)
-                if not res_cost:
-                    tire_service_order_cost = 'Error! Sum is None!'
-                else:
-                    tire_service_order_cost = res_cost
+            for types in res:
+                type = types[0]
 
-                sql_query = """SELECT task_name, worker_id, task_cost FROM temp 
-                                WHERE service_order_id = '{0}'""".format(service_order_id)
+                sql_query = """SELECT DISTINCT service_order_id FROM temp 
+                                            WHERE service_type_name = '{0}';""".format(type)
                 cursor.execute(sql_query)
                 conn.commit()
-                res_task = cursor.fetchall()
+                res_ = cursor.fetchall()
 
-                if not res_task[0][0]:
-                    result_tire_service_order_tasks = 'You do not have any tasks in your tire service order.'
-                else:
-                    result_tire_service_order_tasks = []
-                    for j in res_task:
-                        result_tire_service_order_tasks.append({
-                            'task_name': j[0],
-                            'worker_id': j[1],
-                            'task cost': j[2]
-                        })
 
-                result_tire_service_order.append({
-                    'service_order_id': service_order_id,
-                    'start_datetime': i[1],
-                    'manager_id': i[2],
-                    'vehicle_id': i[3],
-                    'tire service order cost': tire_service_order_cost,
-                    'tasks': result_tire_service_order_tasks
-                })
+                for i in res_:
+                    service_order_id = i[0]
+                    res_cost = get_value_from_table('SUM(task_cost)', 'temp', 'service_order_id', service_order_id)
+                    if not res_cost:
+                        tire_service_order_cost = 'Error! Sum is None!'
+                    else:
+                        tire_service_order_cost = res_cost
+
+                    sql_query = """SELECT task_name, worker_id, worker_name, worker_surname, task_cost FROM temp 
+                                    WHERE service_order_id = '{0}'""".format(service_order_id)
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    res_task = cursor.fetchall()
+
+                    if not res_task[0][0]:
+                        result_tire_service_order_tasks = 'You do not have any tasks in your tire service order.'
+                    else:
+                        result_tire_service_order_tasks = []
+                        for j in res_task:
+                            result_tire_service_order_tasks.append({
+                                'task_name': j[0],
+                                'worker': {
+                                    'worker_id': j[1],
+                                    'worker_name': j[2] + ' ' + j[3]
+                                },
+                                'task cost': j[4]
+                            })
+
+                    sql_query = """SELECT start_datetime, stop_datetime, manager_id, manager_name, manager_surname, 
+                                    vehicle_id, vehicle_name, size_name FROM temp WHERE service_order_id = '{0}'""".\
+                                    format(service_order_id)
+                    cursor.execute(sql_query)
+                    conn.commit()
+                    res_info = cursor.fetchall()
+
+                    start_datetime, stop_datetime, manager_id, manager_name, manager_surname, \
+                    vehicle_id, vehicle_name, size_name = res_info
+
+                    result_tire_service_order.append({
+                        'service_order_id': service_order_id,
+                        'service_order_type': type,
+                        'start_datetime': start_datetime,
+                        'stop_datetime': stop_datetime,
+                        'manager': {
+                            'manager_id': manager_id,
+                            'manager_name': manager_name + ' ' + manager_surname
+                        },
+                        'vehicle': {
+                            'vehicle_id': vehicle_id,
+                            'vehicle_name': vehicle_name,
+                            'size_name': size_name
+                        },
+                        'tire service order cost': tire_service_order_cost,
+                        'tasks': result_tire_service_order_tasks
+                    })
+            # result_tire_service_order
 
         sql_query = """drop view temp"""
         cursor.execute(sql_query)

@@ -38,13 +38,22 @@ paths:
       tags:
       - users
       summary: A JSON array of user(s) data
-      description: If the user_id is not provided, returns short info about all users
+      description: |
+        - If the <user_id> is not provided, returns short info about all users
+        - If the active parameter is 'yes' - output info about active user(s) only
+        - If the active parameter is 'no' - output info about inactive user(s) only
+        - If the active parameter is blank or something except 'yes' or 'no' - output info about all users
       parameters:
       - name: user_id
         in: query
         required: false
-        description: |
-              *optional* - the user_id must consist only of digits
+        description: '*optional* - the user_id must consist only of digits'
+        schema:
+          type: integer
+      - name: active
+        in: query
+        required: false
+        description: '*optional* - you can fill in "yes", "no", leave blank or something other :)'
         schema:
           type: string
       responses:
@@ -67,21 +76,18 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                 $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/error'
         '503':
           description: Could not connect to the database
           content:
             application/json:
               schema:
-                type: array
-                items:
-                 $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/error'
     post:
       tags:
       - users
       summary: Register a new user
+      description: Please, remember your password.
       requestBody:
         content:
           multipart/form-data:
@@ -132,9 +138,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                 $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/error'
     put:
       tags:
       - users
@@ -156,8 +160,8 @@ paths:
                   type: string
                   format: uuid
                   description: |
-                      ***required*** - Enter your token
-                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
                 New first_name:
                   type: string
                   description: |
@@ -210,7 +214,7 @@ paths:
     delete:
       tags:
       - users
-      summary: Delete the current user. 
+      summary: Delete the current user.
       description: |
         The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see [there](github.com/OAI/OpenAPI-Specification/pull/2117). ***This can only be done with an admin password.***
       responses:
@@ -227,7 +231,7 @@ paths:
     post:
       tags:
       - vehicle
-      summary: Register a new user's vehicle. 
+      summary: Register a new user's vehicle.
       description: |
                 *This can only be done by the logged in user.*
       requestBody:
@@ -251,7 +255,7 @@ paths:
                 vehicle_name:
                   type: string
                   description: |
-                      ***required*** -Choose the type of your vehicle. 
+                      ***required*** -Choose the type of your vehicle.
                   enum:
                     - bus
                     - truck
@@ -333,7 +337,7 @@ paths:
                 new_vehicle_name:
                   type: string
                   description: |
-                      *optional* - Choose the type of your vehicle. 
+                      *optional* - Choose the type of your vehicle.
                   enum:
                     - bus
                     - truck
@@ -582,9 +586,9 @@ paths:
                 type: array
                 items:
                  $ref: '#/components/schemas/error'
- 
+
 #----------------------------------------------------------------------------------------------
-                 
+
   /users/user_info:
     post:
       tags:
@@ -643,7 +647,7 @@ paths:
                 type: array
                 items:
                  $ref: '#/components/schemas/error'
-                 
+
 #----------------------------------------------------------------------------------------------
 
   /storage_order:
@@ -651,8 +655,8 @@ paths:
       tags:
       - storage order
       summary: Create new storage order
-      description: | 
-            The size_name OR user_vehicle_id is required. Not both of those. 
+      description: |
+            The size_name OR user_vehicle_id is required. Not both of those.
             *This can only be done by the logged in user.*
       requestBody:
         required: true
@@ -828,8 +832,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'             
-                
+                $ref: '#/components/schemas/error'
+
 #----------------------------------------------------------------------------------------------
 
   /tire_service_order:
@@ -837,7 +841,7 @@ paths:
       tags:
       - tire service order
       summary: Create a new tire service order
-      description: | 
+      description: |
             *This can only be done by the logged in user.*
       requestBody:
         required: true
@@ -902,7 +906,7 @@ paths:
       tags:
       - tire service order
       summary: Create new storage order
-      description: | 
+      description: |
             You can change the date and time, as well as the vehicle in your tire order
             *This can only be done by the logged in user.*
       requestBody:
@@ -934,7 +938,7 @@ paths:
                 new_u_veh_id:
                   type: string
                   description: |
-                      *optional* - Fill in another vehicle id 
+                      *optional* - Fill in another vehicle id
       responses:
         '200':
           description: Successful operation
@@ -979,16 +983,16 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error' 
-                
+                $ref: '#/components/schemas/error'
+
 #----------------------------------------------------------------------------------------------
-  
+
   /tire_service_order/task:
     post:
       tags:
       - tire service order
       summary: You can add, update and delete a tasks in your tire service order
-      description: | 
+      description: |
             *This can only be done by the logged in user.*
       requestBody:
         required: true
@@ -1056,9 +1060,9 @@ paths:
                 type: array
                 items:
                  $ref: '#/components/schemas/error'
-                
+
 #----------------------------------------------------------------------------------------------
-  
+
   /warehouse:
     get:
       tags:
@@ -1073,7 +1077,7 @@ paths:
         - name: size_id
           in: query
           required: false
-          description: | 
+          description: |
                 *optional* - The size_id must contain only digits
           schema:
             type: string
@@ -1083,7 +1087,7 @@ paths:
           description: |
                 *optional* - The available_only can be 'yes' or 'no'. Or empty.
           schema:
-            type: string 
+            type: string
       responses:
         '200':
           description: Successful operation
@@ -1132,9 +1136,9 @@ components:
         manager_last_name:
           type: string
         manager_phone:
-          type: string  
+          type: string
         manager_email:
-          type: string  
+          type: string
     storage_order_changed:
       type: object
       properties:
@@ -1151,7 +1155,7 @@ components:
         new_shelf_id:
           type: string
         old_shelf_id:
-          type: string  
+          type: string
     storage_order:
       type: object
       properties:
@@ -1265,6 +1269,8 @@ components:
         l_name:
           type: string
         phone:
+          type: string
+        avtive:
           type: string
     user_changed:
       type: object
