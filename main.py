@@ -1634,7 +1634,10 @@ def push():
     if request.method == 'POST':
         admin_password = request.form.get('admin password')
         if admin_password == 'push':
-            push_user_auth()
+            repository.git.add('user_auth.txt')
+            repository.git.commit(m='update user_auth.txt')
+            repository.git.push()
+            return 'pushed'
 
 
 if __name__ == '__main__':
