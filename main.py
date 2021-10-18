@@ -720,14 +720,19 @@ def users_vehicle():
         if not token or not email or not user_vehicle_id:
             abort(400, description='The token, email and user vehicle id are required')
 
-        if not vehicle_exists(user_vehicle_id):
-            abort(400, description='The vehicle does not exist')
-
         user_auth = user_authorization(email, token)
         if not user_auth['result']:
             abort(401, description=user_auth['text'])
 
         r.expire(email, 600)
+
+        if not user_vehicle_id.isdigit():
+            abort(400, description='The <size_name> should be int')
+        else:
+            user_vehicle_id = int(user_vehicle_id)
+
+        if not vehicle_exists(user_vehicle_id):
+            abort(400, description='The vehicle does not exist')
 
         if not conn:
             abort(503, description='There is no connection to the database')

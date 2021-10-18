@@ -245,7 +245,7 @@ paths:
                 email:
                   type: string
                   description: |
-                      ***required*** - Enter your email
+                      - ***required*** - Enter your email
                 token:
                   type: string
                   description: |
@@ -254,7 +254,7 @@ paths:
                 vehicle_name:
                   type: string
                   description: |
-                      ***required*** -Choose the type of your vehicle.
+                      - ***required*** -Choose the type of your vehicle.
                   enum:
                     - bus
                     - truck
@@ -263,7 +263,7 @@ paths:
                 size_name:
                   type: integer
                   description: |
-                      ***required*** -Choose the size of your tires
+                      - ***required*** -Choose the size of your tires
                   enum:
                     - 14
                     - 15
@@ -310,7 +310,6 @@ paths:
       - "Vehicle"
       summary: Change your vehicle type or tire size
       description: You can fill in only one of the new_vehicle_name or new_size_name. Or both.
-                The email, token and vehicle_id are required. New_vehicle_name and new_size_name are optional.
                 *This can only be done by the logged in user.*
       requestBody:
         content:
@@ -322,7 +321,7 @@ paths:
                   type: string
                   format: email
                   description: |
-                      ***required*** - Enter your email
+                     - ***required*** - Enter your email
                 token:
                   type: string
                   format: uuid
@@ -330,13 +329,13 @@ paths:
                     - ***required*** - Enter your token
                     - example - faf353cd-2e44-46c5-9864-7c53426eb58a
                 vehicle_id:
-                  type: string
+                  type: integer
                   description: |
-                      ***required*** - ID of your vehicle that needs to be updated
+                     - ***required*** - ID of your vehicle that needs to be updated
                 new_vehicle_name:
                   type: string
                   description: |
-                      *optional* - Choose the type of your vehicle.
+                      - *optional* - Choose the type of your vehicle.
                   enum:
                     - bus
                     - truck
@@ -345,7 +344,7 @@ paths:
                 new_size_name:
                   type: integer
                   description: |
-                      *optional* - Choose the size of your tires
+                      - *optional* - Choose the size of your tires
                   enum:
                     - 14
                     - 15
@@ -1319,11 +1318,11 @@ components:
       type: object
       properties:
         vehicle_id:
-          type: string
+          type: integer
         vehicle_name:
           type: string
         size_name:
-          type: string
+          type: integer
     vehicle_changed:
       type: object
       properties:
