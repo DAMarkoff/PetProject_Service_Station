@@ -481,14 +481,14 @@ def user_info():
                             })
 
                     sql_query = """SELECT start_datetime, stop_datetime, manager_id, manager_name, manager_surname, 
-                                    vehicle_id, vehicle_name, size_name FROM temp WHERE service_order_id = '{0}'""".\
+                                    user_vehicle_id, vehicle_name, size_name FROM temp WHERE service_order_id = '{0}'""".\
                                     format(service_order_id)
                     cursor.execute(sql_query)
                     conn.commit()
                     res_info = cursor.fetchall()
 
                     start_datetime, stop_datetime, manager_id, manager_name, manager_surname, \
-                    vehicle_id, vehicle_name, size_name = res_info
+                    user_vehicle_id, vehicle_name, size_name = res_info
 
                     result_tire_service_order.append({
                         'service_order_id': service_order_id,
@@ -500,7 +500,7 @@ def user_info():
                             'manager_name': manager_name + ' ' + manager_surname
                         },
                         'vehicle': {
-                            'vehicle_id': vehicle_id,
+                            'user_vehicle_id': user_vehicle_id,
                             'vehicle_name': vehicle_name,
                             'size_name': size_name
                         },
