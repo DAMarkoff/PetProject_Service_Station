@@ -244,13 +244,14 @@ In memories:
 			return info
 
 	
-/storage_orders [POST] ========================================== NEEDS UPDATING ==================================================
+/storage_orders [POST] 
 	input:
 			token				- required
 			email				- required
 			start_date			- required - format - YYYY-MM-DD
 			stop_date			- required - format - YYYY-MM-DD
-			size_name			- required
+			size_name			- optional
+			user_vehicle_id		- optional
 	
 	output:
 			storage_order_cost

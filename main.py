@@ -8,11 +8,11 @@ import redis
 import datetime
 from datetime import date
 from flask_swagger_ui import get_swaggerui_blueprint
-from defs import *
 import bcrypt
 import git
 from git import Repo
 
+from defs import *
 
 app = Flask(__name__)
 
@@ -1653,7 +1653,47 @@ def push():
                 origin.push()
                 return 'pushed'
             except:
-                return 'updated'
+                return 'error'
+
+
+@app.route("/admin/change_password", methods=['POST'])
+def change_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        admin_password = request.form.get('admin_password')
+        new_password = request.form.get('new_password')
+
+        if not conn:
+            abort(503, description='There is no connection to the database')
+
+        if not user_exists('email', email):
+            abort(400, description="The user does not exist. Please, register")
+
+        if admin_password != 'change_password':
+            abort(403, description="Wrong admin password!")
+
+        check_password = validate_password(new_password)
+        if not check_password['result']:
+            abort(400, description=check_password['text'])
+
+        hash_password, salt = generate_password_hash(new_password)
+        user_id = get_value_from_table('user_id', 'users', 'email', email)
+
+        sql_query = """UPDATE users SET password = '{0}', salt = '{1}' WHERE user_id = '{2}';""".\
+            format(hash_password, salt, user_id)
+        cursor.execute(sql_query)
+        conn.commit()
+
+        save_to_file(user_id, email, new_password, 'admin_change_password')
+
+        result = {
+            "ID": user_id,
+            "email": email,
+            "confirmation": 'The password has been changed'
+        }
+
+        # push_user_auth()
+        return jsonify(result)
 
 
 if __name__ == '__main__':

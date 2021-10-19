@@ -180,12 +180,6 @@ def generate_password_hash(password):
     return password.decode(), salt.decode()
 
 
-def push_user_auth():
-    repository.git.add('user_auth.txt')
-    repository.git.commit(m='update user_auth.txt')
-    repository.git.push()
-
-
 def choose_a_manager(date_to_query):
     return_val = {'result': True, 'manager_id': ''}
     # =========================================================================================================
@@ -333,10 +327,15 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
                 })
 
         # get the manager's and worker's first and last names
-        worker_first_name = get_value_from_table('first_name', 'staff', 'worker_id', worker_id)
-        worker_last_name = get_value_from_table('last_name', 'staff', 'worker_id', worker_id)
-        manager_first_name = get_value_from_table('first_name', 'managers', 'manager_id', manager_id)
-        manager_last_name = get_value_from_table('last_name', 'managers', 'manager_id', manager_id)
+        sql_query = """SELECT first_name, last_name FROM staff WHERE worker_id = '{0}'
+                UNION ALL 
+                SELECT first_name, last_name FROM managers WHERE manager_id = '{1}';""".format(worker_id, manager_id)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_cost = cursor.fetchall()
+
+        worker_first_name, worker_last_name = res_cost[0]
+        manager_first_name, manager_last_name = res_cost[1]
 
         # get service order cost
         if service_order_tasks == []:

@@ -147,7 +147,7 @@ paths:
       - "Users"
       summary: Change the user info.
       description: |
-                *This can only be done by the logged in user.*
+                *This can only be done by the logged user.*
       requestBody:
         content:
           multipart/form-data:
@@ -234,7 +234,7 @@ paths:
       - "Vehicle"
       summary: Register a new user's vehicle.
       description: |
-                *This can only be done by the logged in user.*
+                *This can only be done by the logged user.*
       requestBody:
         required: true
         content:
@@ -311,7 +311,7 @@ paths:
       summary: Change your vehicle type or tire size
       description: |
                 - You can change the vehicle_name or/and size_name.
-                - *This can only be done by the logged in user.*
+                - *This can only be done by the logged user.*
       requestBody:
         content:
           multipart/form-data:
@@ -462,7 +462,7 @@ paths:
       tags:
       - "Users"
       summary: Mark yourself as an inactive user
-      description: WARNING! Only the admin can mark you as an active user again. *This can only be done by the logged in user.*
+      description: WARNING! Only the admin can mark you as an active user again. *This can only be done by the logged user.*
       requestBody:
         required: true
         content:
@@ -592,9 +592,9 @@ paths:
     post:
       tags:
       - "Users"
-      summary: Provides complete information about the logged in user
+      summary: Provides full information about the logged user
       description: |
-          *This can only be done by the logged in user.*
+          *This can only be done by the logged user.*
       requestBody:
         required: true
         content:
@@ -654,7 +654,7 @@ paths:
       summary: Create a new storage order
       description: |
             - The size_name OR user_vehicle_id is required. If both of them were provided - the size_name will be ignored.
-            - *This can only be done by the logged in user.*
+            - *This can only be done by the logged user.*
       requestBody:
         required: true
         content:
@@ -748,7 +748,7 @@ paths:
 #      - storage order
 #      summary: Create new storage order
 #      description: |
-#            *This can only be done by the logged in user.*
+#            *This can only be done by the logged user.*
 #      requestBody:
 #        required: true
 #        content:
@@ -849,7 +849,7 @@ paths:
       - "Tire service order"
       summary: Create a new tire service order
       description: |
-            *This can only be done by the logged in user.*
+            *This can only be done by the logged user.*
       requestBody:
         required: true
         content:
@@ -930,7 +930,7 @@ paths:
     #   summary: Create new tire service order
     #   description: |
     #         You can change the date and time, as well as the vehicle in your tire order
-    #         *This can only be done by the logged in user.*
+    #         *This can only be done by the logged user.*
     #   requestBody:
     #     required: true
     #     content:
@@ -1017,7 +1017,7 @@ paths:
   #     - "Tire service order"
   #     summary: You can add, update and delete a tasks in your tire service order
   #     description: |
-  #           *This can only be done by the logged in user.*
+  #           *This can only be done by the logged user.*
   #     requestBody:
   #       required: true
   #       content:
