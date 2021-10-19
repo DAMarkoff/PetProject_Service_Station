@@ -66,7 +66,7 @@ Done:
 			
 		/tire_service_order/task:
 			*[GET] - request the task 					- not implemented (the info is provided in user_info. there will be another endpoint for managers)
-			*[POST] - create new task					- tasks are created when creating a service order
+			*[POST] - create new task					- the tasks were created when creating the service order
 			*[PUT] - change the task 					- not implemented (the user can delete or add tasks in the tire service order. only the manager can change workers)
 			*[DELETE] - delete the task					- closed. on maintenance
 		
@@ -84,8 +84,8 @@ d		/user_info
 		/users/user_info		
 		/warehouse
 		/vehicle
-		/storage_order			- needs updating			
-		/tire_service_order		- needs updating
+		/storage_order						
+		/tire_service_order		
 	
 ToDo Dmitrii:
 
@@ -99,8 +99,6 @@ ToDo Dmitrii:
 	
 	- vehicle.name in /vehicle	[POST] - ok, but in [PUT]?	
     - 401 status code when the email or token does not exist?
-    - change password
-    - restore password
 
 	- drop the pass column from the users table?
 
@@ -464,12 +462,9 @@ In memories:
 				worker name
 			
 	user_authorization
-		if it is not user's vehicle: :)
-		max load per one manager - 5:
-		    if the load of the manager == 4, mark him as unavailable
-		if the order date is before today	
+		if it is not user's vehicle: - 403
+		if the order date is before today - 400
 		
-		add delta (10 mins) for workers to the end_time
 
 
 /tire_service_order [PUT] =========================================== ON MAINTENANCE ===============================================
