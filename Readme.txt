@@ -263,8 +263,6 @@ In memories:
 	user_authorization
 		the user can specify either the size_name or the user_vehicle_id
 			if both size_name and user_vehicle_id are specified, the size_name is ignored
-				
-!!!	Delete the size_id from storage_orders table
 
 	shelf_id selection:
 		- min shelf_id, that have no storage_order and matches on size_id needed
@@ -435,20 +433,35 @@ In memories:
 
 /tire_service_order [POST] ========================================== NEEDS UPDATING ==================================================
 	input:
-			email				- required
-			token				- required
-			order_date			- required
-			user_vehicle_id	    - required
+			email							- required
+			token							- required
+			order_date						- required
+			user_vehicle_id	    			- required
+			order_type						- required
+			numbers_of_wheels				- required
+			removing_installing_wheels		- required
+			tubeless						- required
+			balancing						- required
+			wheel_alignment					- required
 
 	
 	output:
 			service_order_id
-			date
-			manager_id
-			manager_first_name
-			manager_last_name
-			manager_phone
-			manager_email
+			order datetime
+			estimated service duration
+			estimated end of service datetime
+			service order cost
+			manager:
+				manager_id
+				manager name
+				manager_email
+				manager_phone
+			tasks:
+				task_name
+				task_cost
+			worker:
+				worker_id
+				worker name
 			
 	user_authorization
 		if it is not user's vehicle: :)

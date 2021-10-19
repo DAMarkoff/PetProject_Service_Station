@@ -592,7 +592,7 @@ paths:
     post:
       tags:
       - "Users"
-      summary: Provides full information about the logged user
+      summary: Provides complete information about the logged in user
       description: |
           *This can only be done by the logged user.*
       requestBody:
@@ -859,25 +859,23 @@ paths:
               properties:
                 email:
                   type: string
+                  format: email
                   description: |
-                      - ***required*** - Enter your email
+                      ***required*** - Enter your email
                 token:
                   type: string
+                  format: uuid
                   description: |
                     - ***required*** - Enter your token
                     - example - faf353cd-2e44-46c5-9864-7c53426eb58a
-                order_type:
-                  type: string
-                  description: |
-                    -
                 order_date:
                   type: string
                   description: |
-                     - ***required*** - Tire service order date
+                      ***required*** - Tire service order date
                 u_veh_id:
                   type: string
                   description: |
-                     - ***required*** - The id of your car that will be serviced
+                      ***required*** - The id of your car that will be serviced
       responses:
         '200':
           description: Successful operation
@@ -1163,23 +1161,6 @@ components:
           type: string
         manager_email:
           type: string
-    storage_order_changed:
-      type: object
-      properties:
-        storage_order:
-          type: string
-        new_start_date:
-          type: string
-        new_stop_date:
-          type: string
-        new_size_id:
-          type: string
-        old_size_id:
-          type: string
-        new_shelf_id:
-          type: string
-        old_shelf_id:
-          type: string
     storage_order:
       type: object
       properties:
@@ -1239,6 +1220,10 @@ components:
                 type: integer
               manager_name:
                 type: string
+              manager_email:
+                type: string
+              manager_phone:
+                type: string
           vehicle:
             type: object
             properties:
@@ -1268,6 +1253,10 @@ components:
                       worker_id:
                         type: integer
                       worker_name:
+                        type: string
+                      worker_email:
+                        type: string
+                      worker_phone:
                         type: string
                   task cost:
                     type: integer
@@ -1395,9 +1384,3 @@ components:
       properties:
         error:
           type: string
-  # requestBodies:
-  #   User_Info:
-  #     content:
-  #       application/json:
-  #         schema:
-  #           $ref: '#/components/schemas/ToDos'

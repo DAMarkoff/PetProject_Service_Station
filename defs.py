@@ -323,19 +323,20 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
                 service_order_cost += int(task_cost)
                 service_order_tasks.append({
                     'task_name': task_name,
-                    'task cost': task_cost
+                    'task_cost': task_cost
                 })
 
         # get the manager's and worker's first and last names
-        sql_query = """SELECT first_name, last_name FROM staff WHERE worker_id = '{0}'
-                UNION ALL 
-                SELECT first_name, last_name FROM managers WHERE manager_id = '{1}';""".format(worker_id, manager_id)
+        sql_query = """SELECT first_name, last_name, email, phone FROM staff WHERE worker_id = '{0}'
+                       UNION ALL 
+                       SELECT first_name, last_name, email, phone FROM managers WHERE manager_id = '{1}';""".\
+                format(worker_id, manager_id)
         cursor.execute(sql_query)
         conn.commit()
         res_cost = cursor.fetchall()
 
-        worker_first_name, worker_last_name = res_cost[0]
-        manager_first_name, manager_last_name = res_cost[1]
+        worker_first_name, worker_last_name, worker_email, worker_phone = res_cost[0]
+        manager_first_name, manager_last_name, manager_email, manager_phone = res_cost[1]
 
         # get service order cost
         if service_order_tasks == []:
@@ -349,11 +350,15 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
             'user_vehicle_id': user_vehicle_id,
             'manager:': {
                 'manager_id': manager_id,
-                'manager name': manager_first_name + ' ' + manager_last_name
+                'manager_name': manager_first_name + ' ' + manager_last_name,
+                'manager_email': manager_email,
+                'manager_phone': manager_phone
             },
             'worker:': {
                 'worker_id': worker_id,
-                'worker name': worker_first_name + ' ' + worker_last_name
+                'worker_name': worker_first_name + ' ' + worker_last_name,
+                'worker_email': worker_email,
+                'worker_phone': worker_phone
             },
             'service order type': order_type,
             'order datetime': str(order_date),
