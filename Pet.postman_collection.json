@@ -78,12 +78,12 @@
 							"formdata": [
 								{
 									"key": "email",
-									"value": "dan@dan.us",
+									"value": "test_sw_changed@test_sw.sw",
 									"type": "text"
 								},
 								{
 									"key": "password",
-									"value": "qwe",
+									"value": "Test!SW#1",
 									"type": "text"
 								}
 							]
@@ -224,28 +224,24 @@
 									"type": "text"
 								},
 								{
-									"key": "f_name",
-									"value": "Dexter",
-									"type": "text",
-									"disabled": true
+									"key": "new_first_name",
+									"value": "test_sw_fn_changed",
+									"type": "text"
 								},
 								{
-									"key": "l_name",
-									"value": "Morgan",
-									"type": "text",
-									"disabled": true
+									"key": "new_last_name",
+									"value": "test_sw_ln_changed",
+									"type": "text"
 								},
 								{
 									"key": "new_email",
-									"value": "test@test12_2.ru",
-									"type": "text",
-									"disabled": true
+									"value": "test_sw_changed@test_sw.sw",
+									"type": "text"
 								},
 								{
-									"key": "phone",
-									"value": "",
-									"type": "text",
-									"disabled": true
+									"key": "new_phone",
+									"value": "555",
+									"type": "text"
 								}
 							]
 						},
@@ -638,7 +634,7 @@
 								},
 								{
 									"key": "order_date",
-									"value": "2021-10-01 15:40",
+									"value": "2021-11-02 15:40",
 									"type": "text"
 								},
 								{
@@ -648,7 +644,7 @@
 								},
 								{
 									"key": "order_type",
-									"value": "tire change",
+									"value": "tire repair",
 									"type": "text"
 								},
 								{
@@ -900,10 +896,6 @@
 					"response": []
 				}
 			]
-		},
-		{
-			"name": "Admin",
-			"item": []
 		}
 	]
 }
