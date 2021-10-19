@@ -309,8 +309,9 @@ paths:
       tags:
       - "Vehicle"
       summary: Change your vehicle type or tire size
-      description: You can fill in only one of the new_vehicle_name or new_size_name. Or both.
-                *This can only be done by the logged in user.*
+      description: |
+                - You can change the vehicle_name or/and size_name.
+                - *This can only be done by the logged in user.*
       requestBody:
         content:
           multipart/form-data:
@@ -328,7 +329,7 @@ paths:
                   description: |
                     - ***required*** - Enter your token
                     - example - faf353cd-2e44-46c5-9864-7c53426eb58a
-                vehicle_id:
+                user_vehicle_id:
                   type: integer
                   description: |
                      - ***required*** - ID of your vehicle that needs to be updated
@@ -650,10 +651,10 @@ paths:
     post:
       tags:
       - "Storage order"
-      summary: Create new storage order
+      summary: Create a new storage order
       description: |
-            The size_name OR user_vehicle_id is required. Not both of those.
-            *This can only be done by the logged in user.*
+            - The size_name OR user_vehicle_id is required. If both of them were provided - the size_name will be ignored.
+            - *This can only be done by the logged in user.*
       requestBody:
         required: true
         content:
@@ -663,27 +664,27 @@ paths:
               properties:
                 email:
                   type: string
-                  format: email
                   description: |
-                      ***required*** - Enter your email
+                      - ***required*** - Enter your email
                 token:
                   type: string
-                  format: uuid
                   description: |
                     - ***required*** - Enter your token
                     - example - faf353cd-2e44-46c5-9864-7c53426eb58a
                 start_date:
                   type: string
                   description: |
-                      ***required*** - Initial storage start date
+                     - ***required*** - Initial storage start date
+                     - format: YYYY-MM-DD, for example - 2021-10-30
                 stop_date:
                   type: string
                   description: |
-                      *optional* - End date of storage start
+                      - ***required*** - End date of storage start
+                      - format: YYYY-MM-DD, for example - 2021-10-30
                 size_name:
                   type: integer
                   description: |
-                      *optional* -Choose the size of your tires
+                      - ***required*** -Choose the size of your tires
                   enum:
                     - 14
                     - 15
@@ -692,10 +693,10 @@ paths:
                     - 18
                     - 19
                     - 20
-                u_veh_id:
-                  type: string
+                user_vehicle_id:
+                  type: integer
                   description: |
-                      *optional* - ID of your vehicle whose tires will be stored
+                      - ***required*** - ID of your vehicle whose tires will be stored
       responses:
         '200':
           description: Successful operation
@@ -729,6 +730,16 @@ paths:
                 type: array
                 items:
                  $ref: '#/components/schemas/error'
+
+    put:
+      tags:
+      - "Storage order"
+      summary: Change your storage order
+      description: |
+            ***ON MAINTENANCE.***
+      responses:
+        '200':
+          description: Successful operation
 #====================================================================================================
 #                                           ON MAINTENANCE
 #====================================================================================================
@@ -848,23 +859,25 @@ paths:
               properties:
                 email:
                   type: string
-                  format: email
                   description: |
-                      ***required*** - Enter your email
+                      - ***required*** - Enter your email
                 token:
                   type: string
-                  format: uuid
                   description: |
                     - ***required*** - Enter your token
                     - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+                order_type:
+                  type: string
+                  description: |
+                    -
                 order_date:
                   type: string
                   description: |
-                      ***required*** - Tire service order date
+                     - ***required*** - Tire service order date
                 u_veh_id:
                   type: string
                   description: |
-                      ***required*** - The id of your car that will be serviced
+                     - ***required*** - The id of your car that will be serviced
       responses:
         '200':
           description: Successful operation
@@ -901,73 +914,86 @@ paths:
     put:
       tags:
       - "Tire service order"
-      summary: Create new tire service order
+      summary: Change your tire service order
       description: |
-            You can change the date and time, as well as the vehicle in your tire order
-            *This can only be done by the logged in user.*
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-                  description: |
-                      ***required*** - Enter your email
-                token:
-                  type: string
-                  format: uuid
-                  description: |
-                    - ***required*** - Enter your token
-                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
-                serv_order_id:
-                  type: string
-                  description: |
-                      ***required*** - ID of your tire service order that needs to be updated
-                new_order_date:
-                  type: string
-                  description: |
-                      *optional* - New tire service order date
-                new_u_veh_id:
-                  type: string
-                  description: |
-                      *optional* - Fill in another vehicle id
+            ***ON MAINTENANCE.***
       responses:
         '200':
           description: Successful operation
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/tire_service_order_changed'
-        '400':
-          description: bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-        '405':
-          description: method not allowed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-        '401':
-          description: unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-        '503':
-          description: Could not connect to the database
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                 $ref: '#/components/schemas/error'
+
+#====================================================================================================
+#                                           ON MAINTENANCE
+#====================================================================================================
+    # put:
+    #   tags:
+    #   - "Tire service order"
+    #   summary: Create new tire service order
+    #   description: |
+    #         You can change the date and time, as well as the vehicle in your tire order
+    #         *This can only be done by the logged in user.*
+    #   requestBody:
+    #     required: true
+    #     content:
+    #       multipart/form-data:
+    #         schema:
+    #           type: object
+    #           properties:
+    #             email:
+    #               type: string
+    #               format: email
+    #               description: |
+    #                   ***required*** - Enter your email
+    #             token:
+    #               type: string
+    #               format: uuid
+    #               description: |
+    #                 - ***required*** - Enter your token
+    #                 - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+    #             serv_order_id:
+    #               type: string
+    #               description: |
+    #                   ***required*** - ID of your tire service order that needs to be updated
+    #             new_order_date:
+    #               type: string
+    #               description: |
+    #                   *optional* - New tire service order date
+    #             new_u_veh_id:
+    #               type: string
+    #               description: |
+    #                   *optional* - Fill in another vehicle id
+    #   responses:
+    #     '200':
+    #       description: Successful operation
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: '#/components/schemas/tire_service_order_changed'
+    #     '400':
+    #       description: bad request
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: '#/components/schemas/error'
+    #     '405':
+    #       description: method not allowed
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: '#/components/schemas/error'
+    #     '401':
+    #       description: unauthorized
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: '#/components/schemas/error'
+    #     '503':
+    #       description: Could not connect to the database
+    #       content:
+    #         application/json:
+    #           schema:
+    #             type: array
+    #             items:
+    #             $ref: '#/components/schemas/error'
     delete:
       tags:
       - "Tire service order"
@@ -1159,7 +1185,13 @@ components:
       properties:
         shelf_id:
           type: integer
-        storage order id:
+        storage_order_id:
+          type: integer
+        start_date:
+          type: string
+        stop_date:
+          type: string
+        storage_order_cost:
           type: integer
     storage_orders_info:
       type: array
@@ -1327,15 +1359,15 @@ components:
       type: object
       properties:
         vehicle_id:
-          type: string
+          type: integer
         old_vehicle_name:
           type: string
         new_vehicle_name:
           type: string
         old_size_name:
-          type: string
+          type: integer
         new_size_name:
-          type: string
+          type: integer
     storage_places:
       type: object
       properties:

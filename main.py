@@ -1037,7 +1037,7 @@ def storage_order():
         new_storage_order_id = get_value_from_table('storage_order_id', 'storage_orders', 'shelf_id', shelf_id)
 
         result = {
-            'storage order id': new_storage_order_id,
+            'storage_order_id': new_storage_order_id,
             'shelf_id': shelf_id,
             'start_date': start_date,
             'stop_date': stop_date,
