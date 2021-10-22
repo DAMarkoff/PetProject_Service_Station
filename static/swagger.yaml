@@ -1,0 +1,1383 @@
+openapi: 3.0.0
+servers:
+  - description: PetProgect
+    url: http://23.88.52.139:5006
+info:
+  description: |
+      # in progress...
+      **If you find any defects or have suggestions for improvement, feel free to fill out the Google forms below.**
+
+      **I will be very grateful for any help. Thanks.**
+      - [Bug Report Google Form](https://docs.google.com/forms/d/1Nh_-KE00CpirA_I4WLBXR5gWD5Gkl7KaT2u72x2CC7o/edit?usp=sharing)
+      - [Suggestions for improvement](https://docs.google.com/forms/d/1mjiIaQwa0_C0FiihzpKBFCOUvVSR_PjzusJMgmsEQkM/edit?usp=sharing)
+      - [Readme Google Doc](https://docs.google.com/document/d/1j8iKLZLj_GRenQDMlHrvDHJkvNcg7s8gzdzcO8gdpiA/edit?usp=sharing)
+  version: 0.0.1
+  title: Service Station
+  contact:
+    email: dmitri.markoff@gmail.com
+
+#----------------------------------------------------------------------------------------------
+
+tags:
+  - name: "Users"
+    description: "This suit contains API methods for operations with a user account and requests for information about user data"
+  - name: "Warehouse"
+    description: "shelf reports"
+  - name: "Vehicle"
+    description: "user's vehicle(s)"
+  - name: "Storage order"
+    description: "create/edit/delete user's tire storage order(s)"
+  - name: "Tire service order"
+    description: "create/edit/delete user's tire service order(s)"
+
+#----------------------------------------------------------------------------------------------
+
+paths:
+  /users:
+    get:
+      tags:
+      - "Users"
+      summary: A JSON array of user(s) data
+      description: |
+        - If the 'user_id' is not provided, returns short info about all users
+        - If the 'active' parameter is 'yes' - output info about active user(s) only
+        - If the 'active' parameter is 'no' - output info about inactive user(s) only
+        - If the 'active' parameter is blank - output info about both active and inactive users
+      parameters:
+      - name: user_id
+        in: query
+        required: false
+        description: '- *optional* - the user_id must consist only of digits'
+        schema:
+          type: integer
+      - name: active
+        in: query
+        required: false
+        description: '- *optional* - you can fill in "yes", "no" or leave blank'
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/users'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    post:
+      tags:
+      - "Users"
+      summary: Register a new user
+      description: Please, remember your password.
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                  description: |
+                      - ***required*** - 1 - 30 chars, can include the space and the .,'- chars
+                last_name:
+                  type: string
+                  description: |
+                      - ***required*** - 1 - 30 chars, can include the space and the .,'- chars
+                email:
+                  type: string
+                  description: |
+                      - ***required*** - The email must contain @ and . chars
+                password:
+                  type: string
+                  description: |
+                      - ***required*** - 8 - 32 chars, must contain at least one digit, one uppercase letter, one lowercase letter, one of the symbols $@#!%'
+                phone:
+                  type: string
+                  description: |
+                      - ***required*** - Validation has not been implemented yet
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/users'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    put:
+      tags:
+      - "Users"
+      summary: Change the user info.
+      description: |
+                *This can only be done by the logged user.*
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: |
+                      - ***required*** - Enter your email
+                token:
+                  type: string
+                  description: |
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+                new_first_name:
+                  type: string
+                  description: |
+                      - *optional* - 1 - 30 chars, can include the space and the .,'- chars
+                new_last_name:
+                  type: string
+                  description: |
+                      - *optional* - 1 - 30 chars, can include the space and the .,'- chars
+                new_email:
+                  type: string
+                  description: |
+                      - *optional* - The email must contain @ and . chars
+                new_phone:
+                  type: string
+                  description: |
+                      - *optional* - Validation has not been implemented yet
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_changed'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
+    delete:
+      tags:
+      - "Users"
+      summary: Delete the current user.
+      description: |
+        The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see [there](github.com/OAI/OpenAPI-Specification/pull/2117). ***This can only be done with an admin password.***
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+#----------------------------------------------------------------------------------------------
+
+  /vehicle:
+    post:
+      tags:
+      - "Vehicle"
+      summary: Register a new user's vehicle.
+      description: |
+                *This can only be done by the logged user.*
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: |
+                      - ***required*** - Enter your email
+                token:
+                  type: string
+                  description: |
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+                vehicle_name:
+                  type: string
+                  description: |
+                      - ***required*** -Choose the type of your vehicle.
+                  enum:
+                    - bus
+                    - truck
+                    - car
+                    - jeep
+                size_name:
+                  type: integer
+                  description: |
+                      - ***required*** -Choose the size of your tires
+                  enum:
+                    - 14
+                    - 15
+                    - 16
+                    - 17
+                    - 18
+                    - 19
+                    - 20
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/vehicle'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
+    put:
+      tags:
+      - "Vehicle"
+      summary: Change your vehicle type or tire size
+      description: |
+                - You can change the vehicle_name or/and size_name.
+                - *This can only be done by the logged user.*
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: |
+                     - ***required*** - Enter your email
+                token:
+                  type: string
+                  format: uuid
+                  description: |
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+                user_vehicle_id:
+                  type: integer
+                  description: |
+                     - ***required*** - ID of your vehicle that needs to be updated
+                new_vehicle_name:
+                  type: string
+                  description: |
+                      - *optional* - Choose the type of your vehicle.
+                  enum:
+                    - bus
+                    - truck
+                    - car
+                    - jeep
+                new_size_name:
+                  type: integer
+                  description: |
+                      - *optional* - Choose the size of your tires
+                  enum:
+                    - 14
+                    - 15
+                    - 16
+                    - 17
+                    - 18
+                    - 19
+                    - 20
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/vehicle_changed'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
+    delete:
+      tags:
+      - "Vehicle"
+      summary: Delete your vehicle
+      description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+#----------------------------------------------------------------------------------------------
+
+  /users/login:
+    post:
+      tags:
+      - "Users"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: |
+                      - ***required*** - Enter your email
+                password:
+                  type: string
+                  description: |
+                      - ***required*** - Enter your password. If you have forgotten your password, feel free to contact me.
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/hello'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
+
+#----------------------------------------------------------------------------------------------
+
+  /users/deactivate:
+    post:
+      tags:
+      - "Users"
+      summary: Mark yourself as an inactive user
+      description: WARNING! Only the admin can mark you as an active user again. *This can only be done by the logged user.*
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: |
+                      - ***required*** - Enter your email
+                token:
+                  type: string
+                  format: uuid
+                  description: |
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+                sure:
+                  type: string
+                  description: |
+                      - ***required*** - Are you sure? Type 'yes' or 'no'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  confirmation:
+                    type: string
+              example: 'User {first_name last_name} has been successfully deactivated'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
+
+#----------------------------------------------------------------------------------------------
+
+  /users/activate:
+    post:
+      tags:
+      - "Users"
+      summary: Mark the user as active
+      description: 'Note: Only the admin can mark you as an active user'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: |
+                      - ***required*** - Enter your email
+                admin password:
+                  type: string
+                  format: uuid
+                  description: |
+                      - ***required*** - Enter the admin password
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  confirmation:
+                    type: string
+              example: 'User {first_name last_name} has been successfully activated'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
+
+#----------------------------------------------------------------------------------------------
+
+  /users/user_info:
+    post:
+      tags:
+      - "Users"
+      summary: Provides complete information about the logged in user
+      description: |
+          *This can only be done by the logged user.*
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: |
+                    - ***required*** - Enter your email
+                token:
+                  type: string
+                  description: |
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_info'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
+
+#----------------------------------------------------------------------------------------------
+
+  /storage_order:
+    post:
+      tags:
+      - "Storage order"
+      summary: Create a new storage order
+      description: |
+            - The size_name OR user_vehicle_id is required. If both of them were provided - the size_name will be ignored.
+            - *This can only be done by the logged user.*
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: |
+                      - ***required*** - Enter your email
+                token:
+                  type: string
+                  description: |
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+                start_date:
+                  type: string
+                  description: |
+                     - ***required*** - Initial storage start date
+                     - format: YYYY-MM-DD, for example - 2021-10-30
+                stop_date:
+                  type: string
+                  description: |
+                      - ***required*** - End date of storage start
+                      - format: YYYY-MM-DD, for example - 2021-10-30
+                size_name:
+                  type: integer
+                  description: |
+                      - ***required*** -Choose the size of your tires
+                  enum:
+                    - 14
+                    - 15
+                    - 16
+                    - 17
+                    - 18
+                    - 19
+                    - 20
+                user_vehicle_id:
+                  type: integer
+                  description: |
+                      - ***required*** - ID of your vehicle whose tires will be stored
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/storage_order'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
+
+    put:
+      tags:
+      - "Storage order"
+      summary: Change your storage order
+      description: |
+            ***ON MAINTENANCE.***
+      responses:
+        '200':
+          description: Successful operation
+#====================================================================================================
+#                                           ON MAINTENANCE
+#====================================================================================================
+#    put:
+#      tags:
+#      - storage order
+#      summary: Create new storage order
+#      description: |
+#            *This can only be done by the logged user.*
+#      requestBody:
+#        required: true
+#        content:
+#          multipart/form-data:
+#            schema:
+#              type: object
+#              properties:
+#                email:
+#                  type: string
+#                  format: email
+#                  description: |
+#                      ***required*** - Enter your email
+#                token:
+#                  type: string
+#                  format: uuid
+#                  description: |
+#                      ***required*** - Enter your token
+#                  example: faf353cd-2e44-46c5-9864-7c53426eb58a
+#                st_ord_id:
+#                  type: string
+#                  description: |
+#                      ***required*** - ID of your storage order that needs to be updated
+#                start_date:
+#                  type: string
+#                  description: |
+#                      *optional* - New initial storage start date
+#                stop_date:
+#                  type: string
+#                  description: |
+#                      *optional* - New end date of storage start
+#                size_name:
+#                  type: integer
+#                  description: |
+#                      *optional* - Choose the other size of your tires
+#                  enum:
+#                    - 14
+#                    - 15
+#                    - 16
+#                    - 17
+#                    - 18
+#                    - 19
+#                    - 20
+#                # u_veh_id:
+#                #   type: string
+#                #   description: |
+#                #       *optional* - ID of your vehicle whose tires will be stored
+#      responses:
+#        '200':
+#          description: Successful operation
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/storage_order_changed'
+#        '400':
+#          description: bad request
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/error'
+#        '405':
+#          description: method not allowed
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/error'
+#        '401':
+#          description: unauthorized
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/error'
+#        '503':
+#          description: Could not connect to the database
+#          content:
+#            application/json:
+#              schema:
+#                type: array
+#                items:
+#                 $ref: '#/components/schemas/error'
+    delete:
+      tags:
+      - "Storage order"
+      summary: Delete your storage order
+      description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+#----------------------------------------------------------------------------------------------
+
+  /tire_service_order:
+    post:
+      tags:
+      - "Tire service order"
+      summary: Create a new tire service order
+      description: |
+            *This can only be done by the logged user.*
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: |
+                      ***required*** - Enter your email
+                token:
+                  type: string
+                  format: uuid
+                  description: |
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+                order_date:
+                  type: string
+                  description: |
+                      ***required*** - Tire service order date
+                u_veh_id:
+                  type: string
+                  description: |
+                      ***required*** - The id of your car that will be serviced
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/tire_service_order'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                 $ref: '#/components/schemas/error'
+    put:
+      tags:
+      - "Tire service order"
+      summary: Change your tire service order
+      description: |
+            ***ON MAINTENANCE.***
+      responses:
+        '200':
+          description: Successful operation
+
+#====================================================================================================
+#                                           ON MAINTENANCE
+#====================================================================================================
+    # put:
+    #   tags:
+    #   - "Tire service order"
+    #   summary: Create new tire service order
+    #   description: |
+    #         You can change the date and time, as well as the vehicle in your tire order
+    #         *This can only be done by the logged user.*
+    #   requestBody:
+    #     required: true
+    #     content:
+    #       multipart/form-data:
+    #         schema:
+    #           type: object
+    #           properties:
+    #             email:
+    #               type: string
+    #               format: email
+    #               description: |
+    #                   ***required*** - Enter your email
+    #             token:
+    #               type: string
+    #               format: uuid
+    #               description: |
+    #                 - ***required*** - Enter your token
+    #                 - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+    #             serv_order_id:
+    #               type: string
+    #               description: |
+    #                   ***required*** - ID of your tire service order that needs to be updated
+    #             new_order_date:
+    #               type: string
+    #               description: |
+    #                   *optional* - New tire service order date
+    #             new_u_veh_id:
+    #               type: string
+    #               description: |
+    #                   *optional* - Fill in another vehicle id
+    #   responses:
+    #     '200':
+    #       description: Successful operation
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: '#/components/schemas/tire_service_order_changed'
+    #     '400':
+    #       description: bad request
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: '#/components/schemas/error'
+    #     '405':
+    #       description: method not allowed
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: '#/components/schemas/error'
+    #     '401':
+    #       description: unauthorized
+    #       content:
+    #         application/json:
+    #           schema:
+    #             $ref: '#/components/schemas/error'
+    #     '503':
+    #       description: Could not connect to the database
+    #       content:
+    #         application/json:
+    #           schema:
+    #             type: array
+    #             items:
+    #             $ref: '#/components/schemas/error'
+    delete:
+      tags:
+      - "Tire service order"
+      summary: Delete your tire service order
+      description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+#====================================================================================================
+#                                           ON MAINTENANCE
+#====================================================================================================
+
+  # /tire_service_order/task:
+  #   post:
+  #     tags:
+  #     - "Tire service order"
+  #     summary: You can add, update and delete a tasks in your tire service order
+  #     description: |
+  #           *This can only be done by the logged user.*
+  #     requestBody:
+  #       required: true
+  #       content:
+  #         multipart/form-data:
+  #           schema:
+  #             type: object
+  #             properties:
+  #               email:
+  #                 type: string
+  #                 format: email
+  #                 description: |
+  #                     ***required*** - Enter your email
+  #               token:
+  #                 type: string
+  #                 format: uuid
+  #                 description: |
+  #                   - ***required*** - Enter your token
+  #                   - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+  #               service_order_id:
+  #                 type: string
+  #                 description: |
+  #                     ***required*** - The id of your tire service order that will be updated
+  #               task_name:
+  #                 type: string
+  #                 description: |
+  #                     ***required*** - The task, that will be added to your tire service order
+  #               numbers_of_task:
+  #                 type: string
+  #                 description: |
+  #                     ***required*** - The number of the tasks, that will be added to your tire service order
+  #     responses:
+  #       '200':
+  #         description: Successful operation
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: object
+  #               properties:
+  #                 confirmation:
+  #                   type: string
+  #       '400':
+  #         description: bad request
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/error'
+  #       '405':
+  #         description: method not allowed
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/error'
+  #       '401':
+  #         description: unauthorized
+  #         content:
+  #           application/json:
+  #             schema:
+  #               $ref: '#/components/schemas/error'
+  #       '503':
+  #         description: Could not connect to the database
+  #         content:
+  #           application/json:
+  #             schema:
+  #               type: array
+  #               items:
+  #               $ref: '#/components/schemas/error'
+
+#----------------------------------------------------------------------------------------------
+
+  /warehouse:
+    get:
+      tags:
+        - "Warehouse"
+      summary: Shows info about storage shelves
+      description: |
+                   - if size_name is not filled in, it shows all tire sizes
+                   - if available_only is 'yes', it shows only free shelves
+                   - if available_only is 'no', it shows only occupied shelves
+                   - if available_only neither one nor the other, it shows all free shelves
+      parameters:
+        - name: size_id
+          in: query
+          required: false
+          description: |
+                - *optional* - The size_id must contain only digits
+          schema:
+            type: string
+        - name: available_only
+          in: query
+          required: false
+          description: |
+                - *optional* - The available_only can be 'yes' or 'no'. Or empty.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/storage_places'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+#----------------------------------------------------------------------------------------------
+#----------------------------------------------------------------------------------------------
+
+components:
+  schemas:
+    tire_service_order_changed:
+      type: object
+      properties:
+        tire service order:
+          type: string
+        old_vehicle_id:
+          type: string
+        new_vehicle_id:
+          type: string
+        old_order_date:
+          type: string
+        new_order_date:
+          type: string
+    tire_service_order:
+      type: object
+      properties:
+        service_order_id:
+          type: string
+        date:
+          type: string
+        manager_id:
+          type: string
+        manager_first_name:
+          type: string
+        manager_last_name:
+          type: string
+        manager_phone:
+          type: string
+        manager_email:
+          type: string
+    storage_order:
+      type: object
+      properties:
+        shelf_id:
+          type: integer
+        storage_order_id:
+          type: integer
+        start_date:
+          type: string
+        stop_date:
+          type: string
+        storage_order_cost:
+          type: integer
+    storage_orders_info:
+      type: array
+      items:
+        type: object
+        properties:
+          storage_order_id:
+            type: integer
+          start_date:
+            type: string
+          stop_date:
+            type: string
+          order cost:
+            type: integer
+          shelf_id:
+            type: integer
+    your_vehicles:
+      type: array
+      items:
+        type: object
+        properties:
+          vehicle_id:
+            type: integer
+          vehicle_name:
+            type: string
+          size_name:
+            type: integer
+    tire_service_orders:
+      type: array
+      items:
+        type: object
+        properties:
+          service_order_id:
+            type: integer
+          service_order_type:
+            type: string
+          start_datetime:
+           type: string
+          stop_datetime:
+           type: string
+          manager:
+            type: object
+            properties:
+              manager_id:
+                type: integer
+              manager_name:
+                type: string
+              manager_email:
+                type: string
+              manager_phone:
+                type: string
+          vehicle:
+            type: object
+            properties:
+              user_vehicle_id:
+                type: integer
+              vehicle_name:
+                type: string
+              size_name:
+                type: string
+          tire service order cost:
+            type: integer
+          tasks:
+            oneOf:
+            - type: object
+              properties:
+                tasks:
+                  type: string
+            - type: array
+              items:
+                type: object
+                properties:
+                  task_name:
+                    type: string
+                  mworker:
+                    type: object
+                    properties:
+                      worker_id:
+                        type: integer
+                      worker_name:
+                        type: string
+                      worker_email:
+                        type: string
+                      worker_phone:
+                        type: string
+                  task cost:
+                    type: integer
+    user_info:
+      type: array
+      items:
+        type: object
+        properties:
+          your info:
+            type: object
+            properties:
+              id:
+                type: integer
+              first_name:
+                type: string
+              last_name:
+                type: string
+              email:
+                type: string
+              phone:
+                type: string
+          storage orders info:
+            oneOf:
+              - type: object
+                properties:
+                  storage orders info:
+                    type: string
+              - $ref: '#/components/schemas/storage_orders_info'
+          your_vehicle(s):
+            oneOf:
+              - type: object
+                properties:
+                  your vehicle(s):
+                    type: string
+              - $ref: '#/components/schemas/your_vehicles'
+          tire_service_order(s):
+            oneOf:
+              - type: object
+                properties:
+                  tire service order(s):
+                    type: string
+              - $ref: '#/components/schemas/tire_service_orders'
+    users:
+      type: object
+      properties:
+        ID:
+          type: integer
+        email:
+          type: string
+        first_name:
+          type: string
+        last_name:
+          type: string
+        phone:
+          type: string
+        active:
+          type: boolean
+    user_changed:
+      type: object
+      properties:
+        user_id:
+          type: integer
+        new first name:
+          type: string
+        old first name:
+          type: string
+        new last name:
+          type: string
+        old last name:
+          type: string
+        new email:
+          type: string
+        old email:
+          type: string
+        new phone:
+          type: string
+        old phone:
+          type: string
+    vehicle:
+      type: object
+      properties:
+        vehicle_id:
+          type: integer
+        vehicle_name:
+          type: string
+        size_name:
+          type: integer
+    vehicle_changed:
+      type: object
+      properties:
+        vehicle_id:
+          type: integer
+        old_vehicle_name:
+          type: string
+        new_vehicle_name:
+          type: string
+        old_size_name:
+          type: integer
+        new_size_name:
+          type: integer
+    storage_places:
+      type: object
+      properties:
+        active:
+          type: boolean
+        shelf_id:
+          type: integer
+        size_id:
+          type: integer
+        size_name:
+          type: integer
+    hello:
+      type: object
+      properties:
+        hello_message:
+          type: string
+        email:
+          type: string
+        user_id:
+          type: integer
+        token:
+          type: string
+    error:
+      type: object
+      properties:
+        error:
+          type: string
