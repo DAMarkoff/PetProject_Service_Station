@@ -1,8 +1,0 @@
-There should be 3 columns: ID, Title, Status. I wrote some of the positive TitleExamples down below.
-User will be able to login with a valid username and valid password
-Verify the Remember me functionality
-The data in password field is either visible as asterisk or bullet signs
-The data in password cannot be copied with CTRL+C combination
-The data in password cannot be copied with CTRL+INS combination
-The data in password cannot be copied with Copy on right-click mouse button
-The Enter key of the keyboard is pushing Login button by default
