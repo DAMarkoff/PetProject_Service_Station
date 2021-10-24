@@ -170,8 +170,8 @@ def users():
 
         created = datetime.datetime.now()
         sql_query = """INSERT INTO users (first_name, last_name, password, phone, email, active, salt, created) 
-        VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}')""".format(f_name, l_name, hash_password,
-                                                            phone, email, active, salt, created)
+                    VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}')""". \
+            format(f_name, l_name, hash_password, phone, email, active, salt, created)
         cursor.execute(sql_query)
         conn.commit()
 
@@ -459,7 +459,6 @@ def user_info():
                 conn.commit()
                 res_ = cursor.fetchall()
 
-
                 for i in res_:
                     service_order_id = i[0]
                     res_cost = get_value_from_table('SUM(task_cost)', 'temp', 'service_order_id', service_order_id)
@@ -489,13 +488,14 @@ def user_info():
                             })
 
                     sql_query = """SELECT start_datetime, stop_datetime, manager_id, manager_name, manager_surname, 
-                                    user_vehicle_id, vehicle_name, size_name FROM temp WHERE service_order_id = '{0}'""".\
-                                    format(service_order_id)
+                                user_vehicle_id, vehicle_name, size_name FROM temp WHERE service_order_id = '{0}'""". \
+                        format(service_order_id)
                     cursor.execute(sql_query)
                     conn.commit()
                     res_info = cursor.fetchone()
 
-                    start_datetime, stop_datetime, manager_id, manager_name, manager_surname, user_vehicle_id, vehicle_name, size_name = res_info
+                    start_datetime, stop_datetime, manager_id, manager_name, manager_surname, \
+                        user_vehicle_id, vehicle_name, size_name = res_info
 
                     result_tire_service_order.append({
                         'service_order_id': service_order_id,
@@ -537,7 +537,7 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
 
-        if not password or not email:
+        if not any((password, email)):
             abort(400, description='The password and email are required')
 
         if not user_exists('email', email):
@@ -569,10 +569,10 @@ def login():
             template = Template(text)
 
             result = {
-                        "hello_message": template.render(name=first_name + " " + last_name),
-                        "token": token,
-                        "email": email,
-                        "user_id": user_id
+                "hello_message": template.render(name=first_name + " " + last_name),
+                "token": token,
+                "email": email,
+                "user_id": user_id
             }
             return jsonify(result)
         else:
@@ -581,7 +581,8 @@ def login():
         abort(405)
 
 
-@app.route("/users/deactivate_user", methods=['POST'])  # mark the user as inactive (this can be done by the user itself)
+@app.route("/users/deactivate_user",
+           methods=['POST'])  # mark the user as inactive (this can be done by the user itself)
 def deactivate_user():
     if request.method == 'POST':
         email = request.form.get('email')
@@ -736,8 +737,8 @@ def users_vehicle():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE user_vehicle_id = '{0}'""".\
-                                                                                            format(user_vehicle_id)
+        sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE user_vehicle_id = '{0}'""". \
+            format(user_vehicle_id)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
@@ -961,7 +962,8 @@ def storage_order():
             if get_value_from_table('user_id', 'user_vehicle', 'user_vehicle_id', user_vehicle_id) != user_id:
                 abort(403, description='It is not your vehicle! Somebody call the police!')
             size_name = get_value_from_table('size_name', 'sizes', 'size_id',
-                                get_value_from_table('size_id', 'user_vehicle', 'user_vehicle_id', user_vehicle_id))
+                                             get_value_from_table('size_id', 'user_vehicle', 'user_vehicle_id',
+                                                                  user_vehicle_id))
 
         size_id = get_value_from_table('size_id', 'sizes', 'size_name', size_name)
 
@@ -1004,8 +1006,8 @@ def storage_order():
                             AND size_id = {2})
     
                             SELECT shelf_id FROM storage_orders WHERE shelf_id NOT IN 
-                            (SELECT shelf_id FROM dates_intersection) AND active = True AND size_id = {2};""".\
-                            format(start_date, stop_date, size_id)
+                            (SELECT shelf_id FROM dates_intersection) AND active = True AND size_id = {2};""". \
+                format(start_date, stop_date, size_id)
             cursor.execute(sql_query)
             res_ = cursor.fetchall()
 
@@ -1045,122 +1047,122 @@ def storage_order():
         return jsonify(result)
     elif request.method == 'PUT':
         return 'Temporarily closed for maintenance'
-# ======================================================================================================================
-#                                           ON MAINTENANCE
-# ======================================================================================================================
+    # ======================================================================================================================
+    #                                           ON MAINTENANCE
+    # ======================================================================================================================
 
-        # storage_order_id = request.form.get('storage_order_id')
-        # token = request.form.get('token')
-        # email = request.form.get('email')
-        # start_date = request.form.get('start_date')
-        # stop_date = request.form.get('stop_date')
-        # storage_order_cost = request.form.get('storage_order_cost')
-        # size_name = request.form.get('size_name')
-        #
-        # if not token or not email or not storage_order_id:
-        #     abort(400, description='The token, email, storage_order_id data are required')
-        #
-        # user_auth = user_authorization(email, token)
-        # if not user_auth['result']:
-        #     abort(401, description=user_auth['text'])
-        #
-        # r.expire(email, 600)
-        #
-        # if not conn:
-        #     abort(503, description='There is no connection to the database')
-        #
-        # if not storage_order_exists(storage_order_id):
-        #     abort(400, description='The storage order does not exists')
-        #
-        # # get the initial data of the storage order
-        # sql_query = """SELECT start_date, stop_date, size_id, storage_order_cost, shelf_id, user_id
-        #                 FROM storage_orders WHERE storage_order_id = '{0}';""".format(storage_order_id)
-        # cursor.execute(sql_query)
-        # conn.commit()
-        # res_ = cursor.fetchone()
-        #
-        # start_date_db, stop_date_db, size_id_db, storage_order_cost_db, shelf_id_db, user_id_db, shelf_id = \
-        #     res_[0], res_[1], res_[2], res_[3], res_[4], res_[5], 0
-        #
-        # # verify, that the storage order is created by user
-        # if get_user_id(email) != user_id_db:
-        #     abort(403, description='Ouch! This is not your storage order!')
-        #
-        # # what data should be changed
-        # # check dates
-        # if start_date and stop_date:
-        #     if start_date > stop_date:
-        #         abort(400, description='The start date can not be greater than the stop date')
-        #     if stop_date < start_date:
-        #         abort(400, description='The stop date can not be less than the start date')
-        #
-        # if start_date and not stop_date:
-        #     if datetime.datetime.strptime(start_date, '%Y-%m-%d') > datetime.datetime.strptime(str(stop_date_db), '%Y-%m-%d'):
-        #         abort(400, description='The start date can not be greater than the stop date')
-        #
-        # if not start_date and stop_date:
-        #     if datetime.datetime.strptime(stop_date, '%Y-%m-%d') < datetime.datetime.strptime(str(start_date_db), '%Y-%m-%d'):
-        #         abort(400, description='The stop date can not be less than the start date')
-        #
-        # if not start_date:
-        #     start_date = start_date_db
-        # if not stop_date:
-        #     stop_date = stop_date_db
-        # if not storage_order_cost:
-        #     storage_order_cost = storage_order_cost_db
-        # if not size_name:
-        #     size_id = size_id_db
-        # else:
-        #     # if the tire size data needs to be changed
-        #     size_id = get_value_from_table('size_id', 'sizes', 'size_name', size_name)
-        #     if int(size_id) != size_id_db:
-        #         sql_query = """SELECT MIN(shelf_id) FROM warehouse WHERE available = 'True'
-        #                         AND size_id = '{0}';""".format(size_id)
-        #         cursor.execute(sql_query)
-        #         conn.commit()
-        #         shelf_avail_ = cursor.fetchone()
-        #
-        #         # if there is available storage
-        #         if shelf_avail:
-        #             shelf_id = shelf_avail_[0]
-        #
-        #             # update changed storage places
-        #             sql_query = """UPDATE warehouse SET available = 'True'
-        #                             WHERE shelf_id = '{0}';""".format(shelf_id_db)
-        #             cursor.execute(sql_query)
-        #             conn.commit()
-        #
-        #             sql_query = """UPDATE warehouse SET available = 'False'
-        #                             WHERE shelf_id = '{0}';""".format(shelf_id)
-        #             cursor.execute(sql_query)
-        #             conn.commit()
-        #
-        #         else:
-        #             abort(400, description='Sorry, we do not have the storage you need')
-        #
-        # if shelf_id == 0:
-        #     shelf_id = shelf_id_db
-        #
-        # # update data in the DB
-        #
-        # sql_query = """UPDATE storage_orders SET start_date = '{0}', stop_date = '{1}', size_id = '{2}',
-        #             storage_order_cost = '{3}', shelf_id = '{4}' WHERE storage_order_id = '{5}';""".\
-        #             format(start_date, stop_date, size_id, storage_order_cost, shelf_id, storage_order_id)
-        # cursor.execute(sql_query)
-        # conn.commit()
-        #
-        # result = {
-        #     'storage_order': storage_order_id,
-        #     'new_start_date': start_date,
-        #     'new_stop_date': stop_date,
-        #     'new_size_id': size_id,
-        #     'old_size_id': size_id_db,
-        #     'storage_order_cost': storage_order_cost,
-        #     'new_shelf_id': shelf_id,
-        #     'old_shelf_id': shelf_id_db
-        # }
-        #
-        # return jsonify(result)
+    # storage_order_id = request.form.get('storage_order_id')
+    # token = request.form.get('token')
+    # email = request.form.get('email')
+    # start_date = request.form.get('start_date')
+    # stop_date = request.form.get('stop_date')
+    # storage_order_cost = request.form.get('storage_order_cost')
+    # size_name = request.form.get('size_name')
+    #
+    # if not token or not email or not storage_order_id:
+    #     abort(400, description='The token, email, storage_order_id data are required')
+    #
+    # user_auth = user_authorization(email, token)
+    # if not user_auth['result']:
+    #     abort(401, description=user_auth['text'])
+    #
+    # r.expire(email, 600)
+    #
+    # if not conn:
+    #     abort(503, description='There is no connection to the database')
+    #
+    # if not storage_order_exists(storage_order_id):
+    #     abort(400, description='The storage order does not exists')
+    #
+    # # get the initial data of the storage order
+    # sql_query = """SELECT start_date, stop_date, size_id, storage_order_cost, shelf_id, user_id
+    #                 FROM storage_orders WHERE storage_order_id = '{0}';""".format(storage_order_id)
+    # cursor.execute(sql_query)
+    # conn.commit()
+    # res_ = cursor.fetchone()
+    #
+    # start_date_db, stop_date_db, size_id_db, storage_order_cost_db, shelf_id_db, user_id_db, shelf_id = \
+    #     res_[0], res_[1], res_[2], res_[3], res_[4], res_[5], 0
+    #
+    # # verify, that the storage order is created by user
+    # if get_user_id(email) != user_id_db:
+    #     abort(403, description='Ouch! This is not your storage order!')
+    #
+    # # what data should be changed
+    # # check dates
+    # if start_date and stop_date:
+    #     if start_date > stop_date:
+    #         abort(400, description='The start date can not be greater than the stop date')
+    #     if stop_date < start_date:
+    #         abort(400, description='The stop date can not be less than the start date')
+    #
+    # if start_date and not stop_date:
+    #     if datetime.datetime.strptime(start_date, '%Y-%m-%d') > datetime.datetime.strptime(str(stop_date_db), '%Y-%m-%d'):
+    #         abort(400, description='The start date can not be greater than the stop date')
+    #
+    # if not start_date and stop_date:
+    #     if datetime.datetime.strptime(stop_date, '%Y-%m-%d') < datetime.datetime.strptime(str(start_date_db), '%Y-%m-%d'):
+    #         abort(400, description='The stop date can not be less than the start date')
+    #
+    # if not start_date:
+    #     start_date = start_date_db
+    # if not stop_date:
+    #     stop_date = stop_date_db
+    # if not storage_order_cost:
+    #     storage_order_cost = storage_order_cost_db
+    # if not size_name:
+    #     size_id = size_id_db
+    # else:
+    #     # if the tire size data needs to be changed
+    #     size_id = get_value_from_table('size_id', 'sizes', 'size_name', size_name)
+    #     if int(size_id) != size_id_db:
+    #         sql_query = """SELECT MIN(shelf_id) FROM warehouse WHERE available = 'True'
+    #                         AND size_id = '{0}';""".format(size_id)
+    #         cursor.execute(sql_query)
+    #         conn.commit()
+    #         shelf_avail_ = cursor.fetchone()
+    #
+    #         # if there is available storage
+    #         if shelf_avail:
+    #             shelf_id = shelf_avail_[0]
+    #
+    #             # update changed storage places
+    #             sql_query = """UPDATE warehouse SET available = 'True'
+    #                             WHERE shelf_id = '{0}';""".format(shelf_id_db)
+    #             cursor.execute(sql_query)
+    #             conn.commit()
+    #
+    #             sql_query = """UPDATE warehouse SET available = 'False'
+    #                             WHERE shelf_id = '{0}';""".format(shelf_id)
+    #             cursor.execute(sql_query)
+    #             conn.commit()
+    #
+    #         else:
+    #             abort(400, description='Sorry, we do not have the storage you need')
+    #
+    # if shelf_id == 0:
+    #     shelf_id = shelf_id_db
+    #
+    # # update data in the DB
+    #
+    # sql_query = """UPDATE storage_orders SET start_date = '{0}', stop_date = '{1}', size_id = '{2}',
+    #             storage_order_cost = '{3}', shelf_id = '{4}' WHERE storage_order_id = '{5}';""".\
+    #             format(start_date, stop_date, size_id, storage_order_cost, shelf_id, storage_order_id)
+    # cursor.execute(sql_query)
+    # conn.commit()
+    #
+    # result = {
+    #     'storage_order': storage_order_id,
+    #     'new_start_date': start_date,
+    #     'new_stop_date': stop_date,
+    #     'new_size_id': size_id,
+    #     'old_size_id': size_id_db,
+    #     'storage_order_cost': storage_order_cost,
+    #     'new_shelf_id': shelf_id,
+    #     'old_shelf_id': shelf_id_db
+    # }
+    #
+    # return jsonify(result)
     elif request.method == 'DELETE':
         email = request.form.get('email')
         token = request.form.get('token')
@@ -1221,9 +1223,9 @@ def tire_service_order():
         balancing = request.form.get('balancing')
         wheel_alignment = request.form.get('wheel_alignment')
 
-        if not token or not email or not order_date_str or not user_vehicle_id or not order_type\
-                    or not numbers_of_wheels or not removing_installing_wheels \
-                    or not tubeless or not balancing or not wheel_alignment:
+        if not token or not email or not order_date_str or not user_vehicle_id or not order_type \
+                or not numbers_of_wheels or not removing_installing_wheels \
+                or not tubeless or not balancing or not wheel_alignment:
             abort(400, description='All fields are required')
 
         if not user_vehicle_id.isdigit():
@@ -1266,7 +1268,7 @@ def tire_service_order():
 
         if order_type.lower() == 'tire change':
             service_type_id = get_value_from_table('service_type_id', 'tire_service_order_type',
-                                                                            'service_type_name', order_type)
+                                                   'service_type_name', order_type)
             tasks = []
             tire_change = 'tire_change'
             tire_repair = 'no'
@@ -1288,11 +1290,11 @@ def tire_service_order():
             # =========================================================================================================
             # Calculate the expected duration of tire replacement
             service_duration = duration_of_service(tire_repair, tire_change, removing_installing_wheels, balancing,
-                                                            wheel_alignment, camera_repair, numbers_of_wheels)
+                                                   wheel_alignment, camera_repair, numbers_of_wheels)
             end_time = order_date + service_duration + delta
             if int(end_time.hour) >= 20 and int(end_time.minute) >= 15:
                 abort(400, description='Sorry, we close at 08:00 pm. The estimated end time of your order is '
-                                                                + str(end_time.hour) + ':' + str(end_time.minute))
+                                       + str(end_time.hour) + ':' + str(end_time.minute))
 
             # =========================================================================================================
             # Select a manager
@@ -1306,7 +1308,8 @@ def tire_service_order():
             # =========================================================================================================
             # Time
             result = choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_vehicle_id, manager_id,
-                                         tasks, numbers_of_wheels, order_type, service_duration, service_type_id)
+                                                          tasks, numbers_of_wheels, order_type, service_duration,
+                                                          service_type_id)
             return result['value']
         elif order_type.lower() == 'tire repair':
             service_type_id = get_value_from_table('service_type_id', 'tire_service_order_type',
@@ -1337,11 +1340,11 @@ def tire_service_order():
             # =========================================================================================================
             # Calculate the expected duration of tire replacement
             service_duration = duration_of_service(tire_repair, tire_change, removing_installing_wheels, balancing,
-                                                            wheel_alignment, camera_repair, numbers_of_wheels)
+                                                   wheel_alignment, camera_repair, numbers_of_wheels)
             end_time = order_date + service_duration + delta
             if int(end_time.hour) >= 20 and int(end_time.minute) >= 15:
                 abort(400, description='Sorry, we close at 08:00 pm. The estimated end time of your order is '
-                                                                + str(end_time.hour) + ':' + str(end_time.minute))
+                                       + str(end_time.hour) + ':' + str(end_time.minute))
 
             # =========================================================================================================
             # Select a manager
@@ -1355,85 +1358,86 @@ def tire_service_order():
             # =========================================================================================================
             # Time
             result = choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_vehicle_id, manager_id,
-                                            tasks, numbers_of_wheels, order_type, service_duration, service_type_id)
+                                                          tasks, numbers_of_wheels, order_type, service_duration,
+                                                          service_type_id)
             return result['value']
         else:
             return jsonify({'confirmation': 'we only provide the <tire change> and <tire repair> services by now'})
     elif request.method == 'PUT':
         return 'Temporarily closed for maintenance'
-# ======================================================================================================================
-#                                           ON MAINTENANCE
-# ======================================================================================================================
-#         email = request.form.get('email')
-#         token = request.form.get('token')
-#         service_order_id = request.form.get('service order id')
-#         new_order_date = request.form.get('new order date')
-#         new_user_vehicle_id = request.form.get('new user vehicle id')
-#
-#         if not token or not email or not service_order_id:
-#             abort(400, description='The token, email, service order id are required')
-#
-#         user_auth = user_authorization(email, token)
-#         if not user_auth['result']:
-#             abort(401, description=user_auth['text'])
-#
-#         r.expire(email, 600)
-#
-#         if not conn:
-#             abort(503, description='There is no connection to the database')
-#
-#         if not tire_service_order_exists(service_order_id):
-#             abort(400, description='The tire service order does not exist')
-#
-#         # get the initial data about the tire_service_order
-#         sql_query = """SELECT user_id, user_vehicle_id, start_datetime FROM tire_service_order
-#                                                 WHERE service_order_id = '{0}';""".format(service_order_id)
-#         cursor.execute(sql_query)
-#         conn.commit()
-#         res_ = cursor.fetchone()
-#
-#         user_id_order, user_vehicle_id_db, start_datetime_db = res_
-#         user_id = get_user_id(email)
-#
-#         if user_id_order != user_id:
-#             abort(403, description='It is not your tire service order!')
-#
-#         if (new_order_date is None and new_user_vehicle_id is None) or \
-#                 (new_order_date == start_datetime_db and new_user_vehicle_id == user_vehicle_id_db):
-#             abort(400, description='Ok. Nothing needs to be changed :)')
-#
-#         if not new_order_date or new_order_date == start_datetime_db:
-#             order_date_to_db = start_datetime_db
-#             new_order_date = 'The tire service date has not been changed'
-#         else:
-#             if datetime.datetime.strptime(new_order_date[:10], '%Y-%m-%d') < \
-#                     datetime.datetime.strptime(str(datetime.datetime.now())[:10], '%Y-%m-%d'):
-#                 abort(400, description='The new tire service date can not be earlier than today')
-#             order_date_to_db = new_order_date
-#
-#         if not new_user_vehicle_id or new_user_vehicle_id == user_vehicle_id_db:
-#             user_vehicle_id_to_db = user_vehicle_id_db
-#             new_user_vehicle_id = 'The vehicle id has not been changed'
-#         else:
-#             user_id_vehicle = get_value_from_table('user_id', 'user_vehicle', 'user_vehicle_id', new_user_vehicle_id)
-#             if user_id_vehicle != user_id:
-#                 abort(403, description='It is not your vehicle! Somebody call the police!')
-#             user_vehicle_id_to_db = new_user_vehicle_id
-#
-#         sql_query = """UPDATE tire_service_order SET start_datetime = '{0}', user_vehicle_id = '{1}'
-#                     WHERE service_order_id = '{2}'""".format(order_date_to_db, user_vehicle_id_to_db, service_order_id)
-#         cursor.execute(sql_query)
-#         conn.commit()
-#
-#         result = {
-#             'tire service order': service_order_id,
-#             'old_vehicle_id': user_vehicle_id_db,
-#             'new_vehicle_id': new_user_vehicle_id,
-#             'old_order_date': start_datetime_db,
-#             'new_order_date': new_order_date
-#         }
-#
-#         return jsonify(result)
+    # ======================================================================================================================
+    #                                           ON MAINTENANCE
+    # ======================================================================================================================
+    #         email = request.form.get('email')
+    #         token = request.form.get('token')
+    #         service_order_id = request.form.get('service order id')
+    #         new_order_date = request.form.get('new order date')
+    #         new_user_vehicle_id = request.form.get('new user vehicle id')
+    #
+    #         if not token or not email or not service_order_id:
+    #             abort(400, description='The token, email, service order id are required')
+    #
+    #         user_auth = user_authorization(email, token)
+    #         if not user_auth['result']:
+    #             abort(401, description=user_auth['text'])
+    #
+    #         r.expire(email, 600)
+    #
+    #         if not conn:
+    #             abort(503, description='There is no connection to the database')
+    #
+    #         if not tire_service_order_exists(service_order_id):
+    #             abort(400, description='The tire service order does not exist')
+    #
+    #         # get the initial data about the tire_service_order
+    #         sql_query = """SELECT user_id, user_vehicle_id, start_datetime FROM tire_service_order
+    #                                                 WHERE service_order_id = '{0}';""".format(service_order_id)
+    #         cursor.execute(sql_query)
+    #         conn.commit()
+    #         res_ = cursor.fetchone()
+    #
+    #         user_id_order, user_vehicle_id_db, start_datetime_db = res_
+    #         user_id = get_user_id(email)
+    #
+    #         if user_id_order != user_id:
+    #             abort(403, description='It is not your tire service order!')
+    #
+    #         if (new_order_date is None and new_user_vehicle_id is None) or \
+    #                 (new_order_date == start_datetime_db and new_user_vehicle_id == user_vehicle_id_db):
+    #             abort(400, description='Ok. Nothing needs to be changed :)')
+    #
+    #         if not new_order_date or new_order_date == start_datetime_db:
+    #             order_date_to_db = start_datetime_db
+    #             new_order_date = 'The tire service date has not been changed'
+    #         else:
+    #             if datetime.datetime.strptime(new_order_date[:10], '%Y-%m-%d') < \
+    #                     datetime.datetime.strptime(str(datetime.datetime.now())[:10], '%Y-%m-%d'):
+    #                 abort(400, description='The new tire service date can not be earlier than today')
+    #             order_date_to_db = new_order_date
+    #
+    #         if not new_user_vehicle_id or new_user_vehicle_id == user_vehicle_id_db:
+    #             user_vehicle_id_to_db = user_vehicle_id_db
+    #             new_user_vehicle_id = 'The vehicle id has not been changed'
+    #         else:
+    #             user_id_vehicle = get_value_from_table('user_id', 'user_vehicle', 'user_vehicle_id', new_user_vehicle_id)
+    #             if user_id_vehicle != user_id:
+    #                 abort(403, description='It is not your vehicle! Somebody call the police!')
+    #             user_vehicle_id_to_db = new_user_vehicle_id
+    #
+    #         sql_query = """UPDATE tire_service_order SET start_datetime = '{0}', user_vehicle_id = '{1}'
+    #                     WHERE service_order_id = '{2}'""".format(order_date_to_db, user_vehicle_id_to_db, service_order_id)
+    #         cursor.execute(sql_query)
+    #         conn.commit()
+    #
+    #         result = {
+    #             'tire service order': service_order_id,
+    #             'old_vehicle_id': user_vehicle_id_db,
+    #             'new_vehicle_id': new_user_vehicle_id,
+    #             'old_order_date': start_datetime_db,
+    #             'new_order_date': new_order_date
+    #         }
+    #
+    #         return jsonify(result)
     elif request.method == 'DELETE':
         email = request.form.get('email')
         token = request.form.get('token')
@@ -1485,7 +1489,8 @@ def tire_service_order():
         abort(405)
 
 
-@app.route("/tire_service_order/task", methods=['GET', 'POST', 'DELETE'])  # add new/change/delete a task to the user's service order
+@app.route("/tire_service_order/task",
+           methods=['GET', 'POST', 'DELETE'])  # add new/change/delete a task to the user's service order
 def task():
     if request.method == 'GET':
         return 'Temporarily closed for maintenance'
@@ -1678,7 +1683,7 @@ def change_password():
         hash_password, salt = generate_password_hash(new_password)
         user_id = get_value_from_table('user_id', 'users', 'email', email)
 
-        sql_query = """UPDATE users SET password = '{0}', salt = '{1}' WHERE user_id = '{2}';""".\
+        sql_query = """UPDATE users SET password = '{0}', salt = '{1}' WHERE user_id = '{2}';""". \
             format(hash_password, salt, user_id)
         cursor.execute(sql_query)
         conn.commit()
