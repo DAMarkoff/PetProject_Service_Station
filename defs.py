@@ -14,6 +14,15 @@ conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', hos
 cursor = conn.cursor()
 
 
+def check_required_fields(required_fields: tuple):
+    if any(elem is None for elem in required_fields):
+        text = 'The {{ name }} are required!'
+        template = Template(text)
+        name = ', '.join(map(str, required_fields))
+        abort(400, description=template.render(name=name))
+        # abort(400, description='The password and email are required')
+
+
 def user_exists(where: str, email: str) -> bool:
     """Checks that the user with this email is already registered"""
     if conn:
