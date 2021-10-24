@@ -537,7 +537,8 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
 
-        if not any(password, email):
+        required_fields = (password, email)
+        if not any(required_fields):
             abort(400, description='The password and email are required')
 
         if not user_exists('email', email):
