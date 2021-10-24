@@ -30,9 +30,9 @@ conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', hos
 cursor = conn.cursor()
 
 
-@app.errorhandler(400)
-def bad_request(e):
-    return jsonify(error=str(e)), 400
+# @app.errorhandler(400)
+# def bad_request(e):
+#     return jsonify(error=str(e)), 400
 
 
 @app.errorhandler(405)
@@ -51,7 +51,7 @@ def unauthorized(e):
 
 
 @app.errorhandler(503)
-def unauthorized(e):
+def db_conn_error(e):
     return jsonify(error=str(e)), 503
 
 
