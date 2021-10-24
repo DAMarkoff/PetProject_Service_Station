@@ -115,14 +115,13 @@ def users():
             res = cursor.fetchone()
 
             if res is not None:
-                result = []
-                result.append({
+                result = [{
                     "ID": res[0],
                     "f_name": res[1],
                     "l_name": res[2],
                     "phone": res[3],
                     "email": res[4]
-                })
+                }]
             else:
                 result = {
                     'confirmation': 'There is no user ID ' + user_id + ' in the DB'
