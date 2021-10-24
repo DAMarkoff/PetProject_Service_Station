@@ -1,3 +1,5 @@
-.idea/
-test.py
-tire_order_old.py
+/.gitignore
+/.idea/
+/test.py
+/tire_order_old.py
+/__pycache__/
