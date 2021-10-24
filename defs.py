@@ -19,7 +19,7 @@ def check_required_fields(required_fields: tuple):
     if not all(required_fields.values()):
         text = 'The {{ name }} are required!'
         template = Template(text)
-        name = ', '.join(map(str, fields))
+        name = ', '.join(map(str, required_fields))
         abort(400, description=template.render(name=name))
         # abort(400, description='The password and email are required')
 
