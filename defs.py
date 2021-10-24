@@ -4,7 +4,7 @@ import re
 import redis
 import datetime
 import bcrypt
-import  git
+import git
 from git import Repo
 import random
 
@@ -12,6 +12,7 @@ repository = Repo('~/server/Course')
 r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode_responses=True)
 conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', host='159.69.151.133', port='5056')
 cursor = conn.cursor()
+
 
 def user_exists(where: str, email: str) -> bool:
     """Checks that the user with this email is already registered"""
@@ -339,7 +340,7 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
         manager_first_name, manager_last_name, manager_email, manager_phone = res_cost[1]
 
         # get service order cost
-        if service_order_tasks == []:
+        if not service_order_tasks:
             service_order_tasks.append({'confirmation': 'really strange situation, no tasks in order'})
 
         if service_order_tasks == 0:
