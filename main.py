@@ -67,16 +67,16 @@ def users():
 
         if not active:
             active = 'all'
+        elif active not in ('yes', 'no'):
+            abort(400, description='The <active> should be <yes>, <no> or blank')
 
         if not user_id:
             if active.lower() == 'yes':
                 sql_query = "SELECT user_id, first_name, last_name, phone, email, active FROM users WHERE active = True"
             elif active.lower() == 'no':
                 sql_query = "SELECT user_id, first_name, last_name, phone, email, active FROM users WHERE active = False"
-            elif active.lower() == 'all':
-                sql_query = "SELECT user_id, first_name, last_name, phone, email, active FROM users"
             else:
-                abort(400, description='The <active> should be <yes>, <no> or blank')
+                sql_query = "SELECT user_id, first_name, last_name, phone, email, active FROM users"
 
             cursor.execute(sql_query)
             conn.commit()
@@ -84,22 +84,26 @@ def users():
 
             if res:
                 result = []
-                for i in res:
+                for user in res:
                     result.append({
-                        "ID": i[0],
-                        "f_name": i[1],
-                        "l_name": i[2],
-                        "phone": i[3],
-                        "email": i[4],
-                        "active": i[5]
+                        "ID": user[0],
+                        "f_name": user[1],
+                        "l_name": user[2],
+                        "phone": user[3],
+                        "email": user[4],
+                        "active": user[5]
                     })
             else:
                 result = {
                     'confirmation': 'There are no users in the DB'
                 }
         else:
-            if not str(user_id).isdigit():
+            try:
+                user_id = int(user_id)
+            except ValueError:
                 abort(400, description='The user_id must contain only digits')
+            # if not str(user_id).isdigit():
+            #     abort(400, description='The user_id must contain only digits')
 
             if not user_exists('user_id', user_id):
                 abort(400, description='The user does not exist')

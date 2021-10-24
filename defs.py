@@ -26,14 +26,13 @@ def check_required_fields(required_fields: dict):
 
 def user_exists(where: str, email: str) -> bool:
     """Checks that the user with this email is already registered"""
-    if conn:
-        sql_query = "SELECT user_id FROM users WHERE {0} = '{1}'".format(where, email)
-        cursor.execute(sql_query)
-        conn.commit()
-        usr_id_ = cursor.fetchone()
+    sql_query = "SELECT user_id FROM users WHERE {0} = '{1}'".format(where, email)
+    cursor.execute(sql_query)
+    conn.commit()
+    usr_id_ = cursor.fetchone()
 
-        if not usr_id_:
-            return False
+    if not usr_id_:
+        return False
     return True
 
 
