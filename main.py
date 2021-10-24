@@ -65,15 +65,16 @@ def users():
         if not conn:
             abort(503, description='There is no connection to the database')
 
+        active.lower()
         if not active:
             active = 'all'
         elif active not in ('yes', 'no'):
             abort(400, description='The <active> should be <yes>, <no> or blank')
 
         if not user_id:
-            if active.lower() == 'yes':
+            if active == 'yes':
                 sql_query = "SELECT user_id, first_name, last_name, phone, email, active FROM users WHERE active = True"
-            elif active.lower() == 'no':
+            elif active == 'no':
                 sql_query = "SELECT user_id, first_name, last_name, phone, email, active FROM users WHERE active = False"
             else:
                 sql_query = "SELECT user_id, first_name, last_name, phone, email, active FROM users"
@@ -101,9 +102,7 @@ def users():
             try:
                 user_id = int(user_id)
             except ValueError:
-                abort(400, description='The user_id must contain only digits')
-            # if not str(user_id).isdigit():
-            #     abort(400, description='The user_id must contain only digits')
+                abort(400, description='The <user_id> should contain only numbers')
 
             if not user_exists('user_id', user_id):
                 abort(400, description='The user does not exist')
@@ -692,10 +691,10 @@ def users_vehicle():
         if not user_auth['result']:
             abort(401, description=user_auth['text'])
 
-        if not size_name.isdigit():
-            abort(400, description='The <size_name> should be int')
-        else:
+        try:
             size_name = int(size_name)
+        except ValueError:
+            abort(400, description='The <size_name> should contain only numbers')
 
         # get needed data
         user_id = get_user_id(email)
@@ -743,10 +742,10 @@ def users_vehicle():
 
         r.expire(email, 600)
 
-        if not user_vehicle_id.isdigit():
-            abort(400, description='The <size_name> should be int')
-        else:
+        try:
             user_vehicle_id = int(user_vehicle_id)
+        except ValueError:
+            abort(400, description='The <size_name> should contain only numbers')
 
         if not vehicle_exists(user_vehicle_id):
             abort(400, description='The vehicle does not exist')
@@ -1245,13 +1244,15 @@ def tire_service_order():
                 or not tubeless or not balancing or not wheel_alignment:
             abort(400, description='All fields are required')
 
-        if not user_vehicle_id.isdigit():
-            abort(400, description='The <user_vehicle_id> should be int')
+        try:
+            user_vehicle_id = int(user_vehicle_id)
+        except ValueError:
+            abort(400, description='The <user_vehicle_id> should contain only numbers')
 
         try:
             numbers_of_wheels = int(numbers_of_wheels)
         except ValueError:
-            abort(400, description='The <numbers_of_wheels> should be int')
+            abort(400, description='The <numbers_of_wheels> should contain only numbers')
 
         try:
             order_date = datetime.datetime.strptime(order_date_str, '%Y-%m-%d %H:%M')
