@@ -15,11 +15,6 @@ conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', hos
 cursor = conn.cursor()
 
 
-@app.errorhandler(400)
-def bad_request(e):
-    return jsonify(error=str(e)), 400
-
-
 def check_required_fields(required_fields: dict):
     """Checks that all required fields are filled in"""
     if not all(required_fields.values()):

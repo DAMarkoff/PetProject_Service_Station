@@ -30,9 +30,9 @@ conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', hos
 cursor = conn.cursor()
 
 
-# @app.errorhandler(400)
-# def bad_request(e):
-#     return jsonify(error=str(e)), 400
+@app.errorhandler(400)
+def bad_request(e):
+    return jsonify(error=str(e)), 400
 
 
 @app.errorhandler(405)
@@ -135,8 +135,16 @@ def users():
         phone = request.form.get('phone')
         email = request.form.get('email')
 
-        if not f_name or not l_name or not password or not phone or not email:
-            abort(400, description='The f_name, l_name, password, phone and email data are required')
+        required_fields = {
+            'first_name': f_name,
+            'last_name': l_name,
+            'password': password,
+            'phone': phone,
+            'email': email
+        }
+        check_required_fields(required_fields)
+        # if not f_name or not l_name or not password or not phone or not email:
+        #     abort(400, description='The f_name, l_name, password, phone and email data are required')
 
         if user_exists('email', email):
             abort(400, description="The user with this email already exists")
