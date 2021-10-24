@@ -537,7 +537,10 @@ def login():
         email = request.form.get('email')
         password = request.form.get('password')
 
-        required_fields = (password, email)
+        required_fields = {
+            'email': email,
+            'password': password
+        }
         check_required_fields(required_fields)
         # if any(elem is None for elem in required_fields):
         #     abort(400, description='The password and email are required')

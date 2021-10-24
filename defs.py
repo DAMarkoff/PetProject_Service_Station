@@ -16,10 +16,10 @@ cursor = conn.cursor()
 
 
 def check_required_fields(required_fields: tuple):
-    if any(elem is None for elem in required_fields):
+    if not all(required_fields.values()):
         text = 'The {{ name }} are required!'
         template = Template(text)
-        name = ', '.join(map(str, required_fields))
+        name = ', '.join(map(str, fields))
         abort(400, description=template.render(name=name))
         # abort(400, description='The password and email are required')
 
