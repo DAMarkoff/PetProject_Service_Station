@@ -7,6 +7,7 @@ import bcrypt
 import git
 from git import Repo
 import random
+from jinja2 import Template
 
 repository = Repo('~/server/Course')
 r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode_responses=True)
