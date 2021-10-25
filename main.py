@@ -105,13 +105,8 @@ def users():
             except ValueError:
                 abort(400, description='The <user_id> should contain only numbers')
 
-            if active == 'yes':
-                active = True
-            elif active == 'no':
-                active = False
-
             sql_query = """SELECT user_id, first_name, last_name, phone, email, active FROM users
-                            WHERE user_id = '{0}' AND active = '{1}';""".format(user_id, active)
+                            WHERE user_id = '{0}';""".format(user_id)
             cursor.execute(sql_query)
             conn.commit()
             res = cursor.fetchone()
@@ -123,7 +118,8 @@ def users():
                     "f_name": res[1],
                     "l_name": res[2],
                     "phone": res[3],
-                    "email": res[4]
+                    "email": res[4],
+                    "active": res[5]
                 }]
             else:
                 abort(400, description='There is no user ID ' + str(user_id) + ' in the DB')
