@@ -318,13 +318,13 @@ def user_info():
         token = request.form.get('token')
         email = request.form.get('email')
 
-        if not token or not email:
-            abort(400, description='The token and email data are required')
+        required_fields = {
+            'token': token,
+            'email': email
+        }
+        check_required_fields(required_fields)
 
-        user_auth = user_authorization(email, token)
-        if not user_auth['result']:
-            abort(401, description=user_auth['text'])
-
+        user_authorization(email, token)
         r.expire(email, 600)
 
         if not conn:
