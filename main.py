@@ -93,7 +93,7 @@ def users():
                         "l_name": user[2],
                         "phone": user[3],
                         "email": user[4],
-                        "active": user[5]
+                        "active": eval(user[5].title())
                     })
             else:
                 result = {
@@ -119,7 +119,7 @@ def users():
                     "l_name": res[2],
                     "phone": res[3],
                     "email": res[4],
-                    "active": res[5]
+                    "active": eval(res[5].title())
                 }]
             else:
                 abort(400, description='There is no user ID ' + str(user_id) + ' in the DB')
