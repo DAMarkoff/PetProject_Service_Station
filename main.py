@@ -64,11 +64,11 @@ def users():
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        active = active.lower()
         if not active:
             active = 'all'
-        elif active not in ('yes', 'no'):
+        elif active.lower() not in ('yes', 'no'):
             abort(400, description='The <active> should be <yes>, <no> or blank')
+        active = active.lower()
 
         if not user_id:
             if active == 'yes':
