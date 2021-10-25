@@ -23,7 +23,7 @@ def check_required_fields(required_fields: dict):
         name = ', '.join(map(str, required_fields))
         abort(400, description=template.render(name=name))
 
-
+#to be replaced by check_user_exists and delete
 def user_exists(where: str, email: str) -> bool:
     """Checks that the user with this email is already registered"""
     sql_query = "SELECT user_id FROM users WHERE {0} = '{1}'".format(where, email)
@@ -34,6 +34,19 @@ def user_exists(where: str, email: str) -> bool:
     if not usr_id_:
         return False
     return True
+
+
+def check_user_exists(reason, email):
+    """By <reason> checks:
+    The user with this email is already registered.
+    There is no registered users with this email."""
+    usr_id_ = get_value_from_table('user_id', 'users', 'email', email)
+
+    if not usr_id_:
+        if reason == 'already exists':
+            abort(400, description="The user with this email already exists")
+        elif reason == 'does not exist':
+            abort(400, description='The user does not exist')
 
 
 def vehicle_exists(user_vehicle_id: str) -> bool:
@@ -80,7 +93,9 @@ def get_user_id(email):
         return usr_id_[0]
 
 
-def validate_password(password):
+def validate_password(password: str):
+    """The password must be at least 8 chars long and not exceed 32 chars;
+    must contain at least one digit, one upper, one lower letter, one special char ['$', '@', '#', '!', '%']"""
     special_sym = ['$', '@', '#', '!', '%']
     return_val = {'result': True, 'text': ''}
     if len(password) < 8:
@@ -101,21 +116,19 @@ def validate_password(password):
     if not any(char in special_sym for char in password):
         return_val['text'] = 'The password must contain at least one of the symbols $@#!%'
         return_val['result'] = False
-    return return_val
+    if not return_val['result']:
+        abort(400, description=return_val['text'])
 
 
-def validate_email(email):
-    return_val = {'result': True, 'text': ''}
+def validate_email(email: str):
+    """The email must contain @ and . symbols"""
     if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-        return_val['result'] = False
-        return_val['text'] = 'The email must contain @ and . chars'
-    return return_val
+        abort(400, description='The email must contain @ and . chars')
 
 
-def validate_names(name_type: str, name: str) -> dict:
-    """Validate name - returns a dict with a bool(result) of validation and a str(text) with an error message if exists
-    :type: object
-    """
+def validate_names(name_type: str, name: str):
+    """Names can only include the ' '(space) and '.,- chars;
+    must be at least 1 chars long and not exceed 30 chars"""
     return_val = {'result': True, 'text': ''}
     if len(name) < 1:
         return_val['text'] = 'The {0} must be at least 1 characters long'.format(name_type)
@@ -126,10 +139,11 @@ def validate_names(name_type: str, name: str) -> dict:
     if not validate(name):
         return_val['text'] = """The {0} can only include the ' '(space) and '.,- chars""".format(name_type)
         return_val['result'] = False
-    return return_val
+    if not return_val['result']:
+        abort(400, description=return_val['text'])
 
 
-def validate(name: str) -> bool:
+def validate(name: str):
     """Validate name - match the name to the pattern"""
     valid_pattern = re.compile("^[a-z ,.'-]+$", re.I)
     return bool(valid_pattern.match(name))
@@ -158,15 +172,8 @@ def get_value_from_table(select: str, from_db: str, where: str, what):
 
 
 def user_authorization(email, token):
-    return_val = {'result': True, 'text': ''}
-    if not user_exists('email', email):
-        return_val['result'] = False
-        return_val['text'] = 'The user does not exist. Please, register'
-    else:
-        if not (token == r.get(email)):
-            return_val['result'] = False
-            return_val['text'] = 'The token is invalid, please log in'
-    return return_val
+    if not (token == r.get(email)):
+        abort(401, description='The token is invalid, please log in')
 
 
 def password_is_valid(salt, password, password_db):
@@ -184,7 +191,8 @@ def save_to_file(user_id, email, password, reason):
         file_user_auth.write(content)
 
 
-def generate_password_hash(password):
+def generate_password_hash(password: str):
+    """Generates and returns password hash and salt"""
     salt = bcrypt.gensalt(5)
     password = bcrypt.hashpw(str.encode(password), salt)
     return password.decode(), salt.decode()

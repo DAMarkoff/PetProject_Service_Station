@@ -93,7 +93,7 @@ def users():
                         "l_name": user[2],
                         "phone": user[3],
                         "email": user[4],
-                        "active": eval(user[5].title())
+                        "active": user[5]
                     })
             else:
                 result = {
@@ -119,11 +119,13 @@ def users():
                     "l_name": res[2],
                     "phone": res[3],
                     "email": res[4],
-                    "active": eval(res[5].title())
+                    "active": res[5]
                 }]
             else:
                 abort(400, description='There is no user ID ' + str(user_id) + ' in the DB')
+
         return jsonify(result)
+
     # register a new user
     elif request.method == 'POST':
         f_name = request.form.get('first_name')
@@ -140,32 +142,12 @@ def users():
             'email': email
         }
         check_required_fields(required_fields)
-        # if not f_name or not l_name or not password or not phone or not email:
-        #     abort(400, description='The f_name, l_name, password, phone and email data are required')
 
-        if user_exists('email', email):
-            abort(400, description="The user with this email already exists")
-
-        # The names can only include the ' '(space) and '.,- chars
-        # The names must be at least 1 characters long and not exceed 30 chars
-        check_first_name = validate_names('first name', f_name)
-        if not check_first_name['result']:
-            abort(400, description=check_first_name['text'])
-
-        check_last_name = validate_names('last name', l_name)
-        if not check_last_name['result']:
-            abort(400, description=check_last_name['text'])
-
-        # make sure that the password is strong enough: 8-32 chars,
-        # min one digit, min one upper and min one lower letter, min one special char
-        check_password = validate_password(password)
-        if not check_password['result']:
-            abort(400, description=check_password['text'])
-
-        # the email must contain @ and .
-        check_email = validate_email(email)
-        if not check_email['result']:
-            abort(400, description=check_email['text'])
+        check_user_exists('already exists', email)
+        validate_names('first name', f_name)
+        validate_names('last name', l_name)
+        validate_password(password)
+        validate_email(email)
 
         active = True
         if not conn:
@@ -192,8 +174,8 @@ def users():
             "active": active
         }
 
-        # push_user_auth()
         return jsonify(result)
+
     # change a user's data
     elif request.method == 'PUT':
         token = request.form.get('token')
@@ -203,13 +185,13 @@ def users():
         phone = request.form.get('new_phone')
         new_email = request.form.get('new_email')
 
-        if not token or not email:
-            abort(400, description='The email and token are required')
+        required_fields = {
+            'token': token,
+            'email': email
+        }
+        check_required_fields(required_fields)
 
-        user_auth = user_authorization(email, token)
-        if not user_auth['result']:
-            abort(401, description=user_auth['text'])
-
+        user_authorization(email, token)
         r.expire(email, 600)
 
         if not conn:
@@ -233,18 +215,14 @@ def users():
             f_name = 'The first name has not been changed'
             f_name_to_db = f_name_db
         else:
-            check_first_name = validate_names('first name', f_name)
-            if not check_first_name['result']:
-                abort(400, description=check_first_name['text'])
+            validate_names('first name', f_name)
             f_name_to_db = f_name
 
         if not l_name or l_name == l_name_db:
             l_name = 'The last name has not been changed'
             l_name_to_db = l_name_db
         else:
-            check_last_name = validate_names('last name', l_name)
-            if not check_last_name['result']:
-                abort(400, description=check_last_name['text'])
+            validate_names('last name', l_name)
             l_name_to_db = l_name
 
         if not phone or phone == phone_db:
@@ -257,16 +235,11 @@ def users():
             new_email = 'The email has not been changed'
             new_email_to_db = email
         else:
-            if user_exists('email', new_email):
-                abort(400, description="The user with this email already exists")
-            check_email = validate_email(new_email)
-
-            if not check_email['result']:
-                abort(400, description=check_email['text'])
+            check_user_exists('already exists', email)
+            validate_email(new_email)
             save_to_file(user_id_db, email + '->' + new_email, '!password!', 'user-changed-email')
             new_email_to_db = new_email
-            r.delete(email)
-            # push_user_auth()
+            r.delete(email)  # log out if the email has been changed
 
         # update the data in the users table
         sql_query = """UPDATE users SET first_name = '{0}', last_name = '{1}', email = '{2}', phone = '{3}'
@@ -287,6 +260,7 @@ def users():
         }
 
         return jsonify(result)
+
     # delete a user
     elif request.method == 'DELETE':
         email = request.form.get('email')
@@ -294,18 +268,21 @@ def users():
         sure = request.form.get('ARE_YOU_SURE?')
         admin = request.form.get('admin_password')
 
-        if not token or not email or not sure or not admin:
-            abort(400, description='The token, email, answer and admin password data are required')
+        required_fields = {
+            'token': token,
+            'email': email,
+            'ARE_YOU_SURE?': sure,
+            'admin_password': admin
+        }
+        check_required_fields(required_fields)
 
-        user_auth = user_authorization(email, token)
-        if not user_auth['result']:
-            abort(401, description=user_auth['text'])
+        user_authorization(email, token)
 
         if sure != 'True':
             abort(400, description='АHA! Changed your mind?')
 
         if admin != 'Do Not Do That!!!':
-            abort(400, description='admin password?')
+            abort(400, description='Invalid admin password')
 
         if not conn:
             abort(503, description='There is no connection to the database')
@@ -644,7 +621,7 @@ def activate_user():
             abort(400, description='The admin_password and email are required')
 
         if not user_exists('email', email):
-            abort(400, description='The user is not exist')
+            abort(400, description='The user does not exist')
 
         if admin_password != 'admin':
             abort(400, description='Wrong admin password!')
