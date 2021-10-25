@@ -104,20 +104,11 @@ def users():
                 user_id = int(user_id)
             except ValueError:
                 abort(400, description='The <user_id> should contain only numbers')
-            
-            # user_email = get_value_from_table('email', 'users', 'user_id', user_id)
-            # if not user_email:
-            #     abort(400, description='There is no user ID ' + user_id + ' in the DB')
-
-            # if not user_exists('user_id', user_id):
-            #     abort(400, description='The user does not exist')
 
             if active == 'yes':
                 active = True
             elif active == 'no':
                 active = False
-            # if not user_active(get_value_from_table('email', 'users', 'user_id', user_id)):
-            #     abort(400, description='User is deactivated')
 
             sql_query = """SELECT user_id, first_name, last_name, phone, email, active FROM users
                             WHERE user_id = '{0}' AND active = '{1}';""".format(user_id, active)
@@ -125,6 +116,7 @@ def users():
             conn.commit()
             res = cursor.fetchone()
 
+            result = []
             if res is not None:
                 result = [{
                     "ID": res[0],
@@ -134,9 +126,7 @@ def users():
                     "email": res[4]
                 }]
             else:
-                result = {
-                    'confirmation': 'There is no user ID ' + user_id + ' in the DB'
-                }
+                abort(400, description='There is no user ID ' + str(user_id) + ' in the DB')
         return jsonify(result)
     # register a new user
     elif request.method == 'POST':
