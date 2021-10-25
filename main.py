@@ -522,13 +522,8 @@ def login():
             'password': password
         }
         check_required_fields(required_fields)
-        # if any(elem is None for elem in required_fields):
-        #     abort(400, description='The password and email are required')
 
         check_user_exists('does not exist', email)
-        # if not user_exists('email', email):
-        #     abort(400, description="The user does not exist. Please, register")
-
         user_active(email)
 
         if not conn:
@@ -537,9 +532,8 @@ def login():
         sql_query = "SELECT salt, user_id, first_name, last_name, password FROM users WHERE email = '{0}'".format(email)
         cursor.execute(sql_query)
         conn.commit()
-        res = cursor.fetchone()
-
-        salt, user_id, first_name, last_name, password_db = res
+        # res = cursor.fetchone()
+        salt, user_id, first_name, last_name, password_db = cursor.fetchone()
 
         if password_is_valid(salt, password, password_db):
             if r.exists(email) == 0:
@@ -574,15 +568,14 @@ def deactivate_user():
         token = request.form.get('token')
         sure = request.form.get('ARE_YOU_SURE?')
 
-        if not token or not email or not sure:
-            abort(400, description='The token, email and sure data are required')
+        required_fields = {
+            'email': email,
+            'token': token,
+            'ARE_YOU_SURE?': sure
+        }
+        check_required_fields(required_fields)
 
-        user_auth = user_authorization(email, token)
-        if not user_auth['result']:
-            abort(401, description=user_auth['text'])
-
-        if not user_active(email):
-            abort(400, description='User is already deactivated')
+        user_authorization(email, token)
 
         if sure != 'True':
             abort(400, description='АHA! Changed your mind?')
@@ -603,7 +596,7 @@ def deactivate_user():
             'confirmation': template.render(name=first_name + ' ' + last_name)
         }
 
-        r.delete(email)
+        r.delete(email)  # log out if the user has been deactivated
         return jsonify(result)
     else:
         abort(405)
@@ -615,11 +608,13 @@ def activate_user():
         email = request.form.get('email')
         admin_password = request.form.get('admin_password')
 
-        if not admin_password or not email:
-            abort(400, description='The admin_password and email are required')
+        required_fields = {
+            'email': email,
+            'admin_password': admin_password
+        }
+        check_required_fields(required_fields)
 
-        if not user_exists('email', email):
-            abort(400, description='The user does not exist')
+        check_user_exists('does not exist', email)
 
         if admin_password != 'admin':
             abort(400, description='Wrong admin password!')
@@ -647,23 +642,31 @@ def activate_user():
 
 @app.route("/vehicle", methods=['POST', 'PUT', 'DELETE'])  # add new/change/delete user's vehicle
 def users_vehicle():
+    # Add new user's vehicle
     if request.method == 'POST':
         token = request.form.get('token')
         email = request.form.get('email')
         vehicle_name = request.form.get('vehicle_name')
         size_name = request.form.get('size_name')
 
-        if not token or not email or not vehicle_name or not size_name:
-            abort(400, description='The token, email, vehicle_name and size_name data are required')
+        required_fields = {
+            'email': email,
+            'token': token,
+            'vehicle_name': vehicle_name,
+            'size_name': size_name
+        }
+        check_required_fields(required_fields)
 
-        user_auth = user_authorization(email, token)
-        if not user_auth['result']:
-            abort(401, description=user_auth['text'])
+        user_authorization(email, token)
+        r.expire(email, 600)
 
         try:
             size_name = int(size_name)
         except ValueError:
             abort(400, description='The <size_name> should contain only numbers')
+
+        if not conn:
+            abort(503, description='There is no connection to the database')
 
         # get needed data
         user_id = get_user_id(email)
@@ -671,15 +674,10 @@ def users_vehicle():
         vehicle_id = get_value_from_table('vehicle_id', 'vehicle', 'vehicle_name', vehicle_name)
 
         if not size_id:
-            abort(400, description='Unknown tire size, add the tire size data to the sizes DB')
+            abort(400, description='Unknown size_name')
 
         if not vehicle_id:
-            abort(400, description='Unknown type of the vehicle, add the vehicle type data to the vehicle DB')
-
-        r.expire(email, 600)
-
-        if not conn:
-            abort(503, description='There is no connection to the database')
+            abort(400, description='Unknown vehicle_name')
 
         created = datetime.datetime.now()
         sql_query = """INSERT INTO user_vehicle (user_id, vehicle_id, size_id, created) 
@@ -695,6 +693,8 @@ def users_vehicle():
             'size_name': size_name
         }
         return jsonify(result)
+
+    # Update the user's vehicle data
     elif request.method == 'PUT':
         email = request.form.get('email')
         token = request.form.get('token')
@@ -702,39 +702,44 @@ def users_vehicle():
         new_vehicle_name = request.form.get('new_vehicle_name')
         new_size_name = request.form.get('new_size_name')
 
-        if not token or not email or not user_vehicle_id:
-            abort(400, description='The token, email and user vehicle id are required')
+        required_fields = {
+            'email': email,
+            'token': token,
+            'user_vehicle_id': user_vehicle_id
+        }
+        check_required_fields(required_fields)
 
-        user_auth = user_authorization(email, token)
-        if not user_auth['result']:
-            abort(401, description=user_auth['text'])
+        if not conn:
+            abort(503, description='There is no connection to the database')
 
+        user_authorization(email, token)
         r.expire(email, 600)
 
         try:
             user_vehicle_id = int(user_vehicle_id)
         except ValueError:
-            abort(400, description='The <size_name> should contain only numbers')
+            abort(400, description='The <user_vehicle_id> should contain only numbers')
 
-        if not vehicle_exists(user_vehicle_id):
-            abort(400, description='The vehicle does not exist')
+        try:
+            new_size_name = int(new_size_name)
+        except ValueError:
+            abort(400, description='The <new_size_name> should contain only numbers')
 
-        if not conn:
-            abort(503, description='There is no connection to the database')
+        vehicle_exists(user_vehicle_id)
 
         sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE user_vehicle_id = '{0}'""". \
             format(user_vehicle_id)
         cursor.execute(sql_query)
         conn.commit()
-        res_ = cursor.fetchone()
+        # res_ = cursor.fetchone()
 
-        user_id_db, vehicle_id_db, size_id_db = res_
+        user_id_db, vehicle_id_db, size_id_db = cursor.fetchone()
 
         if user_id_db != get_user_id(email):
             abort(403, description='It is not your vehicle! Somebody call the police!')
 
         vehicle_name_db = get_value_from_table('vehicle_name', 'vehicle', 'vehicle_id', vehicle_id_db)
-        size_name_db = str(get_value_from_table('size_name', 'sizes', 'size_id', size_id_db))
+        size_name_db = get_value_from_table('size_name', 'sizes', 'size_id', size_id_db)
 
         if (not new_vehicle_name and not new_size_name) or \
                 (new_vehicle_name == vehicle_name_db and new_size_name == size_name_db):
@@ -770,6 +775,8 @@ def users_vehicle():
         }
 
         return jsonify(result)
+
+    # Delete the user's vehicle from DB
     elif request.method == 'DELETE':
         email = request.form.get('email')
         token = request.form.get('token')

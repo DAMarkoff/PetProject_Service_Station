@@ -48,16 +48,10 @@ def check_user_exists(reason, email):
             abort(400, description='The user does not exist')
 
 
-def vehicle_exists(user_vehicle_id: str) -> bool:
-    """Checks if the vehicle with this vehicle_id exists"""
-    sql_query = """SELECT user_id FROM user_vehicle WHERE user_vehicle_id = '{0}'""".format(user_vehicle_id)
-    cursor.execute(sql_query)
-    conn.commit()
-    res_ = cursor.fetchone()
-
-    if res_:
-        return True
-    return False
+def vehicle_exists(user_vehicle_id: str):
+    """Checks that the vehicle with this vehicle_id exists"""
+    if not get_value_from_table('user_id', 'user_vehicle', 'user_vehicle_id', user_vehicle_id):
+        abort(400, description='The vehicle does not exist')
 
 
 def storage_order_exists(storage_order_id):
