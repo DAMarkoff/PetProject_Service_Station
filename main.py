@@ -525,11 +525,11 @@ def login():
         # if any(elem is None for elem in required_fields):
         #     abort(400, description='The password and email are required')
 
-        if not user_exists('email', email):
-            abort(400, description="The user does not exist. Please, register")
+        check_user_exists('does not exist', email)
+        # if not user_exists('email', email):
+        #     abort(400, description="The user does not exist. Please, register")
 
-        if not user_active(email):
-            abort(400, description='The user is deactivated')
+        user_active(email)
 
         if not conn:
             abort(503, description='There is no connection to the database')
