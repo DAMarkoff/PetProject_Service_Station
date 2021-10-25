@@ -88,7 +88,7 @@ d		/user_info
 		/tire_service_order		
 	
 ToDo Dmitrii:
-
+        - rename user_active to check
 				- add a state vehicle number column to the user_vehicle table and in the output info in the user_info and [PUT] service order insetead of user_vehicle_id
 				- validate required fields (not filleld is not working) test: False, True, '   ' (spaces)
 

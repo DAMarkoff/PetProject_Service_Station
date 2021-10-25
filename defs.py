@@ -83,14 +83,9 @@ def tire_service_order_exists(service_order_id):
     return False
 
 
-def get_user_id(email):
-    if conn:
-        sql_query = "SELECT user_id FROM users WHERE email = '{0}'".format(email)
-        cursor.execute(sql_query)
-        conn.commit()
-        usr_id_ = cursor.fetchone()
-
-        return usr_id_[0]
+def get_user_id(email: str) -> str:
+    """Returns user_id by email"""
+    return get_value_from_table('user_id', 'users', 'email', email)
 
 
 def validate_password(password: str):
@@ -149,26 +144,21 @@ def validate(name: str):
     return bool(valid_pattern.match(name))
 
 
-def user_active(email: str) -> bool:
-    sql_query = """SELECT active FROM users WHERE email = '{0}'""".format(email)
-    cursor.execute(sql_query)
-    conn.commit()
-    res_ = cursor.fetchone()
-    if res_[0]:
-        return True
-    return False
+def user_active(email: str):
+    """Checks that the user is active"""
+    if not get_value_from_table('active', 'users', 'email', email):
+        abort(400, description='The user is deactivated')
 
 
 def get_value_from_table(select: str, from_db: str, where: str, what):
-    if conn:
-        sql_query = """SELECT {0} FROM {1} WHERE {2} = '{3}'""".format(select, from_db, where, what)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
+    sql_query = """SELECT {0} FROM {1} WHERE {2} = '{3}'""".format(select, from_db, where, what)
+    cursor.execute(sql_query)
+    conn.commit()
+    res_ = cursor.fetchone()
 
-        if not res_:
-            return None
-        return res_[0]
+    if not res_:
+        return None
+    return res_[0]
 
 
 def user_authorization(email, token):

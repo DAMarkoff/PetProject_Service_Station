@@ -351,20 +351,21 @@ def user_info():
                                                 FROM storage_orders WHERE user_id = '{0}'""".format(user_id)
         cursor.execute(sql_query)
         conn.commit()
-        res_ = cursor.fetchall()
+        storage_orders_data = cursor.fetchall()
 
-        empty_result = []
-        if res_ == empty_result:
+        # empty_result = []
+        # if res_ == empty_result:
+        if not storage_orders_data:
             result_order = 'You do not have any storage orders'
         else:
             result_order = []
-            for i in res_:  # does the user need the size_id or size_name data?
+            for order in storage_orders_data:  # does the user need the size_id or size_name data?
                 result_order.append({
-                    "storage_order_id": i[0],
-                    "start_date": i[1],
-                    "stop_date": i[2],
-                    "order cost": i[3],
-                    "shelf_id": i[4]
+                    "storage_order_id": order[0],
+                    "start_date": order[1],
+                    "stop_date": order[2],
+                    "order cost": order[3],
+                    "shelf_id": order[4]
                 })
 
         # collecting data about the user's vehicles from the user_vehicle, vehicle and sizes db's
@@ -374,17 +375,17 @@ def user_info():
                     WHERE user_id = '{0}'""".format(user_id)
         cursor.execute(sql_query)
         conn.commit()
-        res_ = cursor.fetchall()
+        users_vehicles = cursor.fetchall()
 
-        if not res_:
+        if not users_vehicles:
             result_vehicle = 'You do not have any vehicles'
         else:
             result_vehicle = []
-            for i in res_:
+            for vehicle in users_vehicles:
                 result_vehicle.append({
-                    'vehicle_id': i[0],
-                    'vehicle_name': i[1],
-                    'size_name': i[2]
+                    'vehicle_id': vehicle[0],
+                    'vehicle_name': vehicle[1],
+                    'size_name': vehicle[2]
                 })
 
         # get all info about all user's service orders
@@ -426,47 +427,44 @@ def user_info():
         sql_query = """SELECT DISTINCT service_type_name FROM temp"""
         cursor.execute(sql_query)
         conn.commit()
-        res = cursor.fetchall()
+        service_orders_types = cursor.fetchall()
 
-        if not res:
+        if not service_orders_types:
             result_tire_service_order = 'You do not have any tire service orders'
         else:
             result_tire_service_order = []
-            for types in res:
+            for types in service_orders_types:
                 type = types[0]
 
                 sql_query = """SELECT DISTINCT service_order_id FROM temp 
                                             WHERE service_type_name = '{0}';""".format(type)
                 cursor.execute(sql_query)
                 conn.commit()
-                res_ = cursor.fetchall()
+                service_order_data = cursor.fetchall()
 
-                for i in res_:
-                    service_order_id = i[0]
-                    res_cost = get_value_from_table('SUM(task_cost)', 'temp', 'service_order_id', service_order_id)
-                    if not res_cost:
-                        tire_service_order_cost = 'Error! Sum is None!'
-                    else:
-                        tire_service_order_cost = res_cost
+                for order in service_order_data:
+                    service_order_id = order[0]
+                    tire_service_order_cost = \
+                        get_value_from_table('SUM(task_cost)', 'temp', 'service_order_id', service_order_id)
 
                     sql_query = """SELECT task_name, worker_id, worker_name, worker_surname, task_cost FROM temp 
                                     WHERE service_order_id = '{0}'""".format(service_order_id)
                     cursor.execute(sql_query)
                     conn.commit()
-                    res_task = cursor.fetchall()
+                    tasks_data = cursor.fetchall()
 
-                    if not res_task[0][0]:
+                    if not tasks_data[0][0]:
                         result_tire_service_order_tasks = 'You do not have any tasks in your tire service order.'
                     else:
                         result_tire_service_order_tasks = []
-                        for j in res_task:
+                        for task in tasks_data:
                             result_tire_service_order_tasks.append({
-                                'task_name': j[0],
+                                'task_name': task[0],
                                 'worker': {
-                                    'worker_id': j[1],
-                                    'worker_name': j[2] + ' ' + j[3]
+                                    'worker_id': task[1],
+                                    'worker_name': task[2] + ' ' + task[3]
                                 },
-                                'task cost': j[4]
+                                'task cost': task[4]
                             })
 
                     sql_query = """SELECT start_datetime, stop_datetime, manager_id, manager_name, manager_surname, 
@@ -474,10 +472,10 @@ def user_info():
                         format(service_order_id)
                     cursor.execute(sql_query)
                     conn.commit()
-                    res_info = cursor.fetchone()
+                    # res_info = cursor.fetchone()
 
                     start_datetime, stop_datetime, manager_id, manager_name, manager_surname, \
-                        user_vehicle_id, vehicle_name, size_name = res_info
+                        user_vehicle_id, vehicle_name, size_name = cursor.fetchone()
 
                     result_tire_service_order.append({
                         'service_order_id': service_order_id,
