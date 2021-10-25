@@ -11,7 +11,6 @@ from flask_swagger_ui import get_swaggerui_blueprint
 import bcrypt
 import git
 from git import Repo
-
 from defs import *
 
 app = Flask(__name__)
@@ -73,11 +72,13 @@ def users():
 
         if not user_id:
             if active == 'yes':
-                sql_query = "SELECT user_id, first_name, last_name, phone, email, active FROM users WHERE active = True"
+                sql_query = """SELECT user_id, first_name, last_name, phone, email, active 
+                                FROM users WHERE active = True;"""
             elif active == 'no':
-                sql_query = "SELECT user_id, first_name, last_name, phone, email, active FROM users WHERE active = False"
+                sql_query = """SELECT user_id, first_name, last_name, phone, email, active 
+                                FROM users WHERE active = False;"""
             else:
-                sql_query = "SELECT user_id, first_name, last_name, phone, email, active FROM users"
+                sql_query = """SELECT user_id, first_name, last_name, phone, email, active FROM users;"""
 
             cursor.execute(sql_query)
             conn.commit()
@@ -103,16 +104,23 @@ def users():
                 user_id = int(user_id)
             except ValueError:
                 abort(400, description='The <user_id> should contain only numbers')
+            
+            # user_email = get_value_from_table('email', 'users', 'user_id', user_id)
+            # if not user_email:
+            #     abort(400, description='There is no user ID ' + user_id + ' in the DB')
 
-            if not user_exists('user_id', user_id):
-                abort(400, description='The user does not exist')
+            # if not user_exists('user_id', user_id):
+            #     abort(400, description='The user does not exist')
 
-            if active.lower() == 'yes' or active.lower() == 'no':
-                if not user_active(get_value_from_table('email', 'users', 'user_id', user_id)):
-                    abort(400, description='User is deactivated')
+            if active == 'yes':
+                active = True
+            elif active == 'no':
+                active = False
+            # if not user_active(get_value_from_table('email', 'users', 'user_id', user_id)):
+            #     abort(400, description='User is deactivated')
 
             sql_query = """SELECT user_id, first_name, last_name, phone, email, active FROM users
-                            WHERE user_id = '{0}'""".format(user_id)
+                            WHERE user_id = '{0}' AND active = '{1}';""".format(user_id, active)
             cursor.execute(sql_query)
             conn.commit()
             res = cursor.fetchone()
