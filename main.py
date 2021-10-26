@@ -1204,41 +1204,47 @@ def storage_order():
         token = request.form.get('token')
         storage_order_id = request.form.get('storage_order_id')
 
-        if not token or not email or not storage_order_id:
-            abort(400, description='The token, email and storage_order_id are required')
+        required_fields = {
+            'email': email,
+            'token': token,
+            'storage_order_id': storage_order_id
+        }
+        check_required_fields(required_fields)
 
-        user_auth = user_authorization(email, token)
-        if not user_auth['result']:
-            abort(401, description=user_auth['text'])
-
+        user_authorization(email, token)
         r.expire(email, 600)
+
+        if storage_order_id:
+            try:
+                storage_order_id = int(storage_order_id)
+            except ValueError:
+                abort(400, description='The <storage_order_id> should contain only numbers')
 
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        if not storage_order_exists(storage_order_id):
-            abort(400, description='The storage order does not exist')
+        check_storage_order_exists(storage_order_id)
 
         sql_query = """SELECT user_id, shelf_id, start_date FROM storage_orders 
                                     WHERE storage_order_id = '{0}';""".format(storage_order_id)
         cursor.execute(sql_query)
         conn.commit()
-        res_ = cursor.fetchone()
-
-        user_id, shelf_id, start_date = res_
+        user_id, shelf_id, start_date = cursor.fetchone()
 
         if get_user_id(email) != user_id:
             abort(403, description='It is not your storage order!')
 
-        if start_date < datetime.datetime.now():
+        if start_date < datetime.datetime.now().date():
             abort(400, description='You cannot delete a completed service order')
 
         sql_query = """DELETE FROM storage_orders WHERE storage_order_id = '{0}';""".format(storage_order_id)
         cursor.execute(sql_query)
         conn.commit()
 
+        text = 'Storage order ID {{ storage_order_id }} has been successfully deleted'
+        template = Template(text)
         result = {
-            'confirmation': 'Storage order ID ' + storage_order_id + ' has been successfully deleted'
+            'confirmation': template.render(storage_order_id=storage_order_id)
         }
         return jsonify(result)
     else:

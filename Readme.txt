@@ -88,6 +88,7 @@ d		/user_info
 		/tire_service_order		
 	
 ToDo Dmitrii:
+        - user_exists
         - move conn check after reqired fields check
         - rename user_active to check
         - rename vehicle_exists to check

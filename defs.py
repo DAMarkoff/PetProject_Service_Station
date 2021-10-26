@@ -48,21 +48,17 @@ def check_user_exists(reason, email):
             abort(400, description='The user does not exist')
 
 
-def vehicle_exists(user_vehicle_id: str):
+def vehicle_exists(user_vehicle_id: int):
     """Checks that the vehicle with this vehicle_id exists"""
     if not get_value_from_table('user_id', 'user_vehicle', 'user_vehicle_id', user_vehicle_id):
         abort(400, description='The vehicle does not exist')
 
 
-def storage_order_exists(storage_order_id):
-    sql_query = """SELECT user_id FROM storage_orders WHERE storage_order_id = '{0}';""".format(storage_order_id)
-    cursor.execute(sql_query)
-    conn.commit()
-    res_ = cursor.fetchone()
+def check_storage_order_exists(storage_order_id: int):
+    """Checks that the vehicle with this vehicle_id exists"""
+    if not get_value_from_table('user_id', 'storage_orders', 'storage_order_id', storage_order_id):
+        abort(400, description='The storage order does not exist')
 
-    if res_:
-        return True
-    return False
 
 
 def tire_service_order_exists(service_order_id):
