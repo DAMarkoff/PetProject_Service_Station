@@ -1029,7 +1029,7 @@ def storage_order():
         else:
             # Запрос на полки, у которых нет пересечений по датам
             sql_query = """WITH dates_intersection AS (
-                            SELECT DISTINCT shelf_id FROM storage_orders WHERE 
+                            SELECT DISTINCT shelf_id FROM storage_orders JOIN warehouse USING (shelf_id) WHERE 
                                 (
                                     start_date BETWEEN '{0}' AND '{1}'
                                     OR
@@ -1041,7 +1041,7 @@ def storage_order():
                                 )	
                             AND size_id = {2})
     
-                            SELECT shelf_id FROM storage_orders WHERE shelf_id NOT IN 
+                            SELECT shelf_id FROM storage_orders JOIN warehouse USING (shelf_id) WHERE shelf_id NOT IN 
                             (SELECT shelf_id FROM dates_intersection) AND active = True AND size_id = {2};""". \
                 format(start_date, stop_date, size_id)
             cursor.execute(sql_query)
