@@ -942,27 +942,51 @@ def storage_order():
         size_name = request.form.get('size_name')
         user_vehicle_id = request.form.get('user_vehicle_id')
 
-        if not token or not email or not start_date or not stop_date:
-            abort(400, description='The token, email, start_date, stop_date and size_name data are required')
+        required_fields = {
+            'email': email,
+            'token': token,
+            'start_date': start_date,
+            'stop_date': stop_date
+        }
+        check_required_fields(required_fields)
+
+        user_authorization(email, token)
+        r.expire(email, 600)
 
         if (not size_name and not user_vehicle_id) or (size_name and user_vehicle_id):
             abort(400, description='The size_name OR user_vehicle_id is required')
 
-        if start_date < str(datetime.datetime.now()):
-            abort(400, description='The start_date can not be less than today')
+        if size_name:
+            try:
+                size_name = int(size_name)
+            except ValueError:
+                abort(400, description='The <size_name> should contain only numbers')
 
-        if stop_date > str(date(datetime.datetime.now().year + 2, datetime.datetime.now().month,
-                                datetime.datetime.now().day)):
+        if user_vehicle_id:
+            try:
+                user_vehicle_id = int(user_vehicle_id)
+            except ValueError:
+                abort(400, description='The <user_vehicle_id> should contain only numbers')
+
+        try:
+            start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+        except ValueError:
+            abort(400, description='The <start_date> should be in YYYY-MM-DD format')
+
+        try:
+            stop_date = datetime.datetime.strptime(stop_date, '%Y-%m-%d')
+        except ValueError:
+            abort(400, description='The <stop_date> should be in YYYY-MM-DD format')
+
+        if start_date < datetime.datetime.now():
+            abort(400, description='The <start_date> cannot be less than today')
+
+        if stop_date > date(datetime.datetime.now().year + 2, datetime.datetime.now().month,
+                                datetime.datetime.now().day):
             abort(400, description='The stop_date can not exceed +2 year from today')
 
         if start_date > stop_date:
             abort(400, description='The start date can not be greater than the stop date')
-
-        user_auth = user_authorization(email, token)
-        if not user_auth['result']:
-            abort(401, description=user_auth['text'])
-
-        r.expire(email, 600)
 
         if not conn:
             abort(503, description='There is no connection to the database')
@@ -972,9 +996,11 @@ def storage_order():
         if user_vehicle_id:
             if get_value_from_table('user_id', 'user_vehicle', 'user_vehicle_id', user_vehicle_id) != user_id:
                 abort(403, description='It is not your vehicle! Somebody call the police!')
-            size_name = get_value_from_table('size_name', 'sizes', 'size_id',
-                                             get_value_from_table('size_id', 'user_vehicle', 'user_vehicle_id',
-                                                                  user_vehicle_id))
+            else:
+                sql_query = """SELECT size_name FROM sizes JOIN user_vehicle USING (size_id) 
+                                WHERE user_vehicle_id = {0};""".format(user_vehicle_id)
+                cursor.execute(sql_query)
+                size_name = cursor.fetchone()[0]
 
         size_id = get_value_from_table('size_id', 'sizes', 'size_name', size_name)
 
@@ -1226,7 +1252,7 @@ def tire_service_order():
         email = request.form.get('email')
         token = request.form.get('token')
         order_type = request.form.get('order_type')
-        order_date_str = request.form.get('order_date')
+        order_date = request.form.get('order_date')
         user_vehicle_id = request.form.get('user_vehicle_id')
         numbers_of_wheels = request.form.get('numbers_of_wheels')
         removing_installing_wheels = request.form.get('removing_installing_wheels')
@@ -1234,7 +1260,7 @@ def tire_service_order():
         balancing = request.form.get('balancing')
         wheel_alignment = request.form.get('wheel_alignment')
 
-        if not token or not email or not order_date_str or not user_vehicle_id or not order_type \
+        if not token or not email or not order_date or not user_vehicle_id or not order_type \
                 or not numbers_of_wheels or not removing_installing_wheels \
                 or not tubeless or not balancing or not wheel_alignment:
             abort(400, description='All fields are required')
@@ -1250,7 +1276,7 @@ def tire_service_order():
             abort(400, description='The <numbers_of_wheels> should contain only numbers')
 
         try:
-            order_date = datetime.datetime.strptime(order_date_str, '%Y-%m-%d %H:%M')
+            order_date = datetime.datetime.strptime(order_date, '%Y-%m-%d %H:%M')
         except ValueError:
             abort(400, description='The <order_date> should be in YYYY-MM-DD HH-MM format')
 
