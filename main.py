@@ -969,12 +969,12 @@ def storage_order():
                 abort(400, description='The <user_vehicle_id> should contain only numbers')
 
         try:
-            start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d')
+            start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
         except ValueError:
             abort(400, description='The <start_date> should be in YYYY-MM-DD format')
 
         try:
-            stop_date = datetime.datetime.strptime(stop_date, '%Y-%m-%d')
+            stop_date = datetime.datetime.strptime(stop_date, '%Y-%m-%d').date()
         except ValueError:
             abort(400, description='The <stop_date> should be in YYYY-MM-DD format')
 
