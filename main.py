@@ -782,33 +782,38 @@ def users_vehicle():
         token = request.form.get('token')
         user_vehicle_id = request.form.get('user_vehicle_id')
 
-        if not token or not email or not user_vehicle_id:
-            abort(400, description='The token, email and user_vehicle_id are required')
-
-        user_auth = user_authorization(email, token)
-        if not user_auth['result']:
-            abort(401, description=user_auth['text'])
-
-        r.expire(email, 600)
+        required_fields = {
+            'email': email,
+            'token': token,
+            'user_vehicle_id': user_vehicle_id
+        }
+        check_required_fields(required_fields)
 
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        if not vehicle_exists(user_vehicle_id):
-            abort(400, description='The vehicle does not exist')
+        user_authorization(email, token)
+        r.expire(email, 600)
 
-        user_id = get_value_from_table('user_id', 'user_vehicle', 'user_vehicle_id', user_vehicle_id)
+        vehicle_exists(user_vehicle_id)
 
-        if get_user_id(email) != user_id:
+        if get_user_id(email) != get_value_from_table('user_id', 'user_vehicle', 'user_vehicle_id', user_vehicle_id):
             abort(403, description='It is not your vehicle! Somebody call the police!')
         else:
+            sql_query = """SELECT vehicle_name FROM user_vehicle JOIN vehicle USING (vehicle_id)
+                            WHERE user_vehicle_id = '{0}'""".format(user_vehicle_id)
+            cursor.execute(sql_query)
+            conn.commit()
+            vehicle_name = cursor.fetchone()[0]
 
             sql_query = """DELETE FROM user_vehicle WHERE user_vehicle_id = '{0}'""".format(user_vehicle_id)
             cursor.execute(sql_query)
             conn.commit()
 
+            text = 'Your {{ type }} ID {{ ID }} has been successfully deleted'
+            template = Template(text)
             result = {
-                'confirmation': 'User vehicle ID ' + user_vehicle_id + ' has been deleted'
+                'confirmation': template.render(type=vehicle_name, ID=user_vehicle_id)
             }
             return jsonify(result)
     else:
@@ -817,22 +822,31 @@ def users_vehicle():
 
 @app.route("/warehouse", methods=['GET'])  # shows shelves in the warehouse (availability depends on the request params)
 def active_storage():
+    # if size_name is None - show all sizes
+    # if active_only.lower() = 'yes' - show only free shelves
+    # if active_only.lower() = 'no' - show only occupied shelves
+    # if active_only.lower() is blank - show all shelves
+    # if active_only.lower() != 'yes', 'no' or blank - show an error message
     if request.method == 'GET':
         size_name = request.args.get('size_name')
         active_only = request.args.get('active_only')
 
-        # if size_name is None - show all sizes
-        # if active_only.lower() = 'yes' - show only free shelves
-        # if active_only.lower() = 'no' - show only occupied shelves
-        # if active_only.lower() != 'yes' and != 'no' - show all free shelves
-        if not active_only:
+        if active_only:
+            try:
+                active_only = active_only.lower()
+            except AttributeError:
+                abort(400, description='The <active_only> should be string')
+            else:
+                if active_only not in ('yes', 'no', ''):
+                    abort(400, description='The <active_only> should be <yes>, <no> or blank')
+        else:
             active_only = 'undefined'
 
         if not conn:
             abort(503, description='There is no connection to the database')
 
         if not size_name:
-            if active_only.lower() == 'yes':
+            if active_only == 'yes':
 
                 sql_query = """SELECT shelf_id, size_id, active FROM warehouse 
                                 WHERE active = 'True'"""
@@ -840,7 +854,7 @@ def active_storage():
                 conn.commit()
                 res_ = cursor.fetchall()
 
-            elif active_only.lower() == 'no':
+            elif active_only == 'no':
 
                 sql_query = """SELECT shelf_id, size_id, active FROM warehouse 
                                                 WHERE active = 'False'"""
@@ -857,21 +871,26 @@ def active_storage():
 
             if res_:
                 result = []
-                for i in res_:
+                for shelf in res_:
                     result.append({
-                        'shelf_id': i[0],
-                        'size_id': i[1],
-                        'size_name': get_value_from_table('size_name', 'sizes', 'size_id', i[1]),
-                        'active': i[2]
+                        'shelf_id': shelf[0],
+                        'size_id': shelf[1],
+                        'size_name': get_value_from_table('size_name', 'sizes', 'size_id', shelf[1]),
+                        'active': shelf[2]
                     })
             else:
                 result = {
-                    'confirmation': 'Unfortunately, we do not have active storage shelves you need'
+                    'confirmation': 'Unfortunately, we do not have the storage shelves you requested'
                 }
         else:
+            try:
+                size_name = int(size_name)
+            except ValueError:
+                abort(400, description='The <size_name> should contain only numbers')
+
             size_id = get_value_from_table('size_id', 'sizes', 'size_name', size_name)
 
-            if active_only.lower() == 'yes':
+            if active_only == 'yes':
 
                 sql_query = """SELECT shelf_id, size_id, active FROM warehouse WHERE active = 'True'
                                 AND size_id = '{0}'""".format(size_id)
@@ -879,7 +898,7 @@ def active_storage():
                 conn.commit()
                 res_ = cursor.fetchall()
 
-            elif active_only.lower() == 'no':
+            elif active_only == 'no':
 
                 sql_query = """SELECT shelf_id, size_id, active FROM warehouse WHERE active = 'False'
                                                 AND size_id = '{0}'""".format(size_id)
@@ -897,12 +916,12 @@ def active_storage():
 
             if res_:
                 result = []
-                for i in res_:
+                for shelf in res_:
                     result.append({
-                        'shelf_id': i[0],
-                        'size_id': i[1],
+                        'shelf_id': shelf[0],
+                        'size_id': shelf[1],
                         'size_name': size_name,
-                        'active': i[2]
+                        'active': shelf[2]
                     })
             else:
                 result = {
