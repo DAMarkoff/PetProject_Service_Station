@@ -1054,9 +1054,9 @@ def storage_order():
 
                 created = datetime.datetime.now()
                 # create storage order
-                sql_query = """INSERT INTO storage_orders (user_id, start_date, stop_date, size_id, shelf_id, 
-                            storage_order_cost, created) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}');""". \
-                    format(user_id, start_date, stop_date, size_id, shelf_id, storage_order_cost, created)
+                sql_query = """INSERT INTO storage_orders (user_id, start_date, stop_date, shelf_id, 
+                            storage_order_cost, created) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}');""". \
+                    format(user_id, start_date, stop_date, shelf_id, storage_order_cost, created)
                 cursor.execute(sql_query)
                 conn.commit()
 
