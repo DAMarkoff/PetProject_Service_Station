@@ -1235,7 +1235,7 @@ def storage_order():
             abort(403, description='It is not your storage order!')
 
         if start_date < datetime.datetime.now().date():
-            abort(400, description='You cannot delete a completed service order')
+            abort(400, description='You cannot delete a completed storage order')
 
         sql_query = """DELETE FROM storage_orders WHERE storage_order_id = '{0}';""".format(storage_order_id)
         cursor.execute(sql_query)
@@ -1254,21 +1254,36 @@ def storage_order():
 @app.route("/tire_service_order", methods=['POST', 'PUT', 'DELETE'])  # add new/change/delete the user's service order
 def tire_service_order():
     if request.method == 'POST':
-        email = request.form.get('email')
-        token = request.form.get('token')
-        order_type = request.form.get('order_type')
-        order_date = request.form.get('order_date')
-        user_vehicle_id = request.form.get('user_vehicle_id')
-        numbers_of_wheels = request.form.get('numbers_of_wheels')
+        email = request.form.get('email') #
+        token = request.form.get('token') #
+        order_type = request.form.get('order_type') #
+        order_date = request.form.get('order_date') #
+        user_vehicle_id = request.form.get('user_vehicle_id') #
+        numbers_of_wheels = request.form.get('numbers_of_wheels') #
         removing_installing_wheels = request.form.get('removing_installing_wheels')
         tubeless = request.form.get('tubeless')
         balancing = request.form.get('balancing')
         wheel_alignment = request.form.get('wheel_alignment')
 
-        if not token or not email or not order_date or not user_vehicle_id or not order_type \
-                or not numbers_of_wheels or not removing_installing_wheels \
-                or not tubeless or not balancing or not wheel_alignment:
-            abort(400, description='All fields are required')
+        required_fields = {
+            'email': email,
+            'token': token,
+            'order_date': order_date,
+            'user_vehicle_id': user_vehicle_id,
+            'order_type': order_type,
+            'numbers_of_wheels': numbers_of_wheels,
+            'removing_installing_wheels': removing_installing_wheels,
+            'tubeless': tubeless,
+            'balancing': balancing,
+            'wheel_alignment': wheel_alignment,
+        }
+        check_required_fields(required_fields)
+
+        user_authorization(email, token)
+        r.expire(email, 600)
+
+        if not conn:
+            abort(503, description='There is no connection to the database')
 
         try:
             user_vehicle_id = int(user_vehicle_id)
@@ -1285,25 +1300,45 @@ def tire_service_order():
         except ValueError:
             abort(400, description='The <order_date> should be in YYYY-MM-DD HH-MM format')
 
-        if order_date_str < str(datetime.datetime.now()):
-            abort(400, description='The start_date can not be less than today')
+        if order_date.date() < datetime.datetime.now().date():
+            abort(400, description='The <start_date> can not be less than today')
+
+        sql_query = """SELECT DISTINCT service_type_name FROM tire_service_order_type;"""
+        cursor.execute(sql_query)
+        conn.commit()
+        order_types = list(types[0] for types in cursor.fetchall())
+
+        try:
+            order_type = order_type.lower()
+        except AttributeError:
+            abort(400, description='The <active_only> should be string')
+        else:
+            if order_type not in order_types:
+                str_order_types = ''
+                for types in order_types:
+                    str_order_types += '<' + str(types) + '>' + ' or '
+                abort(400, description='The <active_only> should be ' + str_order_types[:len(str_order_types) - 4])
+
+        try:
+            tubeless = tubeless.lower()
+            balancing = balancing.lower()
+            wheel_alignment = wheel_alignment.lower()
+        except AttributeError:
+            abort(400, description='The <active_only>, <balancing> and <wheel_alignment> should be string')
+        else:
+            correct_answers = ('yes', 'no')
+            if not all([tubeless in correct_answers, balancing in correct_answers, wheel_alignment in correct_answers]):
+                abort(400, description='The <active_only>, <balancing> and <wheel_alignment> should be <yes> or <no>')
 
         delta_db = get_value_from_table('delta_minutes', 'positions', 'position_name', 'worker')
         delta = datetime.timedelta(minutes=int(delta_db))
 
-        date_to_query = str(order_date.year) + '-' + str(order_date.month) + '-' + str(order_date.day)
+        # to be deleted
+        # date_to_query = str(order_date.year) + '-' + str(order_date.month) + '-' + str(order_date.day)
+        date_to_query = str(order_date.date())
 
         if int(order_date.hour) < 8:
             abort(400, description='Sorry, we open at 08:00 am')
-
-        user_auth = user_authorization(email, token)
-        if not user_auth['result']:
-            abort(401, description=user_auth['text'])
-
-        r.expire(email, 600)
-
-        if not conn:
-            abort(503, description='There is no connection to the database')
 
         user_id = get_value_from_table('user_id', 'user_vehicle', 'user_vehicle_id', user_vehicle_id)
 
@@ -1487,29 +1522,32 @@ def tire_service_order():
         token = request.form.get('token')
         service_order_id = request.form.get('service_order_id')
 
-        if not token or not email or not service_order_id:
-            abort(400, description='The token, email, service_order_id are required')
+        required_fields = {
+            'email': email,
+            'token': token,
+            'service_order_id': service_order_id
+        }
+        check_required_fields(required_fields)
 
-        user_auth = user_authorization(email, token)
-        if not user_auth['result']:
-            abort(401, description=user_auth['text'])
-
+        user_authorization(email, token)
         r.expire(email, 600)
 
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        if not tire_service_order_exists(service_order_id):
-            abort(400, description='The tire service order does not exist')
+        try:
+            service_order_id = int(service_order_id)
+        except ValueError:
+            abort(400, description='The <service_order_id> should contain only numbers')
+
+        check_tire_service_order_exists(service_order_id)
 
         # get the initial data about the tire_service_order
         sql_query = """SELECT user_id, user_vehicle_id, manager_id, start_datetime FROM tire_service_order 
                                         WHERE service_order_id = '{0}';""".format(service_order_id)
         cursor.execute(sql_query)
         conn.commit()
-        res_ = cursor.fetchone()
-
-        user_id, user_vehicle_id, manager_id, start_datetime = res_
+        user_id, user_vehicle_id, manager_id, start_datetime = cursor.fetchone()
 
         if start_datetime < datetime.datetime.now():
             abort(400, description='You cannot delete a completed service order')
@@ -1523,11 +1561,9 @@ def tire_service_order():
 
         text = 'Tire service order ID {{ name }} has been deleted'
         template = Template(text)
-
         result = {
             "confirmation": template.render(name=service_order_id),
         }
-
         return jsonify(result)
     else:
         abort(405)

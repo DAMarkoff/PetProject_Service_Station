@@ -36,7 +36,7 @@ def user_exists(where: str, email: str) -> bool:
     return True
 
 
-def check_user_exists(reason, email):
+def check_user_exists(reason: str, email: str):
     """By <reason> checks:
     The user with this email is already registered.
     There is no registered users with this email."""
@@ -60,16 +60,10 @@ def check_storage_order_exists(storage_order_id: int):
         abort(400, description='The storage order does not exist')
 
 
-
-def tire_service_order_exists(service_order_id):
-    sql_query = """SELECT user_id FROM tire_service_order WHERE service_order_id = '{0}';""".format(service_order_id)
-    cursor.execute(sql_query)
-    conn.commit()
-    res_ = cursor.fetchone()
-
-    if res_:
-        return True
-    return False
+def check_tire_service_order_exists(service_order_id: int):
+    """Checks that the service order exists"""
+    if not get_value_from_table('user_id', 'tire_service_order', 'service_order_id', service_order_id):
+        abort(400, description='The tire service order does not exist')
 
 
 def get_user_id(email: str) -> str:
@@ -150,7 +144,7 @@ def get_value_from_table(select: str, from_db: str, where: str, what):
     return res_[0]
 
 
-def user_authorization(email, token):
+def user_authorization(email: str, token: str):
     if not (token == r.get(email)):
         abort(401, description='The token is invalid, please log in')
 
