@@ -709,21 +709,14 @@ def users_vehicle():
         }
         check_required_fields(required_fields)
 
+        if not new_vehicle_name and not new_size_name:
+            abort(400, description='Ok. Nothing needs to be changed :)')
+
         if not conn:
             abort(503, description='There is no connection to the database')
 
         user_authorization(email, token)
         r.expire(email, 600)
-
-        try:
-            user_vehicle_id = int(user_vehicle_id)
-        except ValueError:
-            abort(400, description='The <user_vehicle_id> should contain only numbers')
-
-        try:
-            new_size_name = int(new_size_name)
-        except ValueError:
-            abort(400, description='The <new_size_name> should contain only numbers')
 
         vehicle_exists(user_vehicle_id)
 
@@ -731,8 +724,6 @@ def users_vehicle():
             format(user_vehicle_id)
         cursor.execute(sql_query)
         conn.commit()
-        # res_ = cursor.fetchone()
-
         user_id_db, vehicle_id_db, size_id_db = cursor.fetchone()
 
         if user_id_db != get_user_id(email):
@@ -741,14 +732,14 @@ def users_vehicle():
         vehicle_name_db = get_value_from_table('vehicle_name', 'vehicle', 'vehicle_id', vehicle_id_db)
         size_name_db = get_value_from_table('size_name', 'sizes', 'size_id', size_id_db)
 
-        if (not new_vehicle_name and not new_size_name) or \
-                (new_vehicle_name == vehicle_name_db and new_size_name == size_name_db):
-            abort(400, description='Ok. Nothing needs to be changed :)')
-
         if not new_vehicle_name or new_vehicle_name == vehicle_name_db:
             new_vehicle_id = vehicle_id_db
             new_vehicle_name = 'The vehicle name has not been changed'
         else:
+            try:
+                user_vehicle_id = int(user_vehicle_id)
+            except ValueError:
+                abort(400, description='The <user_vehicle_id> should contain only numbers')
             new_vehicle_id = get_value_from_table('vehicle_id', 'vehicle', 'vehicle_name', new_vehicle_name)
             if not new_vehicle_id:
                 abort(400, description='Unknown vehicle_name')
@@ -757,6 +748,10 @@ def users_vehicle():
             new_size_id = size_id_db
             new_size_name = 'The size name has not been changed'
         else:
+            try:
+                new_size_name = int(new_size_name)
+            except ValueError:
+                abort(400, description='The <new_size_name> should contain only numbers')
             new_size_id = get_value_from_table('size_id', 'sizes', 'size_name', new_size_name)
             if not new_size_id:
                 abort(400, description='Unknown size_name')
