@@ -978,11 +978,10 @@ def storage_order():
         except ValueError:
             abort(400, description='The <stop_date> should be in YYYY-MM-DD format')
 
-        if start_date < datetime.datetime.now():
+        if start_date < datetime.date.today():
             abort(400, description='The <start_date> cannot be less than today')
 
-        if stop_date > date(datetime.datetime.now().year + 2, datetime.datetime.now().month,
-                                datetime.datetime.now().day):
+        if stop_date > date(datetime.date.today().year + 2, datetime.date.today().month, datetime.date.today().day):
             abort(400, description='The stop_date can not exceed +2 year from today')
 
         if start_date > stop_date:
