@@ -1045,7 +1045,7 @@ def storage_order():
                             (SELECT shelf_id FROM dates_intersection) AND active = True AND size_id = {2};""". \
                 format(start_date, stop_date, size_id)
             cursor.execute(sql_query)
-            res_ = cursor.fetchall()
+            res_ = list(shelf[0] for shelf in cursor.fetchall())
 
             # Если есть, то записываем заказ на нее
             if res_:
