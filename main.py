@@ -1011,7 +1011,7 @@ def storage_order():
         sql_query = """SELECT w.shelf_id FROM storage_orders RIGHT JOIN warehouse AS w USING(shelf_id) WHERE
                         storage_order_id IS NULL AND active = True AND w.size_id = {0};""".format(size_id)
         cursor.execute(sql_query)
-        res = cursor.fetchall()
+        res = list(shelf[0] for shelf in cursor.fetchall())
 
         # Если есть:
         if res:
