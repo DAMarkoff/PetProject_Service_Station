@@ -1,6 +1,6 @@
 bcrypt==3.2.0
 cffi==1.15.0
-click==8.0.2
+click==8.0.3
 file-read-backwards==2.0.0
 Flask==2.0.1
 flask-swagger-ui==3.36.0
