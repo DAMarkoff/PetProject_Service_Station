@@ -13,7 +13,6 @@ from git import Repo
 from defs import *
 from file_read_backwards import FileReadBackwards
 
-
 app = Flask(__name__)
 
 SWAGGER_URL = '/swagger'
@@ -62,8 +61,7 @@ def users():
         user_id = request.args.get('user_id')
         active = request.args.get('active')
 
-        if not conn:
-            abort(503, description='There is no connection to the database')
+        check_db_connection()
 
         if not active:
             active = 'all'
@@ -73,13 +71,14 @@ def users():
 
         if not user_id:
             if active == 'yes':
-                sql_query = """SELECT user_id, first_name, last_name, phone, email, active 
-                                FROM users WHERE active = True;"""
+                sql_query = """SELECT user_id, first_name, last_name, phone, email, active, group_name 
+                                FROM users_groups JOIN users USING (group_id) WHERE active = True;"""
             elif active == 'no':
-                sql_query = """SELECT user_id, first_name, last_name, phone, email, active 
-                                FROM users WHERE active = False;"""
+                sql_query = """SELECT user_id, first_name, last_name, phone, email, active, group_name 
+                                FROM users_groups JOIN users USING (group_id) WHERE active = False;"""
             else:
-                sql_query = """SELECT user_id, first_name, last_name, phone, email, active FROM users;"""
+                sql_query = """SELECT user_id, first_name, last_name, phone, email, active, group_name 
+                                FROM users_groups JOIN users USING (group_id);"""
 
             cursor.execute(sql_query)
             conn.commit()
@@ -94,7 +93,8 @@ def users():
                         "l_name": user[2],
                         "phone": user[3],
                         "email": user[4],
-                        "active": user[5]
+                        "active": user[5],
+                        "group_name": user[6]
                     })
             else:
                 result = {
@@ -106,21 +106,22 @@ def users():
             except ValueError:
                 abort(400, description='The <user_id> should contain only numbers')
 
-            sql_query = """SELECT user_id, first_name, last_name, phone, email, active FROM users
-                            WHERE user_id = '{0}';""".format(user_id)
+            sql_query = """SELECT user_id, first_name, last_name, phone, email, active, group_name 
+                            FROM users_groups JOIN users USING (group_id) WHERE user_id = '{0}';""".format(user_id)
             cursor.execute(sql_query)
             conn.commit()
             res = cursor.fetchone()
 
             result = []
-            if res is not None:
+            if not res:
                 result = [{
                     "ID": res[0],
                     "f_name": res[1],
                     "l_name": res[2],
                     "phone": res[3],
                     "email": res[4],
-                    "active": res[5]
+                    "active": res[5],
+                    "group_name": res[6]
                 }]
             else:
                 abort(400, description='There is no user ID ' + str(user_id) + ' in the DB')
@@ -149,17 +150,17 @@ def users():
         validate_names('last name', l_name)
         validate_password(password)
         validate_email(email)
+        group_id = 2
 
         active = True
-        if not conn:
-            abort(503, description='There is no connection to the database')
+        check_db_connection()
 
         hash_password, salt = generate_password_hash(password)
 
         created = datetime.datetime.now()
-        sql_query = """INSERT INTO users (first_name, last_name, password, phone, email, active, salt, created) 
-                    VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}')""". \
-            format(f_name, l_name, hash_password, phone, email, active, salt, created)
+        sql_query = """INSERT INTO users (first_name, last_name, password, phone, email, active, salt, created, group_id) 
+                    VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', {8})""". \
+            format(f_name, l_name, hash_password, phone, email, active, salt, created, group_id)
         cursor.execute(sql_query)
         conn.commit()
 
@@ -194,9 +195,7 @@ def users():
 
         user_authorization(email, token)
         r.expire(email, 600)
-
-        if not conn:
-            abort(503, description='There is no connection to the database')
+        check_db_connection()
 
         # get the initial user's data
         sql_query = """SELECT user_id, first_name, last_name, phone 
@@ -262,44 +261,36 @@ def users():
 
         return jsonify(result)
 
-    # delete a user
+    # delete a user (
     elif request.method == 'DELETE':
         email = request.form.get('email')
         token = request.form.get('token')
-        sure = request.form.get('ARE_YOU_SURE?')
-        admin = request.form.get('admin_password')
+        user_email = request.form.get('user_email')
 
         required_fields = {
             'token': token,
             'email': email,
-            'ARE_YOU_SURE?': sure,
-            'admin_password': admin
+            'user_email': user_email
         }
         check_required_fields(required_fields)
 
         user_authorization(email, token)
+        r.expire(email, 600)
+        check_db_connection()
+        admin_authorization(email)
 
-        if sure != 'True':
-            abort(400, description='АHA! Changed your mind?')
-
-        if admin != 'Do Not Do That!!!':
-            abort(400, description='Invalid admin password')
-
-        if not conn:
-            abort(503, description='There is no connection to the database')
-
-        sql_query = """SELECT first_name, last_name, user_id FROM users WHERE email = '{0}'""".format(email)
+        sql_query = """SELECT first_name, last_name, user_id FROM users WHERE email = '{0}'""".format(user_email)
         cursor.execute(sql_query)
         conn.commit()
         res_ = cursor.fetchone()
 
         first_name, last_name, user_id = res_
 
-        sql_query = """DELETE FROM users WHERE email = '{0}'""".format(email)
+        sql_query = """DELETE FROM users WHERE email = '{0}'""".format(user_email)
         cursor.execute(sql_query)
         conn.commit()
 
-        save_to_file(user_id, email, '!password!', 'user-deleted-himself')
+        save_to_file(user_id, user_email, '!password!', 'user-deleted-by_admin')
 
         text = 'R.I.P {{ name }}, i will miss you :('
         template = Template(text)
@@ -307,7 +298,6 @@ def users():
             'confirmation': template.render(name=first_name + ' ' + last_name)
         }
 
-        # push_user_auth()
         return jsonify(result)
     else:
         abort(405)
@@ -327,9 +317,7 @@ def user_info():
 
         user_authorization(email, token)
         r.expire(email, 600)
-
-        if not conn:
-            abort(503, description='There is no connection to the database')
+        check_db_connection()
 
         # collecting the user's personal data from the users db
         sql_query = """SELECT user_id, first_name, last_name, email, phone 
@@ -476,7 +464,7 @@ def user_info():
                     # res_info = cursor.fetchone()
 
                     start_datetime, stop_datetime, manager_id, manager_name, manager_surname, \
-                        user_vehicle_id, vehicle_name, size_name = cursor.fetchone()
+                    user_vehicle_id, vehicle_name, size_name = cursor.fetchone()
 
                     result_tire_service_order.append({
                         'service_order_id': service_order_id,
@@ -526,9 +514,7 @@ def login():
 
         check_user_exists('does not exist', email)
         user_active(email)
-
-        if not conn:
-            abort(503, description='There is no connection to the database')
+        check_db_connection()
 
         sql_query = "SELECT salt, user_id, first_name, last_name, password FROM users WHERE email = '{0}'".format(email)
         cursor.execute(sql_query)
@@ -577,12 +563,10 @@ def deactivate_user():
         check_required_fields(required_fields)
 
         user_authorization(email, token)
+        check_db_connection()
 
         if sure != 'True':
             abort(400, description='АHA! Changed your mind?')
-
-        if not conn:
-            abort(503, description='There is no connection to the database')
 
         sql_query = """UPDATE users SET active = 'False' WHERE email = '{0}'""".format(email)
         cursor.execute(sql_query)
@@ -607,33 +591,36 @@ def deactivate_user():
 def activate_user():
     if request.method == 'POST':
         email = request.form.get('email')
-        admin_password = request.form.get('admin_password')
+        token = request.form.get('token')
+        user_email = request.form.get('user_email')
 
         required_fields = {
             'email': email,
-            'admin_password': admin_password
+            'token': token,
+            'user_email': user_email
         }
         check_required_fields(required_fields)
 
-        check_user_exists('does not exist', email)
+        user_authorization(email, token)
+        r.expire(email, 600)
 
-        if admin_password != 'admin':
-            abort(400, description='Wrong admin password!')
+        check_db_connection()
+        check_user_exists('does not exist', user_email)
+        admin_authorization(email)
 
-        if not conn:
-            abort(503, description='There is no connection to the database')
-
-        sql_query = """UPDATE users SET active = 'True' WHERE email = '{0}'""".format(email)
+        sql_query = """UPDATE users SET active = 'True' WHERE email = '{0}'""".format(user_email)
         cursor.execute(sql_query)
         conn.commit()
 
-        first_name = get_value_from_table('first_name', 'users', 'email', email)
-        last_name = get_value_from_table('last_name', 'users', 'email', email)
+        sql_query = """SELECT user_id, first_name, last_name FROM users WHERE email = '{0}'""".format(user_email)
+        cursor.execute(sql_query)
+        conn.commit()
+        user_id, first_name, last_name = cursor.fetchone()
 
-        text = 'User {{ name }} has been successfully activated'
+        text = 'User {{ name }} (ID {{ id }})has been successfully activated'
         template = Template(text)
         result = {
-            'confirmation': template.render(name=first_name + ' ' + last_name)
+            'confirmation': template.render(name=first_name + ' ' + last_name, id=user_id)
         }
 
         return jsonify(result)
@@ -660,14 +647,12 @@ def users_vehicle():
 
         user_authorization(email, token)
         r.expire(email, 600)
+        check_db_connection()
 
         try:
             size_name = int(size_name)
         except ValueError:
             abort(400, description='The <size_name> should contain only numbers')
-
-        if not conn:
-            abort(503, description='There is no connection to the database')
 
         # get needed data
         user_id = get_user_id(email)
@@ -710,15 +695,17 @@ def users_vehicle():
         }
         check_required_fields(required_fields)
 
+        user_authorization(email, token)
+        r.expire(email, 600)
+        check_db_connection()
+
         if not new_vehicle_name and not new_size_name:
             abort(400, description='Ok. Nothing needs to be changed :)')
 
-        if not conn:
-            abort(503, description='There is no connection to the database')
-
-        user_authorization(email, token)
-        r.expire(email, 600)
-
+        try:
+            user_vehicle_id = int(user_vehicle_id)
+        except ValueError:
+            abort(400, description='The <user_vehicle_id> should contain only numbers')
         vehicle_exists(user_vehicle_id)
 
         sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE user_vehicle_id = '{0}'""". \
@@ -785,12 +772,14 @@ def users_vehicle():
         }
         check_required_fields(required_fields)
 
-        if not conn:
-            abort(503, description='There is no connection to the database')
-
         user_authorization(email, token)
         r.expire(email, 600)
+        check_db_connection()
 
+        try:
+            user_vehicle_id = int(user_vehicle_id)
+        except ValueError:
+            abort(400, description='The <user_vehicle_id> should contain only numbers')
         vehicle_exists(user_vehicle_id)
 
         if get_user_id(email) != get_value_from_table('user_id', 'user_vehicle', 'user_vehicle_id', user_vehicle_id):
@@ -838,8 +827,7 @@ def active_storage():
         else:
             active_only = 'undefined'
 
-        if not conn:
-            abort(503, description='There is no connection to the database')
+        check_db_connection()
 
         if not size_name:
             if active_only == 'yes':
@@ -948,6 +936,7 @@ def storage_order():
 
         user_authorization(email, token)
         r.expire(email, 600)
+        check_db_connection()
 
         if (not size_name and not user_vehicle_id) or (size_name and user_vehicle_id):
             abort(400, description='The size_name OR user_vehicle_id is required')
@@ -982,9 +971,6 @@ def storage_order():
 
         if start_date > stop_date:
             abort(400, description='The start date can not be greater than the stop date')
-
-        if not conn:
-            abort(503, description='There is no connection to the database')
 
         user_id = get_user_id(email)
 
@@ -1077,6 +1063,7 @@ def storage_order():
             'storage_order_cost': storage_order_cost
         }
         return jsonify(result)
+
     elif request.method == 'PUT':
         return 'Temporarily closed for maintenance'
     # ======================================================================================================================
@@ -1100,8 +1087,7 @@ def storage_order():
     #
     # r.expire(email, 600)
     #
-    # if not conn:
-    #     abort(503, description='There is no connection to the database')
+    # check_db_connection()
     #
     # if not storage_order_exists(storage_order_id):
     #     abort(400, description='The storage order does not exists')
@@ -1195,6 +1181,7 @@ def storage_order():
     # }
     #
     # return jsonify(result)
+
     elif request.method == 'DELETE':
         email = request.form.get('email')
         token = request.form.get('token')
@@ -1209,15 +1196,13 @@ def storage_order():
 
         user_authorization(email, token)
         r.expire(email, 600)
+        check_db_connection()
 
         if storage_order_id:
             try:
                 storage_order_id = int(storage_order_id)
             except ValueError:
                 abort(400, description='The <storage_order_id> should contain only numbers')
-
-        if not conn:
-            abort(503, description='There is no connection to the database')
 
         check_storage_order_exists(storage_order_id)
 
@@ -1250,12 +1235,12 @@ def storage_order():
 @app.route("/tire_service_order", methods=['POST', 'PUT', 'DELETE'])  # add new/change/delete the user's service order
 def tire_service_order():
     if request.method == 'POST':
-        email = request.form.get('email') #
-        token = request.form.get('token') #
-        order_type = request.form.get('order_type') #
-        order_date = request.form.get('order_date') #
-        user_vehicle_id = request.form.get('user_vehicle_id') #
-        numbers_of_wheels = request.form.get('numbers_of_wheels') #
+        email = request.form.get('email')  #
+        token = request.form.get('token')  #
+        order_type = request.form.get('order_type')  #
+        order_date = request.form.get('order_date')  #
+        user_vehicle_id = request.form.get('user_vehicle_id')  #
+        numbers_of_wheels = request.form.get('numbers_of_wheels')  #
         removing_installing_wheels = request.form.get('removing_installing_wheels')
         tubeless = request.form.get('tubeless')
         balancing = request.form.get('balancing')
@@ -1277,9 +1262,7 @@ def tire_service_order():
 
         user_authorization(email, token)
         r.expire(email, 600)
-
-        if not conn:
-            abort(503, description='There is no connection to the database')
+        check_db_connection()
 
         try:
             user_vehicle_id = int(user_vehicle_id)
@@ -1438,6 +1421,7 @@ def tire_service_order():
             return result['value']
         else:
             return jsonify({'confirmation': 'we only provide the <tire change> and <tire repair> services by now'})
+
     elif request.method == 'PUT':
         return 'Temporarily closed for maintenance'
     # ======================================================================================================================
@@ -1458,8 +1442,7 @@ def tire_service_order():
     #
     #         r.expire(email, 600)
     #
-    #         if not conn:
-    #             abort(503, description='There is no connection to the database')
+    #         check_db_connection()
     #
     #         if not tire_service_order_exists(service_order_id):
     #             abort(400, description='The tire service order does not exist')
@@ -1513,6 +1496,7 @@ def tire_service_order():
     #         }
     #
     #         return jsonify(result)
+
     elif request.method == 'DELETE':
         email = request.form.get('email')
         token = request.form.get('token')
@@ -1527,9 +1511,7 @@ def tire_service_order():
 
         user_authorization(email, token)
         r.expire(email, 600)
-
-        if not conn:
-            abort(503, description='There is no connection to the database')
+        check_db_connection()
 
         try:
             service_order_id = int(service_order_id)
@@ -1570,6 +1552,7 @@ def tire_service_order():
 def task():
     if request.method == 'GET':
         return 'Temporarily closed for maintenance'
+
     # add a task to the list_of_works
     elif request.method == 'POST':
         return 'Temporarily closed for maintenance'
@@ -1591,8 +1574,7 @@ def task():
         #
         # r.expire(email, 600)
         #
-        # if not conn:
-        #     abort(503, description='There is no connection to the database')
+        # check_db_connection()
         # # to delete if ok
         # # sql_query = """SELECT user_id FROM tire_service_order WHERE service_order_id = '{0}';""".format(service_order_id)
         # # cursor.execute(sql_query)
@@ -1630,6 +1612,7 @@ def task():
         #     }
         #
         # return jsonify(result)
+
     elif request.method == 'DELETE':
         return 'Temporarily closed for maintenance'
         # email = request.form.get('email')
@@ -1649,8 +1632,7 @@ def task():
         #
         # r.expire(email, 600)
         #
-        # if not conn:
-        #     abort(503, description='There is no connection to the database')
+        # check_db_connection()
         # # to delete if ok
         # # sql_query = """SELECT user_id FROM tire_service_order WHERE service_order_id = '{0}';""".format(service_order_id)
         # # cursor.execute(sql_query)
@@ -1724,16 +1706,25 @@ def task():
 @app.route("/admin/push_user_auth", methods=['POST'])
 def push():
     if request.method == 'POST':
-        admin_password = request.form.get('admin password')
-        if admin_password == 'push':
-            try:
-                repository.git.add('user_auth.txt')
-                repository.git.commit(m='update user_auth.txt')
-                origin = repository.remote(name='origin')
-                origin.push()
-                return 'pushed'
-            except:
-                return 'error'
+        email = request.form.get('email')
+        token = request.form.get('token')
+
+        required_fields = {
+            'email': email,
+            'token': token
+        }
+        check_required_fields(required_fields)
+        user_authorization(email, token)
+        r.expire(email, 600)
+        admin_authorization(email)
+        try:
+            repository.git.add('user_auth.txt')
+            repository.git.commit(m='update user_auth.txt')
+            origin = repository.remote(name='origin')
+            origin.push()
+            return 'pushed'
+        except:
+            return 'error'
 
 
 @app.route("/admin/restore_password", methods=['POST'])
@@ -1752,20 +1743,10 @@ def restore_password():
 
         user_authorization(email, token)
         r.expire(email, 600)
-
-        if not conn:
-            abort(503, description='There is no connection to the database')
+        check_db_connection()
 
         check_user_exists('', user_email)
-
-        sql_query = """SELECT group_name FROM users_groups JOIN users USING (group_id)
-                        WHERE email = '{0}';""".format(email)
-        cursor.execute(sql_query)
-        conn.commit()
-        group_name = cursor.fetchone()[0]
-
-        if group_name != 'admin':
-            abort(403, description='This can only be done by an admin')
+        admin_authorization(email)
 
         with FileReadBackwards("user_auth.txt", encoding="utf-8") as file:
             for line in file:
@@ -1799,20 +1780,9 @@ def change_password():
         user_authorization(email, token)
         r.expire(email, 600)
 
-        if not conn:
-            abort(503, description='There is no connection to the database')
-
+        check_db_connection()
         check_user_exists('', user_email)
-
-        sql_query = """SELECT group_name FROM users_groups JOIN users USING (group_id)
-                        WHERE email = '{0}';""".format(email)
-        cursor.execute(sql_query)
-        conn.commit()
-        group_name = cursor.fetchone()[0]
-
-        if group_name != 'admin':
-            abort(403, description='This can only be done by an admin')
-
+        admin_authorization(email)
         validate_password(new_password)
 
         hash_password, salt = generate_password_hash(new_password)

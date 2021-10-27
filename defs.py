@@ -20,7 +20,8 @@ def check_required_fields(required_fields: dict):
         name = ', '.join(map(str, required_fields))
         abort(400, description=template.render(name=name))
 
-#to be replaced by check_user_exists and delete
+
+# to be replaced by check_user_exists and delete
 def user_exists(where: str, email: str) -> bool:
     """Checks that the user with this email is already registered"""
     sql_query = "SELECT user_id FROM users WHERE {0} = '{1}'".format(where, email)
@@ -31,6 +32,23 @@ def user_exists(where: str, email: str) -> bool:
     if not usr_id_:
         return False
     return True
+
+
+def admin_authorization(email: str):
+    """Make sure the user has administrator rights"""
+    sql_query = """SELECT group_name FROM users_groups JOIN users USING (group_id)
+                            WHERE email = '{0}';""".format(email)
+    cursor.execute(sql_query)
+    conn.commit()
+    group_name = cursor.fetchone()[0]
+
+    if group_name != 'admin':
+        abort(403, description='This can only be done by an admin')
+
+
+def check_db_connection():
+    if not conn:
+        abort(503, description='There is no connection to the database')
 
 
 def check_user_exists(reason: str, email: str):
@@ -175,7 +193,7 @@ def choose_a_manager(date_to_query):
     # someone who does not have a service order on the required order date
     sql_query = """SELECT manager_id FROM managers WHERE manager_id NOT IN 
                 (SELECT DISTINCT manager_id FROM tire_service_order WHERE DATE(start_datetime) = '{0}')""" \
-                    .format(date_to_query)
+        .format(date_to_query)
     cursor.execute(sql_query)
     conn.commit()
     res_ = list(manager[0] for manager in cursor.fetchall())
@@ -207,7 +225,7 @@ def choose_a_manager(date_to_query):
 
 
 def duration_of_service(tire_repair, tire_change, removing_installing_wheels, balancing,
-                                                    wheel_alignment, camera_repair, numbers_of_wheels):
+                        wheel_alignment, camera_repair, numbers_of_wheels):
     sql_query = """SELECT SUM
                                 (
                                     CASE 
@@ -218,8 +236,8 @@ def duration_of_service(tire_repair, tire_change, removing_installing_wheels, ba
                                         WHEN task_name = '{4}' THEN task_duration  
                                         ELSE '00:00:00'
                                     end
-                                ) AS duration FROM tasks""".\
-                            format(tire_repair, tire_change, removing_installing_wheels, balancing, camera_repair)
+                                ) AS duration FROM tasks""". \
+        format(tire_repair, tire_change, removing_installing_wheels, balancing, camera_repair)
     cursor.execute(sql_query)
     conn.commit()
     res_ = cursor.fetchone()
@@ -271,8 +289,8 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
         created = datetime.datetime.now()
         sql_query = """INSERT INTO tire_service_order 
                     (user_id, start_datetime, stop_datetime, user_vehicle_id, manager_id, service_type_id, created)
-                    VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}');""".\
-                    format(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id, created)
+                    VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}');""". \
+            format(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id, created)
         cursor.execute(sql_query)
         conn.commit()
 
@@ -283,7 +301,7 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
                                         user_vehicle_id = '{3}' AND
                                         manager_id = '{4}' AND
                                         service_type_id = '{5}';""". \
-                                    format(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id)
+            format(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id)
         cursor.execute(sql_query)
         conn.commit()
         service_order_id = cursor.fetchone()[0]
@@ -313,8 +331,8 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
         # get the manager's and worker's first and last names
         sql_query = """SELECT first_name, last_name, email, phone FROM staff WHERE worker_id = '{0}'
                        UNION ALL 
-                       SELECT first_name, last_name, email, phone FROM managers WHERE manager_id = '{1}';""".\
-                        format(worker_id, manager_id)
+                       SELECT first_name, last_name, email, phone FROM managers WHERE manager_id = '{1}';""". \
+            format(worker_id, manager_id)
         cursor.execute(sql_query)
         conn.commit()
         res_cost = cursor.fetchall()
