@@ -10,7 +10,7 @@ from datetime import date
 from flask_swagger_ui import get_swaggerui_blueprint
 import bcrypt
 import git
-# from git import Repo
+from git import Repo
 from defs import *
 from file_read_backwards import FileReadBackwards
 
