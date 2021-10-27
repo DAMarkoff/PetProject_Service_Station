@@ -1738,7 +1738,7 @@ def push():
 
 
 @app.route("/admin/restore_password", methods=['POST'])
-def change_password():
+def restore_password():
     if request.method == 'POST':
         email = request.form.get('email')
         token = request.form.get('token')
