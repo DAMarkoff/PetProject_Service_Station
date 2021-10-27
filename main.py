@@ -1727,12 +1727,12 @@ def push():
     if request.method == 'POST':
         admin_password = request.form.get('admin password')
         if admin_password == 'push':
-            try:
-                repository.git.add('user_auth.txt')
-                repository.git.commit(m='update user_auth.txt')
-                origin = repository.remote(name='origin')
-                origin.push()
-                return 'pushed'
+            # try:
+            repository.git.add('user_auth.txt')
+            repository.git.commit(m='update user_auth.txt')
+            origin = repository.remote(name='origin')
+            origin.push()
+            return 'pushed'
             # except:
             #     return 'error'
 
