@@ -4,12 +4,9 @@ import re
 import redis
 import datetime
 import bcrypt
-import git
-from git import Repo
 import random
 from jinja2 import Template
 
-repository = Repo('~/server/Course')
 r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode_responses=True)
 conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', host='159.69.151.133', port='5056')
 cursor = conn.cursor()
@@ -181,11 +178,10 @@ def choose_a_manager(date_to_query):
                     .format(date_to_query)
     cursor.execute(sql_query)
     conn.commit()
-    res_ = cursor.fetchall()
+    res_ = list(manager[0] for manager in cursor.fetchall())
 
     if res_:
-        rand_id = random.randint(0, len(res_) - 1)
-        manager_id = res_[rand_id][0]
+        manager_id = random.choice(res_)
         return_val['result'] = True
         return_val['manager_id'] = manager_id
     else:
@@ -198,11 +194,10 @@ def choose_a_manager(date_to_query):
                             WHERE load_ in (SELECT MIN(load_) FROM managers_load)""".format(date_to_query)
         cursor.execute(sql_query)
         conn.commit()
-        res_ = cursor.fetchall()
+        res_ = list(manager[0] for manager in cursor.fetchall())
 
         if res_:
-            rand_id = random.randint(0, len(res_) - 1)
-            manager_id = res_[rand_id][0]
+            manager_id = random.choice(res_)
             return_val['result'] = True
             return_val['manager_id'] = manager_id
         else:
@@ -270,10 +265,9 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
                     AND active = true AND position_name = 'worker'""".format(order_date, end_time)
     cursor.execute(sql_query)
     conn.commit()
-    res_ = cursor.fetchall()
+    res_ = list(worker[0] for worker in cursor.fetchall())
     if res_:
-        rand_id = random.randint(0, len(res_) - 1)
-        worker_id = res_[rand_id][0]
+        worker_id = random.choice(res_)
         created = datetime.datetime.now()
         sql_query = """INSERT INTO tire_service_order 
                     (user_id, start_datetime, stop_datetime, user_vehicle_id, manager_id, service_type_id, created)
@@ -292,8 +286,7 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
                                     format(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id)
         cursor.execute(sql_query)
         conn.commit()
-        res_ = cursor.fetchone()
-        service_order_id = res_[0]
+        service_order_id = cursor.fetchone()[0]
 
         service_order_tasks, service_order_cost = [], 0
         for task in tasks:
@@ -321,7 +314,7 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
         sql_query = """SELECT first_name, last_name, email, phone FROM staff WHERE worker_id = '{0}'
                        UNION ALL 
                        SELECT first_name, last_name, email, phone FROM managers WHERE manager_id = '{1}';""".\
-                format(worker_id, manager_id)
+                        format(worker_id, manager_id)
         cursor.execute(sql_query)
         conn.commit()
         res_cost = cursor.fetchall()

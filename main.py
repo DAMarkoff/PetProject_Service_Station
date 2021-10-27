@@ -1,4 +1,3 @@
-import random
 from flask import Flask, request, jsonify, abort
 from jinja2 import Template
 import psycopg2
