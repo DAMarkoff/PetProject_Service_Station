@@ -1733,8 +1733,8 @@ def push():
                 origin = repository.remote(name='origin')
                 origin.push()
                 return 'pushed'
-            except:
-                return 'error'
+            # except:
+            #     return 'error'
 
 
 @app.route("/admin/restore_password", methods=['POST'])
