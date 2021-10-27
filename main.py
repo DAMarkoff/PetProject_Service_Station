@@ -1768,7 +1768,7 @@ def restore_password():
         if group_name != 'admin':
             abort(403, description='This can only be done by an admin')
 
-        with FileReadBackwards("/user_auth.txt", encoding="utf-8") as file:
+        with FileReadBackwards("user_auth.txt", encoding="utf-8") as file:
             for line in file:
                 line_data = line.split('/')
                 if line_data[2] == user_email and line_data[4] != '!password!':
