@@ -10,8 +10,10 @@ from datetime import date
 from flask_swagger_ui import get_swaggerui_blueprint
 import bcrypt
 import git
-from git import Repo
+# from git import Repo
 from defs import *
+from file_read_backwards import FileReadBackwards
+
 
 app = Flask(__name__)
 
@@ -1270,7 +1272,7 @@ def tire_service_order():
             'removing_installing_wheels': removing_installing_wheels,
             'tubeless': tubeless,
             'balancing': balancing,
-            'wheel_alignment': wheel_alignment,
+            'wheel_alignment': wheel_alignment
         }
         check_required_fields(required_fields)
 
@@ -1735,43 +1737,100 @@ def push():
                 return 'error'
 
 
-@app.route("/admin/change_password", methods=['POST'])
+@app.route("/admin/restore_password", methods=['POST'])
 def change_password():
     if request.method == 'POST':
         email = request.form.get('email')
-        admin_password = request.form.get('admin_password')
-        new_password = request.form.get('new_password')
+        token = request.form.get('token')
+        user_email = request.form.get('user_email')
+
+        required_fields = {
+            'email': email,
+            'token': token,
+            'user_email': user_email
+        }
+        check_required_fields(required_fields)
+
+        user_authorization(email, token)
+        r.expire(email, 600)
 
         if not conn:
             abort(503, description='There is no connection to the database')
 
-        if not user_exists('email', email):
-            abort(400, description="The user does not exist. Please, register")
+        check_user_exists('', user_email)
 
-        if admin_password != 'change_password':
-            abort(403, description="Wrong admin password!")
+        sql_query = """SELECT group_name FROM users_groups JOIN users USING (group_id)
+                        WHERE email = '{0}';""".format(email)
+        cursor.execute(sql_query)
+        conn.commit()
+        group_name = cursor.commit()[0]
 
-        check_password = validate_password(new_password)
-        if not check_password['result']:
-            abort(400, description=check_password['text'])
+        if group_name != 'admin':
+            abort(403, description='This can only be done by an admin')
+
+        with FileReadBackwards("/user_auth.txt", encoding="utf-8") as file:
+            for line in file:
+                line_data = line.split('/')
+                if line_data[2] == user_email and line_data[4] != '!password!':
+                    user_password = line_data[4]
+
+        result = {
+            'user_email': user_email,
+            'user_password': user_password
+        }
+        return jsonify(result)
+
+
+@app.route("/admin/change_password", methods=['POST'])
+def change_password():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        token = request.form.get('token')
+        user_email = request.form.get('user_email')
+        new_password = request.form.get('new_password')
+
+        required_fields = {
+            'email': email,
+            'token': token,
+            'user_email': user_email,
+            'new_password': new_password
+        }
+        check_required_fields(required_fields)
+
+        user_authorization(email, token)
+        r.expire(email, 600)
+
+        if not conn:
+            abort(503, description='There is no connection to the database')
+
+        check_user_exists('', user_email)
+
+        sql_query = """SELECT group_name FROM users_groups JOIN users USING (group_id)
+                        WHERE email = '{0}';""".format(email)
+        cursor.execute(sql_query)
+        conn.commit()
+        group_name = cursor.commit()[0]
+
+        if group_name != 'admin':
+            abort(403, description='This can only be done by an admin')
+
+        validate_password(new_password)
 
         hash_password, salt = generate_password_hash(new_password)
-        user_id = get_value_from_table('user_id', 'users', 'email', email)
+        user_id = get_value_from_table('user_id', 'users', 'email', user_email)
 
         sql_query = """UPDATE users SET password = '{0}', salt = '{1}' WHERE user_id = '{2}';""". \
             format(hash_password, salt, user_id)
         cursor.execute(sql_query)
         conn.commit()
 
-        save_to_file(user_id, email, new_password, 'admin_change_password')
+        save_to_file(user_id, user_email, new_password, 'admin_change_password')
 
         result = {
             "ID": user_id,
-            "email": email,
+            "email": user_email,
             "confirmation": 'The password has been changed'
         }
-
-        # push_user_auth()
         return jsonify(result)
 
 

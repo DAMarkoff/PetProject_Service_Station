@@ -44,7 +44,7 @@ def check_user_exists(reason: str, email: str):
     if not usr_id_:
         if reason == 'already exists':
             abort(400, description="The user with this email already exists")
-        elif reason == 'does not exist':
+        elif not reason or reason == 'does not exist':
             abort(400, description='The user does not exist')
 
 
