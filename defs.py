@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, abort
+from flask import jsonify, abort
 import psycopg2
 import re
 import redis
@@ -19,19 +19,6 @@ def check_required_fields(required_fields: dict):
         template = Template(text)
         name = ', '.join(map(str, required_fields))
         abort(400, description=template.render(name=name))
-
-
-# to be replaced by check_user_exists and delete
-def user_exists(where: str, email: str) -> bool:
-    """Checks that the user with this email is already registered"""
-    sql_query = "SELECT user_id FROM users WHERE {0} = '{1}'".format(where, email)
-    cursor.execute(sql_query)
-    conn.commit()
-    usr_id_ = cursor.fetchone()
-
-    if not usr_id_:
-        return False
-    return True
 
 
 def admin_authorization(email: str):
@@ -63,7 +50,7 @@ def check_user_exists(reason: str, email: str):
             abort(400, description='The user does not exist')
 
 
-def vehicle_exists(user_vehicle_id: int):
+def check_vehicle_exists(user_vehicle_id: int):
     """Checks that the vehicle with this vehicle_id exists"""
     if not get_value_from_table('user_id', 'user_vehicle', 'user_vehicle_id', user_vehicle_id):
         abort(400, description='The vehicle does not exist')
@@ -142,12 +129,6 @@ def validate(name: str):
     return bool(valid_pattern.match(name))
 
 
-def user_active(email: str):
-    """Checks that the user is active"""
-    if not get_value_from_table('active', 'users', 'email', email):
-        abort(400, description='The user is deactivated')
-
-
 def get_value_from_table(select: str, from_db: str, where: str, what):
     sql_query = """SELECT {0} FROM {1} WHERE {2} = '{3}'""".format(select, from_db, where, what)
     cursor.execute(sql_query)
@@ -159,7 +140,7 @@ def get_value_from_table(select: str, from_db: str, where: str, what):
     return res_[0]
 
 
-def user_authorization(email: str, token: str):
+def user_authentication(email: str, token: str):
     if not (token == r.get(email)):
         abort(401, description='The token is invalid, please log in')
 
@@ -186,8 +167,7 @@ def generate_password_hash(password: str):
     return password.decode(), salt.decode()
 
 
-def choose_a_manager(date_to_query):
-    return_val = {'result': True, 'manager_id': ''}
+def choose_a_manager(date_to_query: str) -> int or dict:
     # =========================================================================================================
     # Select a manager
     # someone who does not have a service order on the required order date
@@ -200,8 +180,7 @@ def choose_a_manager(date_to_query):
 
     if res_:
         manager_id = random.choice(res_)
-        return_val['result'] = True
-        return_val['manager_id'] = manager_id
+        return manager_id
     else:
         # someone who has the minimum number of service orders on the required order date
         sql_query = """WITH managers_load AS(
@@ -216,16 +195,13 @@ def choose_a_manager(date_to_query):
 
         if res_:
             manager_id = random.choice(res_)
-            return_val['result'] = True
-            return_val['manager_id'] = manager_id
+            return manager_id
         else:
-            return_val['result'] = False
-            return_val['manager_id'] = {'confirmation': 'There are no managers for the required time'}
-    return return_val
+            # unreachable o_O
+            abort(400, description='There are no managers for the required time')
 
 
-def duration_of_service(tire_repair, tire_change, removing_installing_wheels, balancing,
-                        wheel_alignment, camera_repair, numbers_of_wheels):
+def duration_of_service(tasks: dict) -> datetime:
     sql_query = """SELECT SUM
                                 (
                                     CASE 
@@ -237,11 +213,12 @@ def duration_of_service(tire_repair, tire_change, removing_installing_wheels, ba
                                         ELSE '00:00:00'
                                     end
                                 ) AS duration FROM tasks""". \
-        format(tire_repair, tire_change, removing_installing_wheels, balancing, camera_repair)
+        format(tasks['tire_repair'], tasks['tire_change'], tasks['removing_installing_wheels'],
+               tasks['balancing'], tasks['camera_repair'])
     cursor.execute(sql_query)
     conn.commit()
     res_ = cursor.fetchone()
-    service_duration = numbers_of_wheels * res_[0]
+    service_duration = tasks['numbers_of_wheels'] * res_[0]
 
     sql_query = """SELECT SUM
                     (
@@ -250,7 +227,7 @@ def duration_of_service(tire_repair, tire_change, removing_installing_wheels, ba
                             ELSE '00:00:00'
                         END
                     ) AS duration
-                    FROM tasks""".format(wheel_alignment)
+                    FROM tasks""".format(tasks['wheel_alignment'])
     cursor.execute(sql_query)
     conn.commit()
     res_ = cursor.fetchone()
@@ -263,7 +240,7 @@ def duration_of_service(tire_repair, tire_change, removing_installing_wheels, ba
 def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_vehicle_id, manager_id,
                                          tasks, numbers_of_wheels, order_type, service_duration, service_type_id):
     return_val = {'result': True, 'value': ''}
-    # Запрос на свободных работяг в нужное время
+    # Search for a worker without work at the required time
     sql_query = """WITH dates_intersection AS (
                         SELECT DISTINCT worker_id FROM tire_service_order JOIN list_of_works USING (service_order_id) 
                         WHERE 
@@ -284,13 +261,14 @@ def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_veh
     cursor.execute(sql_query)
     conn.commit()
     res_ = list(worker[0] for worker in cursor.fetchall())
+
     if res_:
-        worker_id = random.choice(res_)
+        worker_id = random.choice(res_) # -----------------------------------------------------------
         created = datetime.datetime.now()
         sql_query = """INSERT INTO tire_service_order 
                     (user_id, start_datetime, stop_datetime, user_vehicle_id, manager_id, service_type_id, created)
                     VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}');""". \
-            format(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id, created)
+                format(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id, created)
         cursor.execute(sql_query)
         conn.commit()
 

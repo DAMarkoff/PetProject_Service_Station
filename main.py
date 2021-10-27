@@ -54,7 +54,7 @@ def db_conn_error(e):
     return jsonify(error=str(e)), 503
 
 
-@app.route("/users", methods=['GET', 'POST', 'PUT', 'DELETE'])  # request a short data/register/change data/delete
+@app.route("/users", methods=['GET', 'POST', 'PATCH'])  # request a short data/register a new user/change the user's info
 def users():
     # request a short data about all/one of the users
     if request.method == 'GET':
@@ -178,8 +178,8 @@ def users():
 
         return jsonify(result)
 
-    # change a user's data
-    elif request.method == 'PUT':
+    # change the user's info
+    elif request.method == 'PATCH':
         token = request.form.get('token')
         email = request.form.get('email')
         f_name = request.form.get('new_first_name')
@@ -193,7 +193,7 @@ def users():
         }
         check_required_fields(required_fields)
 
-        user_authorization(email, token)
+        user_authentication(email, token)
         r.expire(email, 600)
         check_db_connection()
 
@@ -260,45 +260,6 @@ def users():
         }
 
         return jsonify(result)
-
-    # delete a user (
-    elif request.method == 'DELETE':
-        email = request.form.get('email')
-        token = request.form.get('token')
-        user_email = request.form.get('user_email')
-
-        required_fields = {
-            'token': token,
-            'email': email,
-            'user_email': user_email
-        }
-        check_required_fields(required_fields)
-
-        user_authorization(email, token)
-        r.expire(email, 600)
-        check_db_connection()
-        admin_authorization(email)
-
-        sql_query = """SELECT first_name, last_name, user_id FROM users WHERE email = '{0}'""".format(user_email)
-        cursor.execute(sql_query)
-        conn.commit()
-        res_ = cursor.fetchone()
-
-        first_name, last_name, user_id = res_
-
-        sql_query = """DELETE FROM users WHERE email = '{0}'""".format(user_email)
-        cursor.execute(sql_query)
-        conn.commit()
-
-        save_to_file(user_id, user_email, '!password!', 'user-deleted-by_admin')
-
-        text = 'R.I.P {{ name }}, i will miss you :('
-        template = Template(text)
-        result = {
-            'confirmation': template.render(name=first_name + ' ' + last_name)
-        }
-
-        return jsonify(result)
     else:
         abort(405)
 
@@ -315,7 +276,7 @@ def user_info():
         }
         check_required_fields(required_fields)
 
-        user_authorization(email, token)
+        user_authentication(email, token)
         r.expire(email, 600)
         check_db_connection()
 
@@ -513,8 +474,10 @@ def login():
         check_required_fields(required_fields)
 
         check_user_exists('does not exist', email)
-        user_active(email)
         check_db_connection()
+
+        if not get_value_from_table('active', 'users', 'email', email):
+            abort(400, description='The user is deactivated')
 
         sql_query = "SELECT salt, user_id, first_name, last_name, password FROM users WHERE email = '{0}'".format(email)
         cursor.execute(sql_query)
@@ -547,8 +510,7 @@ def login():
         abort(405)
 
 
-@app.route("/users/deactivate_user",
-           methods=['POST'])  # mark the user as inactive (this can be done by the user itself)
+@app.route("/users/deactivate_user", methods=['POST'])  # mark the user as inactive (this can be done by the user itself)
 def deactivate_user():
     if request.method == 'POST':
         email = request.form.get('email')
@@ -562,7 +524,7 @@ def deactivate_user():
         }
         check_required_fields(required_fields)
 
-        user_authorization(email, token)
+        user_authentication(email, token)
         check_db_connection()
 
         if sure != 'True':
@@ -587,48 +549,7 @@ def deactivate_user():
         abort(405)
 
 
-@app.route("/users/activate_user", methods=['POST'])  # mark the user as active (this can be done only by the admin)
-def activate_user():
-    if request.method == 'POST':
-        email = request.form.get('email')
-        token = request.form.get('token')
-        user_email = request.form.get('user_email')
-
-        required_fields = {
-            'email': email,
-            'token': token,
-            'user_email': user_email
-        }
-        check_required_fields(required_fields)
-
-        user_authorization(email, token)
-        r.expire(email, 600)
-
-        check_db_connection()
-        check_user_exists('does not exist', user_email)
-        admin_authorization(email)
-
-        sql_query = """UPDATE users SET active = 'True' WHERE email = '{0}'""".format(user_email)
-        cursor.execute(sql_query)
-        conn.commit()
-
-        sql_query = """SELECT user_id, first_name, last_name FROM users WHERE email = '{0}'""".format(user_email)
-        cursor.execute(sql_query)
-        conn.commit()
-        user_id, first_name, last_name = cursor.fetchone()
-
-        text = 'User {{ name }} (ID {{ id }})has been successfully activated'
-        template = Template(text)
-        result = {
-            'confirmation': template.render(name=first_name + ' ' + last_name, id=user_id)
-        }
-
-        return jsonify(result)
-    else:
-        abort(405)
-
-
-@app.route("/vehicle", methods=['POST', 'PUT', 'DELETE'])  # add new/change/delete user's vehicle
+@app.route("/vehicle", methods=['POST', 'PATCH', 'DELETE'])  # add new/change/delete user's vehicle
 def users_vehicle():
     # Add new user's vehicle
     if request.method == 'POST':
@@ -645,7 +566,7 @@ def users_vehicle():
         }
         check_required_fields(required_fields)
 
-        user_authorization(email, token)
+        user_authentication(email, token)
         r.expire(email, 600)
         check_db_connection()
 
@@ -681,7 +602,7 @@ def users_vehicle():
         return jsonify(result)
 
     # Update the user's vehicle data
-    elif request.method == 'PUT':
+    elif request.method == 'PATCH':
         email = request.form.get('email')
         token = request.form.get('token')
         user_vehicle_id = request.form.get('user_vehicle_id')
@@ -695,7 +616,7 @@ def users_vehicle():
         }
         check_required_fields(required_fields)
 
-        user_authorization(email, token)
+        user_authentication(email, token)
         r.expire(email, 600)
         check_db_connection()
 
@@ -706,7 +627,7 @@ def users_vehicle():
             user_vehicle_id = int(user_vehicle_id)
         except ValueError:
             abort(400, description='The <user_vehicle_id> should contain only numbers')
-        vehicle_exists(user_vehicle_id)
+        check_vehicle_exists(user_vehicle_id)
 
         sql_query = """SELECT user_id, vehicle_id, size_id FROM user_vehicle WHERE user_vehicle_id = '{0}'""". \
             format(user_vehicle_id)
@@ -772,7 +693,7 @@ def users_vehicle():
         }
         check_required_fields(required_fields)
 
-        user_authorization(email, token)
+        user_authentication(email, token)
         r.expire(email, 600)
         check_db_connection()
 
@@ -780,7 +701,7 @@ def users_vehicle():
             user_vehicle_id = int(user_vehicle_id)
         except ValueError:
             abort(400, description='The <user_vehicle_id> should contain only numbers')
-        vehicle_exists(user_vehicle_id)
+        check_vehicle_exists(user_vehicle_id)
 
         if get_user_id(email) != get_value_from_table('user_id', 'user_vehicle', 'user_vehicle_id', user_vehicle_id):
             abort(403, description='It is not your vehicle! Somebody call the police!')
@@ -934,7 +855,7 @@ def storage_order():
         }
         check_required_fields(required_fields)
 
-        user_authorization(email, token)
+        user_authentication(email, token)
         r.expire(email, 600)
         check_db_connection()
 
@@ -1081,7 +1002,7 @@ def storage_order():
     # if not token or not email or not storage_order_id:
     #     abort(400, description='The token, email, storage_order_id data are required')
     #
-    # user_auth = user_authorization(email, token)
+    # user_auth = user_authentication(email, token)
     # if not user_auth['result']:
     #     abort(401, description=user_auth['text'])
     #
@@ -1194,7 +1115,7 @@ def storage_order():
         }
         check_required_fields(required_fields)
 
-        user_authorization(email, token)
+        user_authentication(email, token)
         r.expire(email, 600)
         check_db_connection()
 
@@ -1260,7 +1181,7 @@ def tire_service_order():
         }
         check_required_fields(required_fields)
 
-        user_authorization(email, token)
+        user_authentication(email, token)
         r.expire(email, 600)
         check_db_connection()
 
@@ -1268,6 +1189,10 @@ def tire_service_order():
             user_vehicle_id = int(user_vehicle_id)
         except ValueError:
             abort(400, description='The <user_vehicle_id> should contain only numbers')
+
+        user_id = get_value_from_table('user_id', 'user_vehicle', 'user_vehicle_id', user_vehicle_id)
+        if get_user_id(email) != user_id:
+            abort(403, description='It is not your vehicle!')
 
         try:
             numbers_of_wheels = int(numbers_of_wheels)
@@ -1290,13 +1215,13 @@ def tire_service_order():
         try:
             order_type = order_type.lower()
         except AttributeError:
-            abort(400, description='The <active_only> should be string')
+            abort(400, description='The <order_type> should be string')
         else:
             if order_type not in order_types:
                 str_order_types = ''
                 for types in order_types:
                     str_order_types += '<' + str(types) + '>' + ' or '
-                abort(400, description='The <active_only> should be ' + str_order_types[:len(str_order_types) - 4])
+                abort(400, description='The <order_type> should be ' + str_order_types[:len(str_order_types) - 4])
 
         try:
             tubeless = tubeless.lower()
@@ -1310,117 +1235,65 @@ def tire_service_order():
                 abort(400, description='The <active_only>, <balancing> and <wheel_alignment> should be <yes> or <no>')
 
         delta_db = get_value_from_table('delta_minutes', 'positions', 'position_name', 'worker')
-        delta = datetime.timedelta(minutes=int(delta_db))
-
-        # to be deleted
-        # date_to_query = str(order_date.year) + '-' + str(order_date.month) + '-' + str(order_date.day)
+        delta_between_orders = datetime.timedelta(minutes=int(delta_db))
         date_to_query = str(order_date.date())
 
         if int(order_date.hour) < 8:
             abort(400, description='Sorry, we open at 08:00 am')
 
-        user_id = get_value_from_table('user_id', 'user_vehicle', 'user_vehicle_id', user_vehicle_id)
-
-        if get_user_id(email) != user_id:
-            abort(403, description='It is not your vehicle!')
-
+        # form the tasks dict based on the order type and service needed
         if order_type.lower() == 'tire change':
             service_type_id = get_value_from_table('service_type_id', 'tire_service_order_type',
                                                    'service_type_name', order_type)
-            tasks = []
-            tire_change = 'tire_change'
-            tire_repair = 'no'
-            tasks.append('tire_change')
-            camera_repair = 'no'
+            tasks = {
+                'tire_change': 'tire_change',
+                'tire_repair': 'no',
+                'camera_repair': 'no',
+                'numbers_of_wheels': numbers_of_wheels
+            }
 
-            if removing_installing_wheels.lower() == 'yes':
-                removing_installing_wheels = 'wheel_removal_installation'
-                tasks.append('wheel_removal_installation')
+            tasks['wheel_removal_installation'] = 'wheel_removal_installation' \
+                if removing_installing_wheels.lower() == 'yes' else 'no'
+            tasks['wheel_balancing'] = 'wheel_balancing' if balancing.lower() == 'yes' else 'no'
+            tasks['wheel_alignment'] = 'wheel_alignment' if wheel_alignment.lower() == 'yes' else 'no'
 
-            if balancing.lower() == 'yes':
-                balancing = 'wheel_balancing'
-                tasks.append('wheel_balancing')
 
-            if wheel_alignment.lower() == 'yes':
-                wheel_alignment = 'wheel_alignment'
-                tasks.append('wheel_alignment')
-
-            # =========================================================================================================
-            # Calculate the expected duration of tire replacement
-            service_duration = duration_of_service(tire_repair, tire_change, removing_installing_wheels, balancing,
-                                                   wheel_alignment, camera_repair, numbers_of_wheels)
-            end_time = order_date + service_duration + delta
-            if int(end_time.hour) >= 20 and int(end_time.minute) >= 15:
-                abort(400, description='Sorry, we close at 08:00 pm. The estimated end time of your order is '
-                                       + str(end_time.hour) + ':' + str(end_time.minute))
-
-            # =========================================================================================================
-            # Select a manager
-            manager = choose_a_manager(date_to_query)
-            if manager['result']:
-                manager_id = manager['manager_id']
-            else:
-                manager_id = manager['manager_id']
-                abort(400, description=manager_id)
-
-            # =========================================================================================================
-            # Time
-            result = choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_vehicle_id, manager_id,
-                                                          tasks, numbers_of_wheels, order_type, service_duration,
-                                                          service_type_id)
-            return result['value']
         elif order_type.lower() == 'tire repair':
             service_type_id = get_value_from_table('service_type_id', 'tire_service_order_type',
                                                    'service_type_name', order_type)
-            tasks = []
-            tire_change = 'no'
-            tire_repair = 'tire_repair'
-            tasks.append('tire_repair')
+            tasks = {
+                'tire_change': 'no',
+                'tire_repair': 'tire_repair',
+                'numbers_of_wheels': numbers_of_wheels
+            }
 
-            if tubeless.lower() == 'no':
-                camera_repair = 'camera_repair'
-                tasks.append('camera_repair')
-            else:
-                camera_repair = 'no'
-
-            if removing_installing_wheels.lower() == 'yes':
-                removing_installing_wheels = 'wheel_removal_installation'
-                tasks.append('wheel_removal_installation')
-
-            if balancing.lower() == 'yes':
-                balancing = 'wheel_balancing'
-                tasks.append('wheel_balancing')
-
-            if wheel_alignment.lower() == 'yes':
-                wheel_alignment = 'wheel_alignment'
-                tasks.append('wheel_alignment')
-
-            # =========================================================================================================
-            # Calculate the expected duration of tire replacement
-            service_duration = duration_of_service(tire_repair, tire_change, removing_installing_wheels, balancing,
-                                                   wheel_alignment, camera_repair, numbers_of_wheels)
-            end_time = order_date + service_duration + delta
-            if int(end_time.hour) >= 20 and int(end_time.minute) >= 15:
-                abort(400, description='Sorry, we close at 08:00 pm. The estimated end time of your order is '
-                                       + str(end_time.hour) + ':' + str(end_time.minute))
-
-            # =========================================================================================================
-            # Select a manager
-            manager = choose_a_manager(date_to_query)
-            if manager['result']:
-                manager_id = manager['manager_id']
-            else:
-                manager_id = manager['manager_id']
-                abort(400, description=manager_id)
-
-            # =========================================================================================================
-            # Time
-            result = choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_vehicle_id, manager_id,
-                                                          tasks, numbers_of_wheels, order_type, service_duration,
-                                                          service_type_id)
-            return result['value']
+            tasks['camera_repair'] = 'camera_repair' if tubeless.lower() == 'no' else 'no'
+            tasks['wheel_removal_installation'] = 'wheel_removal_installation' \
+                if removing_installing_wheels.lower() == 'yes' else 'no'
+            tasks['wheel_balancing'] = 'wheel_balancing' if balancing.lower() == 'yes' else 'no'
+            tasks['wheel_alignment'] = 'wheel_alignment' if wheel_alignment.lower() == 'yes' else 'no'
         else:
-            return jsonify({'confirmation': 'we only provide the <tire change> and <tire repair> services by now'})
+            return 'Unreachable situation'
+
+        # =========================================================================================================
+        # Calculate the expected duration of tire service
+        service_duration = duration_of_service(tasks)
+        end_time = order_date + service_duration + delta_between_orders
+        if int(end_time.hour) >= 20 and int(end_time.minute) >= 15:
+            abort(400, description='Sorry, we close at 08:00 pm. The estimated end time of your order is '
+                                   + str(end_time.hour) + ':' + str(end_time.minute))
+
+        # =========================================================================================================
+        # Choose a manager
+        manager_id = choose_a_manager(date_to_query)
+
+        # =========================================================================================================
+        # Time
+        result = choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_vehicle_id,
+                                                      manager_id,
+                                                      tasks, numbers_of_wheels, order_type, service_duration,
+                                                      service_type_id)
+        return result['value']
 
     elif request.method == 'PUT':
         return 'Temporarily closed for maintenance'
@@ -1436,9 +1309,7 @@ def tire_service_order():
     #         if not token or not email or not service_order_id:
     #             abort(400, description='The token, email, service order id are required')
     #
-    #         user_auth = user_authorization(email, token)
-    #         if not user_auth['result']:
-    #             abort(401, description=user_auth['text'])
+    #         user_authentication(email, token)
     #
     #         r.expire(email, 600)
     #
@@ -1509,7 +1380,7 @@ def tire_service_order():
         }
         check_required_fields(required_fields)
 
-        user_authorization(email, token)
+        user_authentication(email, token)
         r.expire(email, 600)
         check_db_connection()
 
@@ -1540,7 +1411,7 @@ def tire_service_order():
         text = 'Tire service order ID {{ name }} has been deleted'
         template = Template(text)
         result = {
-            "confirmation": template.render(name=service_order_id),
+            "confirmation": template.render(name=service_order_id)
         }
         return jsonify(result)
     else:
@@ -1568,9 +1439,7 @@ def task():
         # if not str(numbers_of_task).isdigit() or not str(service_order_id).isdigit():
         #     abort(400, description='Please, provide a numbers of tasks and service_order_id in digits')
         #
-        # user_auth = user_authorization(email, token)
-        # if not user_auth['result']:
-        #     abort(401, description=user_auth['text'])
+        # user_authentication(email, token)
         #
         # r.expire(email, 600)
         #
@@ -1626,10 +1495,7 @@ def task():
         # if not str(service_order_id).isdigit():
         #     abort(400, description='Please, provide the service_order_id in digits')
         #
-        # user_auth = user_authorization(email, token)
-        # if not user_auth['result']:
-        #     abort(401, description=user_auth['text'])
-        #
+        # user_authentication(email, token)
         # r.expire(email, 600)
         #
         # check_db_connection()
@@ -1714,7 +1580,7 @@ def push():
             'token': token
         }
         check_required_fields(required_fields)
-        user_authorization(email, token)
+        user_authentication(email, token)
         r.expire(email, 600)
         admin_authorization(email)
         try:
@@ -1725,10 +1591,12 @@ def push():
             return 'pushed'
         except:
             return 'error'
+    else:
+        abort(405)
 
-
-@app.route("/admin/restore_password", methods=['POST'])
-def restore_password():
+@app.route("/admin/password", methods=['POST', 'PATCH'])
+def password():
+    # restore the user's password (this can be done only by the admin)
     if request.method == 'POST':
         email = request.form.get('email')
         token = request.form.get('token')
@@ -1741,7 +1609,7 @@ def restore_password():
         }
         check_required_fields(required_fields)
 
-        user_authorization(email, token)
+        user_authentication(email, token)
         r.expire(email, 600)
         check_db_connection()
 
@@ -1760,10 +1628,8 @@ def restore_password():
         }
         return jsonify(result)
 
-
-@app.route("/admin/change_password", methods=['POST'])
-def change_password():
-    if request.method == 'POST':
+    # change the user's password
+    elif request.method == 'PATCH':
         email = request.form.get('email')
         token = request.form.get('token')
         user_email = request.form.get('user_email')
@@ -1777,10 +1643,10 @@ def change_password():
         }
         check_required_fields(required_fields)
 
-        user_authorization(email, token)
+        user_authentication(email, token)
         r.expire(email, 600)
-
         check_db_connection()
+
         check_user_exists('', user_email)
         admin_authorization(email)
         validate_password(new_password)
@@ -1801,7 +1667,90 @@ def change_password():
             "confirmation": 'The password has been changed'
         }
         return jsonify(result)
+    else:
+        abort(405)
 
+
+@app.route("/admin/user", methods=['PATCH', 'DELETE'])
+def user():
+    # mark the user as active (this can be done only by the admin)
+    if request.method == 'PATCH':
+        email = request.form.get('email')
+        token = request.form.get('token')
+        user_email = request.form.get('user_email')
+
+        required_fields = {
+            'email': email,
+            'token': token,
+            'user_email': user_email
+        }
+        check_required_fields(required_fields)
+
+        user_authentication(email, token)
+        r.expire(email, 600)
+        check_db_connection()
+
+        check_user_exists('does not exist', user_email)
+        admin_authorization(email)
+
+        sql_query = """UPDATE users SET active = 'True' WHERE email = '{0}'""".format(user_email)
+        cursor.execute(sql_query)
+        conn.commit()
+
+        sql_query = """SELECT user_id, first_name, last_name FROM users WHERE email = '{0}'""".format(user_email)
+        cursor.execute(sql_query)
+        conn.commit()
+        user_id, first_name, last_name = cursor.fetchone()
+
+        text = 'User {{ name }} (ID {{ id }})has been successfully activated'
+        template = Template(text)
+        result = {
+            'confirmation': template.render(name=first_name + ' ' + last_name, id=user_id)
+        }
+
+        return jsonify(result)
+
+    # delete the user (this can be done only by the admin)
+    elif request.method == 'DELETE':
+        email = request.form.get('email')
+        token = request.form.get('token')
+        user_email = request.form.get('user_email')
+
+        required_fields = {
+            'token': token,
+            'email': email,
+            'user_email': user_email
+        }
+        check_required_fields(required_fields)
+
+        user_authentication(email, token)
+        r.expire(email, 600)
+        check_db_connection()
+
+        admin_authorization(email)
+
+        sql_query = """SELECT first_name, last_name, user_id FROM users WHERE email = '{0}'""".format(user_email)
+        cursor.execute(sql_query)
+        conn.commit()
+        res_ = cursor.fetchone()
+
+        first_name, last_name, user_id = res_
+
+        sql_query = """DELETE FROM users WHERE email = '{0}'""".format(user_email)
+        cursor.execute(sql_query)
+        conn.commit()
+
+        save_to_file(user_id, user_email, '!password!', 'user-deleted-by_admin')
+
+        text = 'R.I.P {{ name }}, i will miss you :('
+        template = Template(text)
+        result = {
+            'confirmation': template.render(name=first_name + ' ' + last_name)
+        }
+
+        return jsonify(result)
+    else:
+        abort(405)
 
 if __name__ == '__main__':
     app.run()
