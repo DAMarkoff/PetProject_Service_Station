@@ -23,7 +23,7 @@ swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app
 
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
-repository = Repo('~/server/Course')
+repository = Repo('~/PetProject_Service_Station')
 # logging
 
 r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode_responses=True)
