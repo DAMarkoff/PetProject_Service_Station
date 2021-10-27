@@ -1763,7 +1763,7 @@ def restore_password():
                         WHERE email = '{0}';""".format(email)
         cursor.execute(sql_query)
         conn.commit()
-        group_name = cursor.commit()[0]
+        group_name = cursor.fetchone()[0]
 
         if group_name != 'admin':
             abort(403, description='This can only be done by an admin')
@@ -1809,7 +1809,7 @@ def change_password():
                         WHERE email = '{0}';""".format(email)
         cursor.execute(sql_query)
         conn.commit()
-        group_name = cursor.commit()[0]
+        group_name = cursor.fetchone()[0]
 
         if group_name != 'admin':
             abort(403, description='This can only be done by an admin')
