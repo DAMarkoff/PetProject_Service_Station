@@ -384,10 +384,10 @@ def user_info():
         else:
             result_tire_service_order = []
             for types in service_orders_types:
-                type = types[0]
+                type_ = types[0]
 
                 sql_query = """SELECT DISTINCT service_order_id FROM temp 
-                                            WHERE service_type_name = '{0}';""".format(type)
+                                            WHERE service_type_name = '{0}';""".format(type_)
                 cursor.execute(sql_query)
                 conn.commit()
                 service_order_data = cursor.fetchall()
@@ -397,7 +397,7 @@ def user_info():
                     tire_service_order_cost = \
                         get_value_from_table('SUM(task_cost)', 'temp', 'service_order_id', service_order_id)
 
-                    sql_query = """SELECT task_name, worker_id, worker_name, worker_surname, task_cost FROM temp 
+                    sql_query = """SELECT task_name, worker_id, task_cost FROM temp 
                                     WHERE service_order_id = '{0}'""".format(service_order_id)
                     cursor.execute(sql_query)
                     conn.commit()
@@ -408,13 +408,11 @@ def user_info():
                     else:
                         result_tire_service_order_tasks = []
                         for task in tasks_data:
+                            worker_data = get_employee_data(task[1], 'worker')
                             result_tire_service_order_tasks.append({
                                 'task_name': task[0],
-                                'worker': {
-                                    'worker_id': task[1],
-                                    'worker_name': task[2] + ' ' + task[3]
-                                },
-                                'task cost': task[4]
+                                'worker:': worker_data,
+                                'task cost': task[2]
                             })
 
                     sql_query = """SELECT start_datetime, stop_datetime, manager_id, manager_name, manager_surname, 
@@ -429,7 +427,7 @@ def user_info():
 
                     result_tire_service_order.append({
                         'service_order_id': service_order_id,
-                        'service_order_type': type,
+                        'service_order_type': type_,
                         'start_datetime': start_datetime,
                         'stop_datetime': stop_datetime,
                         'manager': {
@@ -1291,9 +1289,14 @@ def tire_service_order():
 
         worker_id = choose_a_worker(order_date, end_time)
         order_id = create_a_service_order(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id)
-        service_order_cost, service_order_tasks = create_tasks_for_the_service_order(tasks, order_id, worker_id)
+        service_order_tasks = create_tasks_for_the_service_order(tasks, order_id, worker_id)
         manager_data = get_employee_data(manager_id, 'manager')
-        worker_data = get_employee_data(worker_id, 'worker')
+
+        sql_query = """SELECT SUM(task_cost) FROM tasks
+                        JOIN list_of_works USING(task_id) WHERE service_order_id = '{0}';""".format(order_id)
+        cursor.execute(sql_query)
+        conn.commit()
+        service_order_cost = int(cursor.fetchaone()[0])
 
         # =========================================================================================================
 
@@ -1301,7 +1304,6 @@ def tire_service_order():
             'service_order_id': order_id,
             'user_vehicle_id': user_vehicle_id,
             'manager:': manager_data,
-            'worker:': worker_data,
             'service order type': order_type,
             'order datetime': str(order_date),
             'estimated service duration': str(service_duration),
@@ -1614,6 +1616,7 @@ def push():
             return 'error'
     else:
         abort(405)
+
 
 @app.route("/admin/password", methods=['POST', 'PATCH'])
 def password():

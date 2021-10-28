@@ -145,7 +145,7 @@ def user_authentication(email: str, token: str):
         abort(401, description='The token is invalid, please log in')
 
 
-def password_is_valid(salt, password, password_db):
+def password_is_valid(salt, password, password_db) -> bool:
     if str.encode(password_db) == bcrypt.hashpw(str.encode(password), str.encode(salt)):
         return True
     return False
@@ -288,8 +288,8 @@ def create_a_service_order(user_id, order_date, end_time, user_vehicle_id, manag
     return cursor.fetchone()[0]  # The service order_id
 
 
-def create_tasks_for_the_service_order(tasks: dict, order_id: int, worker_id: int) -> int and list:
-    service_order_tasks, service_order_cost = [], 0
+def create_tasks_for_the_service_order(tasks: dict, order_id: int, worker_id: int) -> list:
+    service_order_tasks= []
     tasks_to_db = ('tire_repair', 'camera_repair', 'tire_change', 'wheel_removal_installation', 'wheel_balancing')
     for key in tasks:
         if tasks[key] in tasks_to_db:
@@ -308,13 +308,13 @@ def create_tasks_for_the_service_order(tasks: dict, order_id: int, worker_id: in
             conn.commit()
 
             task_name = get_value_from_table('task_name', 'tasks', 'task_id', task_id)
-            task_cost = get_value_from_table('task_cost', 'tasks', 'task_id', task_id)
-            service_order_cost += int(task_cost)
+            worker_data = get_employee_data(worker_id, 'worker')
             service_order_tasks.append({
                 'task_name': task_name,
-                'task_cost': task_cost
+                'worker:': worker_data,
+                'task_id': task_id
             })
-    return service_order_cost, service_order_tasks
+    return service_order_tasks
 
 
 def get_employee_data(employee_id: int, employee_position: str) -> dict:
@@ -330,122 +330,3 @@ def get_employee_data(employee_id: int, employee_position: str) -> dict:
         employee_position + '_phone': phone
     }
     return result
-
-
-# def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_vehicle_id, manager_id,
-#                                          tasks, numbers_of_wheels, order_type, service_duration, service_type_id):
-#     return_val = {'result': True, 'value': ''}
-#     # Search for a worker without work
-#     sql_query = """WITH dates_intersection AS (
-#                         SELECT DISTINCT worker_id FROM tire_service_order JOIN list_of_works USING (service_order_id)
-#                         WHERE
-#                             (
-#                                 start_datetime BETWEEN '{0}' AND '{1}'
-#                                 OR
-#                                 stop_datetime BETWEEN '{0}' AND '{1}'
-#                                 OR
-#                                 '{0}' BETWEEN start_datetime AND stop_datetime
-#                                 OR
-#                                 '{1}' BETWEEN start_datetime AND stop_datetime
-#                             )
-#                         )
-#
-#                     SELECT worker_id FROM staff JOIN positions USING (position_id)
-#                     WHERE worker_id NOT IN (SELECT worker_id FROM dates_intersection)
-#                     AND active = true AND position_name = 'worker'""".format(order_date, end_time)
-#     cursor.execute(sql_query)
-#     conn.commit()
-#     res_ = list(worker[0] for worker in cursor.fetchall())
-#
-#     if res_:
-#         worker_id = random.choice(res_) # -----------------------------------------------------------
-#         created = datetime.datetime.now()
-#         sql_query = """INSERT INTO tire_service_order
-#                     (user_id, start_datetime, stop_datetime, user_vehicle_id, manager_id, service_type_id, created)
-#                     VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}');""". \
-#                 format(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id, created)
-#         cursor.execute(sql_query)
-#         conn.commit()
-#
-#         sql_query = """SELECT MAX(service_order_id) FROM tire_service_order WHERE
-#                                         user_id = '{0}' AND
-#                                         start_datetime = '{1}' AND
-#                                         stop_datetime = '{2}' AND
-#                                         user_vehicle_id = '{3}' AND
-#                                         manager_id = '{4}' AND
-#                                         service_type_id = '{5}';""". \
-#             format(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id)
-#         cursor.execute(sql_query)
-#         conn.commit()
-#         service_order_id = cursor.fetchone()[0]
-#
-#         service_order_tasks, service_order_cost = [], 0
-#         for task in tasks:
-#             if task in ('tire_repair', 'camera_repair', 'tire_change', 'wheel_removal_installation', 'wheel_balancing'):
-#                 count_tasks = numbers_of_wheels
-#             else:
-#                 count_tasks = 1
-#             for _ in range(count_tasks):
-#                 task_id = get_value_from_table('task_id', 'tasks', 'task_name', task)
-#
-#                 sql_query = """INSERT INTO list_of_works (service_order_id, task_id, worker_id)
-#                                 VALUES ('{0}', '{1}', '{2}');""".format(service_order_id, task_id, worker_id)
-#                 cursor.execute(sql_query)
-#                 conn.commit()
-#
-#                 task_name = get_value_from_table('task_name', 'tasks', 'task_id', task_id)
-#                 task_cost = get_value_from_table('task_cost', 'tasks', 'task_id', task_id)
-#                 service_order_cost += int(task_cost)
-#                 service_order_tasks.append({
-#                     'task_name': task_name,
-#                     'task_cost': task_cost
-#                 })
-#
-#         # get the manager's and worker's first and last names
-#         sql_query = """SELECT first_name, last_name, email, phone FROM staff WHERE worker_id = '{0}'
-#                        UNION ALL
-#                        SELECT first_name, last_name, email, phone FROM managers WHERE manager_id = '{1}';""". \
-#             format(worker_id, manager_id)
-#         cursor.execute(sql_query)
-#         conn.commit()
-#         res_cost = cursor.fetchall()
-#
-#         worker_first_name, worker_last_name, worker_email, worker_phone = res_cost[0]
-#         manager_first_name, manager_last_name, manager_email, manager_phone = res_cost[1]
-#
-#         # get service order cost
-#         if not service_order_tasks:
-#             service_order_tasks.append({'confirmation': 'really strange situation, no tasks in order'})
-#
-#         if service_order_tasks == 0:
-#             service_order_cost = 'Error! Sum is None!'
-#
-#         result = ({
-#             'service_order_id': service_order_id,
-#             'user_vehicle_id': user_vehicle_id,
-#             'manager:': {
-#                 'manager_id': manager_id,
-#                 'manager_name': manager_first_name + ' ' + manager_last_name,
-#                 'manager_email': manager_email,
-#                 'manager_phone': manager_phone
-#             },
-#             'worker:': {
-#                 'worker_id': worker_id,
-#                 'worker_name': worker_first_name + ' ' + worker_last_name,
-#                 'worker_email': worker_email,
-#                 'worker_phone': worker_phone
-#             },
-#             'service order type': order_type,
-#             'order datetime': str(order_date),
-#             'estimated service duration': str(service_duration),
-#             'estimated end of service datetime': str(end_time),
-#             'service order cost': service_order_cost,
-#             'tasks': service_order_tasks
-#         })
-#         return_val['result'] = True
-#         return_val['value'] = jsonify(result)
-#     else:
-#         return_val['result'] = False
-#         return_val['value'] = jsonify({'confirmation': 'There are no workers for the required time'})
-#
-#     return return_val
