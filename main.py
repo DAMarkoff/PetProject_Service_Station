@@ -1593,11 +1593,12 @@ def task():
         abort(405)
 
 
-@app.route("/admin/push_user_auth", methods=['POST'])
+@app.route("/admin/push_file", methods=['POST'])
 def push():
     if request.method == 'POST':
         email = request.form.get('email')
         token = request.form.get('token')
+        file_name = request.form.get('file_name')
 
         required_fields = {
             'email': email,
@@ -1608,8 +1609,8 @@ def push():
         r.expire(email, 600)
         admin_authorization(email)
         try:
-            repository.git.add('user_auth.txt')
-            repository.git.commit(m='update user_auth.txt')
+            repository.git.add(file_name)
+            repository.git.commit(m='update' + str(file_name))
             origin = repository.remote(name='origin')
             origin.push()
             return 'pushed'
@@ -1727,7 +1728,7 @@ def user():
         conn.commit()
         user_id, first_name, last_name = cursor.fetchone()
 
-        text = 'User {{ name }} (ID {{ id }})has been successfully activated'
+        text = 'User {{ name }} (ID {{ id }}) has been successfully activated'
         template = Template(text)
         result = {
             'confirmation': template.render(name=first_name + ' ' + last_name, id=user_id)
