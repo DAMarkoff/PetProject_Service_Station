@@ -282,7 +282,7 @@ def user_info():
 
         # collecting the user's personal data from the users db
         sql_query = """SELECT user_id, first_name, last_name, email, phone, group_name 
-                        FROM users JOIN users_groups USING(user_id) WHERE email = '{0}'""".format(email)
+                        FROM users JOIN users_groups USING(group_id) WHERE email = '{0}'""".format(email)
         cursor.execute(sql_query)
         conn.commit()
         res = cursor.fetchone()
