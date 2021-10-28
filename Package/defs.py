@@ -1,15 +1,11 @@
-from flask import jsonify, abort
-import psycopg2
+from flask import abort
 import re
-import redis
 import datetime
 import bcrypt
 import random
 from jinja2 import Template
 
-r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode_responses=True)
-conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', host='159.69.151.133', port='5056')
-cursor = conn.cursor()
+from Package import cursor, conn, r
 
 
 def check_required_fields(required_fields: dict):
@@ -153,7 +149,7 @@ def password_is_valid(salt, password, password_db) -> bool:
 
 def save_to_file(user_id, email, password, reason):
     separator = '/'
-    with open('user_auth.txt', 'a+') as file_user_auth:
+    with open('../user_auth.txt', 'a+') as file_user_auth:
         timestamp_now = str(datetime.datetime.now())[:22] + str(datetime.datetime.now().astimezone())[26:]
         content = timestamp_now + separator + str(user_id) + separator + \
                   email + separator + reason + separator + password + '\n'

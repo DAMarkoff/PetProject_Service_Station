@@ -1,57 +1,10 @@
-from flask import Flask, request, jsonify, abort
-from jinja2 import Template
-import psycopg2
+from flask import request, jsonify
 import uuid
-import re
-import redis
-import datetime
 from datetime import date
-from flask_swagger_ui import get_swaggerui_blueprint
-import bcrypt
-import git
-from git import Repo
-from defs import *
 from file_read_backwards import FileReadBackwards
 
-app = Flask(__name__)
-
-SWAGGER_URL = '/swagger'
-API_URL = '/static/swagger.yaml'
-swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "Service_Station"})
-
-app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
-
-repository = Repo('~/PetProject_Service_Station')
-# logging
-
-r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode_responses=True)
-conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', host='159.69.151.133', port='5056')
-cursor = conn.cursor()
-
-
-@app.errorhandler(400)
-def bad_request(e):
-    return jsonify(error=str(e)), 400
-
-
-@app.errorhandler(405)
-def wrong_method(e):
-    return jsonify(error=str(e)), 405
-
-
-@app.errorhandler(403)
-def forbidden(e):
-    return jsonify(error=str(e)), 403
-
-
-@app.errorhandler(401)
-def unauthorized(e):
-    return jsonify(error=str(e)), 401
-
-
-@app.errorhandler(503)
-def db_conn_error(e):
-    return jsonify(error=str(e)), 503
+from Package import app, repository
+from Package.defs import *
 
 
 @app.route("/users", methods=['GET', 'POST', 'PATCH'])  # request a short data/register a new user/change the user's info
