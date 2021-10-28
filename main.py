@@ -281,8 +281,8 @@ def user_info():
         check_db_connection()
 
         # collecting the user's personal data from the users db
-        sql_query = """SELECT user_id, first_name, last_name, email, phone 
-                        FROM users WHERE email = '{0}'""".format(email)
+        sql_query = """SELECT user_id, first_name, last_name, email, phone, group_name 
+                        FROM users JOIN users_groups USING(user_id) WHERE email = '{0}'""".format(email)
         cursor.execute(sql_query)
         conn.commit()
         res = cursor.fetchone()
@@ -292,7 +292,8 @@ def user_info():
             "first_name": res[1],
             "last_name": res[2],
             "email": res[3],
-            "phone": res[4]
+            "phone": res[4],
+            "group_name": res[5]
         })
 
         user_id = get_user_id(email)
