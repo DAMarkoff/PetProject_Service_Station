@@ -237,10 +237,106 @@ def duration_of_service(tasks: dict) -> datetime:
     return service_duration
 
 
+def choose_a_worker(order_date: datetime, end_time: datetime) -> int:
+    # Search for a worker without a work
+    sql_query = """WITH dates_intersection AS (
+                        SELECT DISTINCT worker_id FROM tire_service_order JOIN list_of_works USING (service_order_id) 
+                        WHERE 
+                            (
+                                start_datetime BETWEEN '{0}' AND '{1}'
+                                OR
+                                stop_datetime BETWEEN '{0}' AND '{1}'
+                                OR
+                                '{0}' BETWEEN start_datetime AND stop_datetime 
+                                OR
+                                '{1}' BETWEEN start_datetime AND stop_datetime
+                            )
+                        )	
+
+                    SELECT worker_id FROM staff JOIN positions USING (position_id)
+                    WHERE worker_id NOT IN (SELECT worker_id FROM dates_intersection) 
+                    AND active = true AND position_name = 'worker'""".format(order_date, end_time)
+    cursor.execute(sql_query)
+    conn.commit()
+    res_ = list(worker[0] for worker in cursor.fetchall())
+
+    if res_:
+        return random.choice(res_)  # randomly choose a worker
+    else:
+        abort(400, description='There are no workers for the required time')
+
+
+def create_a_service_order(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id) -> int:
+    created = datetime.datetime.now()
+    sql_query = """INSERT INTO tire_service_order 
+                        (user_id, start_datetime, stop_datetime, user_vehicle_id, manager_id, service_type_id, created)
+                        VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}');""". \
+        format(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id, created)
+    cursor.execute(sql_query)
+    conn.commit()
+
+    sql_query = """SELECT MAX(service_order_id) FROM tire_service_order WHERE
+                                            user_id = '{0}' AND
+                                            start_datetime = '{1}' AND
+                                            stop_datetime = '{2}' AND
+                                            user_vehicle_id = '{3}' AND
+                                            manager_id = '{4}' AND
+                                            service_type_id = '{5}';""". \
+        format(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id)
+    cursor.execute(sql_query)
+    conn.commit()
+    return cursor.fetchone()[0]  # The service order_id
+
+
+def create_tasks_for_the_service_order(tasks: dict, order_id: int, worker_id: int) -> int and list:
+    service_order_tasks, service_order_cost = [], 0
+    tasks_to_db = ('tire_repair', 'camera_repair', 'tire_change', 'wheel_removal_installation', 'wheel_balancing')
+    for key in tasks:
+        if tasks[key] in tasks_to_db:
+            count_tasks = tasks['numbers_of_wheels']
+        elif tasks[key] == 'wheel_alignment':
+            count_tasks = 1
+        else:
+            count_tasks = 0
+
+        for _ in range(count_tasks):
+            task_id = get_value_from_table('task_id', 'tasks', 'task_name', tasks[key])
+
+            sql_query = """INSERT INTO list_of_works (service_order_id, task_id, worker_id)
+                                    VALUES ('{0}', '{1}', '{2}');""".format(order_id, task_id, worker_id)
+            cursor.execute(sql_query)
+            conn.commit()
+
+            task_name = get_value_from_table('task_name', 'tasks', 'task_id', task_id)
+            task_cost = get_value_from_table('task_cost', 'tasks', 'task_id', task_id)
+            service_order_cost += int(task_cost)
+            service_order_tasks.append({
+                'task_name': task_name,
+                'task_cost': task_cost
+            })
+    return service_order_cost, service_order_tasks
+
+
+def get_employee_data(employee_id: int, employee_position: str) -> dict:
+    employee_position_id = employee_position + '_id'
+    """Get the employee's first and last names, email and phone"""
+    sql_query = """SELECT first_name, last_name, email, phone FROM staff WHERE worker_id = '{0}';""".format(employee_id)
+    cursor.execute(sql_query)
+    conn.commit()
+    first_name, last_name, email, phone = cursor.fetchone()
+    result = {
+        employee_position + '_id': employee_id,
+        employee_position + '_name': first_name + ' ' + last_name,
+        employee_position + '_email': email,
+        employee_position + '_phone': phone
+    }
+    return result
+
+
 def choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_vehicle_id, manager_id,
                                          tasks, numbers_of_wheels, order_type, service_duration, service_type_id):
     return_val = {'result': True, 'value': ''}
-    # Search for a worker without work at the required time
+    # Search for a worker without work
     sql_query = """WITH dates_intersection AS (
                         SELECT DISTINCT worker_id FROM tire_service_order JOIN list_of_works USING (service_order_id) 
                         WHERE 

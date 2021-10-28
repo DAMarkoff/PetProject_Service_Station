@@ -1288,12 +1288,33 @@ def tire_service_order():
         manager_id = choose_a_manager(date_to_query)
 
         # =========================================================================================================
-        # Time
-        result = choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_vehicle_id,
-                                                      manager_id,
-                                                      tasks, numbers_of_wheels, order_type, service_duration,
-                                                      service_type_id)
-        return result['value']
+
+        worker_id = choose_a_worker(order_date, end_time)
+        order_id = create_a_service_order(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id)
+        service_order_cost, service_order_tasks = create_tasks_for_the_service_order(tasks, order_id, worker_id)
+        manager_data = get_employee_data(manager_id, 'manager')
+        worker_data = get_employee_data(worker_id, 'worker')
+
+        # =========================================================================================================
+
+        result = ({
+            'service_order_id': order_id,
+            'user_vehicle_id': user_vehicle_id,
+            'manager:': manager_data,
+            'worker:': worker_data,
+            'service order type': order_type,
+            'order datetime': str(order_date),
+            'estimated service duration': str(service_duration),
+            'estimated end of service datetime': str(end_time),
+            'service order cost': service_order_cost,
+            'tasks': service_order_tasks
+        })
+
+        # result = choose_a_worker_and_insert_the_tasks(user_id, order_date, end_time, user_vehicle_id,
+        #                                               manager_id,
+        #                                               tasks, numbers_of_wheels, order_type, service_duration,
+        #                                               service_type_id)
+        return result
 
     elif request.method == 'PUT':
         return 'Temporarily closed for maintenance'
