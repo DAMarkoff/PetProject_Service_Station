@@ -213,7 +213,7 @@ def duration_of_service(tasks: dict) -> datetime:
                                         ELSE '00:00:00'
                                     end
                                 ) AS duration FROM tasks""". \
-        format(tasks['tire_repair'], tasks['tire_change'], tasks['removing_installing_wheels'],
+        format(tasks['tire_repair'], tasks['tire_change'], tasks['wheel_removal_installation'],
                tasks['balancing'], tasks['camera_repair'])
     cursor.execute(sql_query)
     conn.commit()
