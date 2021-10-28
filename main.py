@@ -1297,7 +1297,7 @@ def tire_service_order():
                         JOIN list_of_works USING(task_id) WHERE service_order_id = '{0}';""".format(order_id)
         cursor.execute(sql_query)
         conn.commit()
-        service_order_cost = int(cursor.fetchaone()[0])
+        service_order_cost = int(cursor.fetchone()[0])
 
         # =========================================================================================================
 
