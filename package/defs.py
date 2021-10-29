@@ -170,7 +170,7 @@ def password_is_valid(salt, password, password_db) -> bool:
 
 def save_to_file(user_id, email, password, reason):
     separator = '/'
-    with open('/user_auth.txt', 'a+') as file_user_auth:
+    with open('user_auth.txt', 'a+') as file_user_auth:
         timestamp_now = str(datetime.datetime.now())[:22] + str(datetime.datetime.now().astimezone())[26:]
         content = timestamp_now + separator + str(user_id) + separator + \
                   email + separator + reason + separator + password + '\n'
