@@ -1272,8 +1272,8 @@ def tire_service_order():
 
         service_order_cost = round(service_order_cost + workers_money)
 
-        sql_query = """INSERT INTO tire_service_order (service_order_cost) 
-                        VALUES ({0}) WHERE service_order_id = {1};""".format(service_order_cost, order_id)
+        sql_query = """UPDATE TABLE tire_service_order SET service_order_cost = {0}
+                        WHERE service_order_id = {1};""".format(service_order_cost, order_id)
         cursor.execute(sql_query)
         conn.commit()
 
