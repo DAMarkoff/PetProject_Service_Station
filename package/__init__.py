@@ -4,7 +4,7 @@ from flask import Flask
 # from flask_swagger_ui import get_swaggerui_blueprint
 from git import Repo
 
-# app = Flask(__name__)
+app = Flask(__name__)
 
 # SWAGGER_URL = '/static'
 # API_URL = '/static/swagger.yaml'
