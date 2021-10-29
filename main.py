@@ -1263,7 +1263,7 @@ def tire_service_order():
         service_order_cost = int(cursor.fetchone()[0])
 
         # workers money
-        duration_in_minutes = (service_duration.seconds % 3600) // 60
+        duration_in_minutes = (service_duration.total_seconds() % 3600) // 60
         sql_query = """SELECT hour_cost FROM staff WHERE worker_id = '{0}';""".format(worker_id)
         cursor.execute(sql_query)
         conn.commit()
