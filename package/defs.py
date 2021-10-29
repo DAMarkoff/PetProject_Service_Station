@@ -5,6 +5,8 @@ import bcrypt
 import random
 from jinja2 import Template
 
+from package import cursor, conn, r
+
 
 def check_required_fields(required_fields: dict):
     """Checks that all required fields are filled in"""
