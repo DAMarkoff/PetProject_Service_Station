@@ -1607,6 +1607,7 @@ def password():
                     line_data = line.split('/')
                     if line_data[2] == user_email and line_data[4] != '!password!':
                         user_password = line_data[4]
+                        break
         except:
             return 'Cannot read file'
 
