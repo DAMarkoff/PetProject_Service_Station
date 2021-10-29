@@ -3,9 +3,9 @@ import uuid
 from datetime import date
 from file_read_backwards import FileReadBackwards
 
-from Package import app, repository
-from Package.defs import *
-from Package.error_handlers import *
+from package import app, repository
+from package.defs import *
+from package.decorators import *
 
 
 @app.route("/users", methods=['GET', 'POST', 'PATCH'])  # request a short data/register a new user/change the user's info
@@ -78,7 +78,7 @@ def users():
                     "group_name": res[6]
                 }]
             else:
-                abort(400, description='There is no user ID ' + str(user_id) + ' in the DB')
+                abort(404, description='There is no user ID ' + str(user_id) + ' in the DB')
 
         return jsonify(result)
 
@@ -130,7 +130,7 @@ def users():
             "active": active
         }
 
-        return jsonify(result)
+        return jsonify(result), 201
 
     # change the user's info
     elif request.method == 'PATCH':
@@ -936,7 +936,7 @@ def storage_order():
             'stop_date': stop_date,
             'storage_order_cost': storage_order_cost
         }
-        return jsonify(result)
+        return jsonify(result), 201
 
     elif request.method == 'PUT':
         return 'Temporarily closed for maintenance'
@@ -1271,7 +1271,7 @@ def tire_service_order():
         #                                               manager_id,
         #                                               tasks, numbers_of_wheels, order_type, service_duration,
         #                                               service_type_id)
-        return result
+        return result, 201
 
     elif request.method == 'PUT':
         return 'Temporarily closed for maintenance'

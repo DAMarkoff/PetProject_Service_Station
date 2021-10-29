@@ -5,7 +5,7 @@ import bcrypt
 import random
 from jinja2 import Template
 
-from Package import cursor, conn, r
+from package import cursor, conn, r
 
 
 def check_required_fields(required_fields: dict):
