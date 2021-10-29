@@ -13,7 +13,7 @@ from package.decorators import *
 
 SWAGGER_URL = '/swagger'
 # API_URL = '/static/swagger.yaml'
-API_URL = Path("~/PetProject_Service_Station/static/swagger.yaml")
+API_URL = Path("/~/PetProject_Service_Station/static/swagger.yaml")
 swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "Service_Station"})
 
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
