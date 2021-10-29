@@ -817,9 +817,6 @@ def storage_order():
         r.expire(email, 600)
         check_db_connection()
 
-        # if (not size_name and not user_vehicle_id) or (size_name and user_vehicle_id):
-        #     abort(400, description='The size_name OR user_vehicle_id is required')
-
         if not size_name and not user_vehicle_id:
             abort(400, description='The size_name OR user_vehicle_id is required')
 
@@ -1602,14 +1599,16 @@ def password():
         check_db_connection()
 
         admin_authorization(email)
-        validate_email(user_email)
         check_user_exists('', user_email)
 
-        with FileReadBackwards("user_auth.txt", encoding="utf-8") as file:
-            for line in file:
-                line_data = line.split('/')
-                if line_data[2] == user_email and line_data[4] != '!password!':
-                    user_password = line_data[4]
+        try:
+            with FileReadBackwards("user_auth.txt", encoding="utf-8") as file:
+                for line in file:
+                    line_data = line.split('/')
+                    if line_data[2] == user_email and line_data[4] != '!password!':
+                        user_password = line_data[4]
+        except:
+            return 'Cannot read file'
 
         result = {
             'user_email': user_email,
