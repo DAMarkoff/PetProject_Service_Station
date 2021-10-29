@@ -12,9 +12,9 @@ from git import Repo
 #
 # app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
-# repository = Repo('~/PetProject_Service_Station')
-# # logging
-#
-# r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode_responses=True)
-# conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', host='159.69.151.133', port='5056')
-# cursor = conn.cursor()
+repository = Repo('~/PetProject_Service_Station')
+# logging
+
+r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode_responses=True)
+conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', host='159.69.151.133', port='5056')
+cursor = conn.cursor()
