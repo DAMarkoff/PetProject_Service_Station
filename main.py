@@ -8,6 +8,13 @@ from package.defs import *
 from package.decorators import *
 
 
+SWAGGER_URL = '/swagger'
+API_URL = '/static/swagger.yaml'
+swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "Service_Station"})
+
+app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
+
+
 @app.route("/users", methods=['GET', 'POST', 'PATCH'])  # request a short data/register a new user/change the user's info
 def users():
     # request a short data about all/one of the users
