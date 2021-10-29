@@ -7,7 +7,6 @@ from file_read_backwards import FileReadBackwards
 from flask_swagger_ui import get_swaggerui_blueprint
 from git import Repo
 
-from package import app, repository
 from package.defs import *
 from package.decorators import *
 
