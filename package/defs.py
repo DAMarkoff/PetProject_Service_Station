@@ -39,10 +39,11 @@ def check_user_exists(reason: str, email: str):
     The user with this email is already registered.
     There is no registered users with this email."""
     usr_id_ = get_value_from_table('user_id', 'users', 'email', email)
-    if usr_id_:
-        if reason == 'already exists':
+    if reason == 'already exists':
+        if usr_id_:
             abort(400, description="The user with this email already exists")
-        elif not reason or reason == 'does not exist':
+    elif not reason or reason == 'does not exist':
+        if not usr_id_:
             abort(404, description='The user does not exist')
 
 
