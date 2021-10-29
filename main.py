@@ -1611,6 +1611,9 @@ def password():
         except:
             return 'Cannot read file'
 
+        if not user_password:
+            return 'The password is NULL'
+
         result = {
             'user_email': user_email,
             'user_password': user_password
