@@ -817,7 +817,10 @@ def storage_order():
         r.expire(email, 600)
         check_db_connection()
 
-        if (not size_name and not user_vehicle_id) or (size_name and user_vehicle_id):
+        # if (not size_name and not user_vehicle_id) or (size_name and user_vehicle_id):
+        #     abort(400, description='The size_name OR user_vehicle_id is required')
+
+        if not size_name and not user_vehicle_id:
             abort(400, description='The size_name OR user_vehicle_id is required')
 
         if size_name:
