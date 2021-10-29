@@ -2,10 +2,19 @@ from flask import request, jsonify
 import uuid
 from datetime import date
 from file_read_backwards import FileReadBackwards
+from flask_swagger_ui import get_swaggerui_blueprint
 
 from package import app, repository
 from package.defs import *
 from package.decorators import *
+
+
+SWAGGER_URL = '/static'
+API_URL = '/static/swagger.yaml'
+swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "Service_Station"})
+
+app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
+
 
 @app.route("/users", methods=['GET', 'POST', 'PATCH'])  # request a short data/register a new user/change the user's info
 def users():
