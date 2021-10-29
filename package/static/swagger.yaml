@@ -434,7 +434,9 @@ paths:
       tags:
       - "Vehicle"
       summary: Delete your vehicle
-      description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
+      description: |
+        The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117.
+        - ***To delete it, you must provide an email, token and user_vehicle_id in form-data***
       responses:
         '200':
           description: Successful operation
@@ -902,7 +904,9 @@ paths:
       tags:
       - "Storage order"
       summary: Delete your storage order
-      description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
+      description: |
+        The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
+        - ***To delete it, you must provide an email, token and storage_order_id in form-data***
       responses:
         '200':
           description: Successful operation
@@ -1115,7 +1119,9 @@ paths:
       tags:
       - "Tire service order"
       summary: Delete your tire service order
-      description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
+      description: |
+        The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
+        - ***To delete it, you must provide an email, token and service_order_id in form-data***
       responses:
         '200':
           description: Successful operation
@@ -1547,7 +1553,9 @@ paths:
       - "Administrator's Corner"
       summary: Delete the user
       description: |
-        The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see [there](github.com/OAI/OpenAPI-Specification/pull/2117). ***This can only be done be done by an admin***
+        The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see [there](github.com/OAI/OpenAPI-Specification/pull/2117).
+         - ***This can only be done be done by an admin***
+         - ***To delete it, you must provide an email, token and user_email in form-data***
       responses:
         '200':
           description: Successful operation
