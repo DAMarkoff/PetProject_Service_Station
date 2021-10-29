@@ -195,7 +195,7 @@ def users():
             new_email = 'The email has not been changed'
             new_email_to_db = email
         else:
-            check_user_exists('already exists', email)
+            check_user_exists('already exists', new_email)
             validate_email(new_email)
             save_to_file(user_id_db, email + '->' + new_email, '!password!', 'user-changed-email')
             new_email_to_db = new_email
