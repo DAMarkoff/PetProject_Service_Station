@@ -1,7 +1,7 @@
 from flask import request, jsonify, Flask
 import uuid
 from file_read_backwards import FileReadBackwards
-from flask_swagger_ui import get_swaggerui_blueprint
+# from flask_swagger_ui import get_swaggerui_blueprint
 import datetime
 from datetime import date
 from package import cursor, conn, r, repository
@@ -10,12 +10,6 @@ from jinja2 import Template
 from werkzeug.exceptions import abort
 
 from package.decorators import *
-
-SWAGGER_URL = '/swagger'
-API_URL = '/static/swagger.yaml'
-swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "Service_Station"})
-
-app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
 
 @app.route("/users", methods=['GET', 'POST', 'PATCH'])  # request a short data/register a new user/change the user's info
@@ -1199,7 +1193,6 @@ def tire_service_order():
                 abort(400, description='The <active_only>, <balancing> and <wheel_alignment> should be <yes> or <no>')
 
         delta_db = get_value_from_table('delta_minutes', 'positions', 'position_name', 'worker')
-        # delta_between_orders = datetime.datetime.timedelta(minutes=int(delta_db))
         delta_between_orders = datetime.timedelta(minutes=int(delta_db))
         date_to_query = str(order_date.date())
 
