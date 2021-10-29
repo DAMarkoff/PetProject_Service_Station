@@ -88,7 +88,11 @@ d		/user_info
 		/tire_service_order		
 	
 ToDo Dmitrii:
-
+        - user_exists
+        - move conn check after reqired fields check
+        - rename user_active to check
+        - rename vehicle_exists to check
+        - delete comments after conn.commit()
 				- add a state vehicle number column to the user_vehicle table and in the output info in the user_info and [PUT] service order insetead of user_vehicle_id
 				- validate required fields (not filleld is not working) test: False, True, '   ' (spaces)
 

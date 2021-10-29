@@ -1,7 +1,7 @@
 openapi: 3.0.0
 servers:
   - description: PetProgect
-    url: http://23.88.52.139:5006
+    url: http://23.88.52.139:5999
 info:
   description: |
       # in progress...
@@ -22,13 +22,15 @@ tags:
   - name: "Users"
     description: "This suit contains API methods for operations with a user account and requests for information about user data"
   - name: "Warehouse"
-    description: "shelf reports"
+    description: "Shows info about storage shelves"
   - name: "Vehicle"
-    description: "user's vehicle(s)"
+    description: "This suit contains API methods for operations with user vehicles: adding new, deleting or updating information"
   - name: "Storage order"
-    description: "create/edit/delete user's tire storage order(s)"
+    description: "This suit contains API methods for operations with user tire storage orders: adding new or deleting"
   - name: "Tire service order"
-    description: "create/edit/delete user's tire service order(s)"
+    description: "This suit contains API methods for operations with user tire service orders: adding new or deleting"
+  - name: "Administrator's Corner"
+    description: "Authorized only )"
 
 #----------------------------------------------------------------------------------------------
 
@@ -56,6 +58,11 @@ paths:
         description: '- *optional* - you can fill in "yes", "no" or leave blank'
         schema:
           type: string
+          enum:
+            - yes
+            - no
+          minLength: 2
+          maxLength: 3
       responses:
         '200':
           description: Successful operation
@@ -67,6 +74,12 @@ paths:
                  $ref: '#/components/schemas/users'
         '400':
           description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '404':
+          description: not found
           content:
             application/json:
               schema:
@@ -98,24 +111,34 @@ paths:
                   type: string
                   description: |
                       - ***required*** - 1 - 30 chars, can include the space and the .,'- chars
+                  minLength: 1
+                  maxLength: 30
                 last_name:
                   type: string
                   description: |
                       - ***required*** - 1 - 30 chars, can include the space and the .,'- chars
+                  minLength: 1
+                  maxLength: 30
                 email:
                   type: string
                   description: |
                       - ***required*** - The email must contain @ and . chars
+                  minLength: 4
+                  maxLength: 100
                 password:
                   type: string
                   description: |
                       - ***required*** - 8 - 32 chars, must contain at least one digit, one uppercase letter, one lowercase letter, one of the symbols $@#!%'
+                  minLength: 8
+                  maxLength: 32
                 phone:
                   type: string
                   description: |
-                      - ***required*** - Validation has not been implemented yet
+                      - ***required*** - 1 - 30 chars, validation has not been implemented yet
+                  minLength: 1
+                  maxLength: 30
       responses:
-        '200':
+        '201':
           description: Successful operation
           content:
             application/json:
@@ -123,6 +146,12 @@ paths:
                 $ref: '#/components/schemas/users'
         '400':
           description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '404':
+          description: not found
           content:
             application/json:
               schema:
@@ -139,7 +168,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-    put:
+    patch:
       tags:
       - "Users"
       summary: Change the user info.
@@ -155,27 +184,39 @@ paths:
                   type: string
                   description: |
                       - ***required*** - Enter your email
+                  minLength: 4
+                  maxLength: 100
                 token:
                   type: string
                   description: |
                     - ***required*** - Enter your token
                     - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+                  minLength: 1
+                  maxLength: 36
                 new_first_name:
                   type: string
                   description: |
                       - *optional* - 1 - 30 chars, can include the space and the .,'- chars
+                  minLength: 1
+                  maxLength: 30
                 new_last_name:
                   type: string
                   description: |
                       - *optional* - 1 - 30 chars, can include the space and the .,'- chars
+                  minLength: 1
+                  maxLength: 30
                 new_email:
                   type: string
                   description: |
                       - *optional* - The email must contain @ and . chars
+                  minLength: 4
+                  maxLength: 100
                 new_phone:
                   type: string
                   description: |
-                      - *optional* - Validation has not been implemented yet
+                      - *optional* - 1 - 30 chars, validation has not been implemented yet
+                  minLength: 1
+                  maxLength: 30
       responses:
         '200':
           description: Successful operation
@@ -206,21 +247,6 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                 $ref: '#/components/schemas/error'
-    delete:
-      tags:
-      - "Users"
-      summary: Delete the current user.
-      description: |
-        The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see [there](github.com/OAI/OpenAPI-Specification/pull/2117). ***This can only be done with an admin password.***
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
                 $ref: '#/components/schemas/error'
 
 #----------------------------------------------------------------------------------------------
@@ -243,15 +269,21 @@ paths:
                   type: string
                   description: |
                       - ***required*** - Enter your email
+                  minLength: 4
+                  maxLength: 100
                 token:
                   type: string
                   description: |
                     - ***required*** - Enter your token
                     - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+                  minLength: 1
+                  maxLength: 36
                 vehicle_name:
                   type: string
                   description: |
                       - ***required*** -Choose the type of your vehicle.
+                  minLength: 1
+                  maxLength: 20
                   enum:
                     - bus
                     - truck
@@ -288,6 +320,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
         '405':
           description: method not allowed
           content:
@@ -299,10 +337,8 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                 $ref: '#/components/schemas/error'
-    put:
+                $ref: '#/components/schemas/error'
+    patch:
       tags:
       - "Vehicle"
       summary: Change your vehicle type or tire size
@@ -320,12 +356,16 @@ paths:
                   format: email
                   description: |
                      - ***required*** - Enter your email
+                  minLength: 4
+                  maxLength: 100
                 token:
                   type: string
                   format: uuid
                   description: |
                     - ***required*** - Enter your token
                     - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+                  minLength: 1
+                  maxLength: 36
                 user_vehicle_id:
                   type: integer
                   description: |
@@ -334,6 +374,8 @@ paths:
                   type: string
                   description: |
                       - *optional* - Choose the type of your vehicle.
+                  minLength: 1
+                  maxLength: 20
                   enum:
                     - bus
                     - truck
@@ -364,6 +406,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
         '405':
           description: method not allowed
           content:
@@ -381,14 +429,14 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                 $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/error'
     delete:
       tags:
       - "Vehicle"
       summary: Delete your vehicle
-      description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
+      description: |
+        The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117.
+        - ***To delete it, you must provide an email, token and user_vehicle_id in form-data***
       responses:
         '200':
           description: Successful operation
@@ -414,10 +462,14 @@ paths:
                   type: string
                   description: |
                       - ***required*** - Enter your email
+                  minLength: 4
+                  maxLength: 100
                 password:
                   type: string
                   description: |
                       - ***required*** - Enter your password. If you have forgotten your password, feel free to contact me.
+                  minLength: 8
+                  maxLength: 32
       responses:
         '200':
           description: Successful operation
@@ -427,6 +479,12 @@ paths:
                 $ref: '#/components/schemas/hello'
         '400':
           description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '404':
+          description: not found
           content:
             application/json:
               schema:
@@ -448,13 +506,11 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                 $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/error'
 
 #----------------------------------------------------------------------------------------------
 
-  /users/deactivate:
+  /users/deactivate_user:
     post:
       tags:
       - "Users"
@@ -469,19 +525,26 @@ paths:
               properties:
                 email:
                   type: string
-                  format: email
                   description: |
                       - ***required*** - Enter your email
+                  minLength: 4
+                  maxLength: 100
                 token:
                   type: string
-                  format: uuid
                   description: |
                     - ***required*** - Enter your token
                     - example - faf353cd-2e44-46c5-9864-7c53426eb58a
-                sure:
+                  minLength: 1
+                  maxLength: 36
+                ARE_YOU_SURE?:
                   type: string
                   description: |
-                      - ***required*** - Are you sure? Type 'yes' or 'no'
+                      - ***required*** - Are you sure? Enter "yes" or "no"
+                  enum:
+                    - yes
+                    - no
+                  minLength: 2
+                  maxLength: 3
       responses:
         '200':
           description: Successful operation
@@ -516,9 +579,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                 $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/error'
 
 #----------------------------------------------------------------------------------------------
 
@@ -537,14 +598,17 @@ paths:
               properties:
                 email:
                   type: string
-                  format: email
                   description: |
                       - ***required*** - Enter your email
-                admin password:
+                  minLength: 4
+                  maxLength: 100
+                token:
                   type: string
-                  format: uuid
                   description: |
-                      - ***required*** - Enter the admin password
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+                  minLength: 1
+                  maxLength: 36
       responses:
         '200':
           description: Successful operation
@@ -579,9 +643,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                 $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/error'
 
 #----------------------------------------------------------------------------------------------
 
@@ -589,8 +651,9 @@ paths:
     post:
       tags:
       - "Users"
-      summary: Provides complete information about the logged in user
+      summary: 'Get full user information'
       description: |
+          Provides complete information about the logged in user include user vehicles, storage orders and service orders
           *This can only be done by the logged user.*
       requestBody:
         required: true
@@ -603,11 +666,15 @@ paths:
                   type: string
                   description: |
                     - ***required*** - Enter your email
+                  minLength: 4
+                  maxLength: 100
                 token:
                   type: string
                   description: |
                     - ***required*** - Enter your token
                     - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+                  minLength: 1
+                  maxLength: 36
       responses:
         '200':
           description: Successful operation
@@ -638,9 +705,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                 $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/error'
 
 #----------------------------------------------------------------------------------------------
 
@@ -663,21 +728,29 @@ paths:
                   type: string
                   description: |
                       - ***required*** - Enter your email
+                  minLength: 4
+                  maxLength: 100
                 token:
                   type: string
                   description: |
                     - ***required*** - Enter your token
                     - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+                  minLength: 1
+                  maxLength: 36
                 start_date:
                   type: string
                   description: |
                      - ***required*** - Initial storage start date
                      - format: YYYY-MM-DD, for example - 2021-10-30
+                  minLength: 10
+                  maxLength: 10
                 stop_date:
                   type: string
                   description: |
                       - ***required*** - End date of storage start
                       - format: YYYY-MM-DD, for example - 2021-10-30
+                  minLength: 10
+                  maxLength: 10
                 size_name:
                   type: integer
                   description: |
@@ -707,6 +780,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
         '405':
           description: method not allowed
           content:
@@ -724,9 +803,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                 $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/error'
 
     put:
       tags:
@@ -822,14 +899,14 @@ paths:
 #          content:
 #            application/json:
 #              schema:
-#                type: array
-#                items:
 #                 $ref: '#/components/schemas/error'
     delete:
       tags:
       - "Storage order"
       summary: Delete your storage order
-      description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
+      description: |
+        The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
+        - ***To delete it, you must provide an email, token and storage_order_id in form-data***
       responses:
         '200':
           description: Successful operation
@@ -858,21 +935,68 @@ paths:
                   type: string
                   format: email
                   description: |
-                      ***required*** - Enter your email
+                      - ***required*** - Enter your email
+                  minLength: 4
+                  maxLength: 100
                 token:
                   type: string
                   format: uuid
                   description: |
                     - ***required*** - Enter your token
                     - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+                  minLength: 4
+                  maxLength: 36
                 order_date:
                   type: string
                   description: |
-                      ***required*** - Tire service order date
-                u_veh_id:
+                      - ***required*** - Tire service order date
+                      - format: YYYY-MM-DD HH-MM, for example - 2021-10-30 14:30
+                  minLength: 16
+                  maxLength: 16
+                order_type:
+                  type: string
+                  nullable: false
+                  description: |
+                      - ***required*** - Type of your service order
+                  enum:
+                  - tire change
+                  - tire repair
+                user_vehicle_id:
+                  type: integer
+                  description: |
+                      - ***required*** - ID of your vehicle
+                numbers_of_wheels:
+                  type: integer
+                  description: |
+                      - ***required*** - Number of wheels for repair or tire fitting
+                removing_installing_wheels:
                   type: string
                   description: |
-                      ***required*** - The id of your car that will be serviced
+                      - ***required*** - Wheel removal and installation service
+                  enum:
+                  - yes
+                  - no
+                tubeless:
+                  type: string
+                  description: |
+                      - ***required*** - If you have a tubeless tire, then a camera repair service will be added to the tire repair service order
+                  enum:
+                  - yes
+                  - no
+                balancing:
+                  type: string
+                  description: |
+                      - ***required*** - Wheel balancing service
+                  enum:
+                  - yes
+                  - no
+                wheel_alignment:
+                  type: string
+                  description: |
+                      - ***required*** - Wheel alignment service
+                  enum:
+                  - yes
+                  - no
       responses:
         '200':
           description: Successful operation
@@ -882,6 +1006,12 @@ paths:
                 $ref: '#/components/schemas/tire_service_order'
         '400':
           description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '404':
+          description: not found
           content:
             application/json:
               schema:
@@ -903,9 +1033,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                 $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/error'
     put:
       tags:
       - "Tire service order"
@@ -986,14 +1114,14 @@ paths:
     #       content:
     #         application/json:
     #           schema:
-    #             type: array
-    #             items:
     #             $ref: '#/components/schemas/error'
     delete:
       tags:
       - "Tire service order"
       summary: Delete your tire service order
-      description: The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
+      description: |
+        The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
+        - ***To delete it, you must provide an email, token and service_order_id in form-data***
       responses:
         '200':
           description: Successful operation
@@ -1076,8 +1204,6 @@ paths:
   #         content:
   #           application/json:
   #             schema:
-  #               type: array
-  #               items:
   #               $ref: '#/components/schemas/error'
 
 #----------------------------------------------------------------------------------------------
@@ -1086,20 +1212,20 @@ paths:
     get:
       tags:
         - "Warehouse"
-      summary: Shows info about storage shelves
+      summary: 'Here you can see the free/occupied shelves of all/certain sizes in the warehouse'
       description: |
                    - if size_name is not filled in, it shows all tire sizes
                    - if available_only is 'yes', it shows only free shelves
                    - if available_only is 'no', it shows only occupied shelves
                    - if available_only neither one nor the other, it shows all free shelves
       parameters:
-        - name: size_id
+        - name: size_name
           in: query
           required: false
           description: |
                 - *optional* - The size_id must contain only digits
           schema:
-            type: string
+            type: integer
         - name: available_only
           in: query
           required: false
@@ -1107,6 +1233,8 @@ paths:
                 - *optional* - The available_only can be 'yes' or 'no'. Or empty.
           schema:
             type: string
+            minLength: 0
+            maxLength: 3
       responses:
         '200':
           description: Successful operation
@@ -1116,12 +1244,325 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/storage_places'
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
         '405':
           description: method not allowed
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+
+#----------------------------------------------------------------------------------------------
+#                                 Administrator's Corner
+#----------------------------------------------------------------------------------------------
+
+  /admin/push_file:
+    post:
+      tags:
+      - "Administrator's Corner"
+      summary: pushes a file onto remote repo
+      description: |
+        ***this can only be done by an admin***
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: |
+                      - ***required*** - Enter your email
+                  minLength: 4
+                  maxLength: 100
+                token:
+                  type: string
+                  description: |
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+                  minLength: 4
+                  maxLength: 36
+                file_name:
+                  type: string
+                  description: |
+                    - ***required*** - Enter a filename to be pushed
+                  minLength: 3
+                  maxLength: 36
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            text/plain:
+              schema:
+                type: string
+        '500':
+          description: Unuccessful operation
+          content:
+            text/plain:
+              schema:
+                type: string
+
+#----------------------------------------------------------------------------------------------
+
+  /admin/password:
+    post:
+      tags:
+      - "Administrator's Corner"
+      summary: user password recovery
+      description: |
+        ***this can only be done by an admin***
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  description: |
+                      - ***required*** - Enter your email
+                  minLength: 4
+                  maxLength: 100
+                token:
+                  type: string
+                  description: |
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+                  minLength: 4
+                  maxLength: 36
+                user_email:
+                  type: string
+                  format: email
+                  description: |
+                      - ***required*** - Enter your email
+                  minLength: 4
+                  maxLength: 100
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_email:
+                    type: string
+                  user_password:
+                    type: string
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    patch:
+      tags:
+      - "Administrator's Corner"
+      summary: change the user's password
+      description: |
+        ***this can only be done by an admin***
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: |
+                      - ***required*** - Enter your email
+                  minLength: 4
+                  maxLength: 100
+                token:
+                  type: string
+                  description: |
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+                  minLength: 4
+                  maxLength: 36
+                user_email:
+                  type: string
+                  description: |
+                      - ***required*** - Enter your email
+                  minLength: 4
+                  maxLength: 100
+                new_password:
+                  type: string
+                  description: |
+                      - ***required*** - 8 - 32 chars, must contain at least one digit, one uppercase letter, one lowercase letter, one of the symbols $@#!%'
+                  minLength: 8
+                  maxLength: 32
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user_id:
+                    type: integer
+                  email:
+                    type: string
+                  confirmation:
+                    type: string
+                    example: 'The password has been changed'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+#----------------------------------------------------------------------------------------------
+
+  /admin/user:
+    patch:
+      tags:
+      - "Administrator's Corner"
+      summary: mark the user as active
+      description: |
+        ***this can only be done by an admin***
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: |
+                      - ***required*** - Enter your email
+                  minLength: 4
+                  maxLength: 100
+                token:
+                  type: string
+                  description: |
+                    - ***required*** - Enter your token
+                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+                  minLength: 4
+                  maxLength: 36
+                user_email:
+                  type: string
+                  description: |
+                      - ***required*** - Enter your email
+                  minLength: 4
+                  maxLength: 100
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  confirmation:
+                    type: string
+                    example: 'User {{ name }} (ID {{ id }}) has been successfully activated'
+        '400':
+          description: bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '404':
+          description: not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '405':
+          description: method not allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '401':
+          description: unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '503':
+          description: Could not connect to the database
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    delete:
+      tags:
+      - "Administrator's Corner"
+      summary: Delete the user
+      description: |
+        The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see [there](github.com/OAI/OpenAPI-Specification/pull/2117).
+         - ***This can only be done be done by an admin***
+         - ***To delete it, you must provide an email, token and user_email in form-data***
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/confirmation'
 
 #----------------------------------------------------------------------------------------------
 #----------------------------------------------------------------------------------------------
@@ -1146,18 +1587,49 @@ components:
       properties:
         service_order_id:
           type: string
-        date:
+        user_vehicle_id:
+          type: integer
+        manager:
+          type: object
+          properties:
+            manager_id:
+              type: integer
+            manager_name:
+              type: string
+            manager_email:
+              type: string
+            manager_phone:
+              type: string
+        service_order_type:
           type: string
-        manager_id:
+        order_datetime:
           type: string
-        manager_first_name:
+        estimated_service_duration:
           type: string
-        manager_last_name:
+        estimated_end_of_service_datetime:
           type: string
-        manager_phone:
-          type: string
-        manager_email:
-          type: string
+        service_order_cost:
+          type: integer
+        tasks:
+          type: array
+          items:
+            type: object
+            properties:
+              task_name:
+                type: string
+              worker:
+                type: object
+                properties:
+                  worker_id:
+                    type: integer
+                  worker_name:
+                    type: string
+                  worker_email:
+                    type: string
+                  worker_phone:
+                    type: string
+              task cost:
+                type: integer
     storage_order:
       type: object
       properties:
@@ -1171,131 +1643,113 @@ components:
           type: string
         storage_order_cost:
           type: integer
-    storage_orders_info:
-      type: array
-      items:
-        type: object
-        properties:
-          storage_order_id:
-            type: integer
-          start_date:
-            type: string
-          stop_date:
-            type: string
-          order cost:
-            type: integer
-          shelf_id:
-            type: integer
-    your_vehicles:
-      type: array
-      items:
-        type: object
-        properties:
-          vehicle_id:
-            type: integer
-          vehicle_name:
-            type: string
-          size_name:
-            type: integer
-    tire_service_orders:
-      type: array
-      items:
-        type: object
-        properties:
-          service_order_id:
-            type: integer
-          service_order_type:
-            type: string
-          start_datetime:
-           type: string
-          stop_datetime:
-           type: string
-          manager:
-            type: object
-            properties:
-              manager_id:
-                type: integer
-              manager_name:
-                type: string
-              manager_email:
-                type: string
-              manager_phone:
-                type: string
-          vehicle:
-            type: object
-            properties:
-              user_vehicle_id:
-                type: integer
-              vehicle_name:
-                type: string
-              size_name:
-                type: string
-          tire service order cost:
-            type: integer
-          tasks:
-            oneOf:
-            - type: object
-              properties:
-                tasks:
-                  type: string
+    user_info:
+      type: object
+      properties:
+        your_info:
+          type: object
+          properties:
+            id:
+              type: integer
+            first_name:
+              type: string
+            last_name:
+              type: string
+            email:
+              type: string
+            phone:
+              type: string
+            group_name:
+              type: string
+        storage_orders_info:
+          oneOf:
+            - type: string
             - type: array
               items:
                 type: object
                 properties:
-                  task_name:
+                  storage_order_id:
+                    type: integer
+                  start_date:
                     type: string
-                  mworker:
+                  stop_date:
+                    type: string
+                  order cost:
+                    type: integer
+                  shelf_id:
+                    type: integer
+        your_vehicle:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: object
+                properties:
+                  vehicle_id:
+                    type: integer
+                  vehicle_name:
+                    type: string
+                  size_name:
+                    type: integer
+        tire_service_order:
+          oneOf:
+            - type: string
+            - type: array
+              items:
+                type: object
+                properties:
+                  service_order_id:
+                    type: integer
+                  service_order_type:
+                    type: string
+                  start_datetime:
+                   type: string
+                  stop_datetime:
+                   type: string
+                  manager:
                     type: object
                     properties:
-                      worker_id:
+                      manager_id:
                         type: integer
-                      worker_name:
+                      manager_name:
                         type: string
-                      worker_email:
+                      manager_email:
                         type: string
-                      worker_phone:
+                      manager_phone:
                         type: string
-                  task cost:
+                  vehicle:
+                    type: object
+                    properties:
+                      user_vehicle_id:
+                        type: integer
+                      vehicle_name:
+                        type: string
+                      size_name:
+                        type: string
+                  tire_service_order_cost:
                     type: integer
-    user_info:
-      type: array
-      items:
-        type: object
-        properties:
-          your info:
-            type: object
-            properties:
-              id:
-                type: integer
-              first_name:
-                type: string
-              last_name:
-                type: string
-              email:
-                type: string
-              phone:
-                type: string
-          storage orders info:
-            oneOf:
-              - type: object
-                properties:
-                  storage orders info:
-                    type: string
-              - $ref: '#/components/schemas/storage_orders_info'
-          your_vehicle(s):
-            oneOf:
-              - type: object
-                properties:
-                  your vehicle(s):
-                    type: string
-              - $ref: '#/components/schemas/your_vehicles'
-          tire_service_order(s):
-            oneOf:
-              - type: object
-                properties:
-                  tire service order(s):
-                    type: string
-              - $ref: '#/components/schemas/tire_service_orders'
+                  tasks:
+                    oneOf:
+                    - type: string
+                    - type: array
+                      items:
+                        type: object
+                        properties:
+                          task_name:
+                            type: string
+                          worker:
+                            type: object
+                            properties:
+                              worker_id:
+                                type: integer
+                              worker_name:
+                                type: string
+                              worker_email:
+                                type: string
+                              worker_phone:
+                                type: string
+                          task_cost:
+                            type: integer
     users:
       type: object
       properties:
@@ -1311,6 +1765,8 @@ components:
           type: string
         active:
           type: boolean
+        group_name:
+          type: string
     user_changed:
       type: object
       properties:
@@ -1380,4 +1836,9 @@ components:
       type: object
       properties:
         error:
+          type: string
+    confirmation:
+      type: object
+      properties:
+        confirmation:
           type: string
