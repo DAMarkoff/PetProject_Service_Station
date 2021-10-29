@@ -98,9 +98,29 @@ def validate_password(password: str):
 
 def validate_email(email: str):
     """The email must contain @ and . symbols"""
+    return_val = {'result': True, 'text': ''}
     if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
         abort(400, description='The email must contain @ and . chars')
+    if len(email) < 4:
+        return_val['text'] = 'The email must be at least 4 characters long'
+        return_val['result'] = False
+    elif len(email) > 100:
+        return_val['text'] = 'The email length should not exceed 100 chars'
+        return_val['result'] = False
+    if not return_val['result']:
+        abort(400, description=return_val['text'])
 
+
+def validate_phone(phone: str):
+    return_val = {'result': True, 'text': ''}
+    if len(phone) < 1:
+        return_val['text'] = 'The phone must be at least 1 characters long'
+        return_val['result'] = False
+    elif len(phone) > 30:
+        return_val['text'] = 'The phone length should not exceed 30 chars'
+        return_val['result'] = False
+    if not return_val['result']:
+        abort(400, description=return_val['text'])
 
 def validate_names(name_type: str, name: str):
     """Names can only include the ' '(space) and '.,- chars;

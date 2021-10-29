@@ -104,6 +104,7 @@ def users():
         validate_names('last name', l_name)
         validate_password(password)
         validate_email(email)
+        validate_phone(phone)
         group_id = 2
 
         active = True
@@ -127,7 +128,8 @@ def users():
             "last_name": l_name,
             "phone": phone,
             "email": email,
-            "active": active
+            "active": active,
+            'group_name': 'users'
         }
 
         return jsonify(result), 201
@@ -367,7 +369,7 @@ def user_info():
                             result_tire_service_order_tasks.append({
                                 'task_name': task[0],
                                 'worker:': worker_data,
-                                'task cost': task[2]
+                                'task_cost': task[2]
                             })
 
                     sql_query = """SELECT start_datetime, stop_datetime, manager_id, manager_name, manager_surname, 
@@ -377,37 +379,34 @@ def user_info():
                     conn.commit()
                     # res_info = cursor.fetchone()
 
-                    start_datetime, stop_datetime, manager_id, manager_name, manager_surname, \
-                    user_vehicle_id, vehicle_name, size_name = cursor.fetchone()
+                    start_datetime, stop_datetime, manager_id, user_vehicle_id, \
+                    vehicle_name, size_name = cursor.fetchone()
+                    manager_data = get_employee_data(manager_id, 'manager')
 
                     result_tire_service_order.append({
                         'service_order_id': service_order_id,
                         'service_order_type': type_,
                         'start_datetime': start_datetime,
                         'stop_datetime': stop_datetime,
-                        'manager': {
-                            'manager_id': manager_id,
-                            'manager_name': manager_name + ' ' + manager_surname
-                        },
+                        'manager': manager_data,
                         'vehicle': {
                             'user_vehicle_id': user_vehicle_id,
                             'vehicle_name': vehicle_name,
                             'size_name': size_name
                         },
-                        'tire service order cost': tire_service_order_cost,
+                        'tire_service_order_cost': tire_service_order_cost,
                         'tasks': result_tire_service_order_tasks
                     })
-            # result_tire_service_order
 
         sql_query = """drop view temp"""
         cursor.execute(sql_query)
         conn.commit()
 
         result = (
-            {"your info": result_users},
-            {"storage orders info:": result_order},
-            {"your vehicle(s)": result_vehicle},
-            {"tire service order(s)": result_tire_service_order}
+            {"your_info": result_users},
+            {"storage_orders_info:": result_order},
+            {"your_vehicle": result_vehicle},
+            {"tire_service_order": result_tire_service_order}
         )
         return jsonify(result)
     else:
@@ -468,19 +467,19 @@ def deactivate_user():
     if request.method == 'POST':
         email = request.form.get('email')
         token = request.form.get('token')
-        sure = request.form.get('ARE_YOU_SURE?')
+        are_you_sure = request.form.get('ARE_YOU_SURE?')
 
         required_fields = {
             'email': email,
             'token': token,
-            'ARE_YOU_SURE?': sure
+            'ARE_YOU_SURE?': are_you_sure
         }
         check_required_fields(required_fields)
 
         user_authentication(email, token)
         check_db_connection()
 
-        if sure.lower() != 'true':
+        if are_you_sure.lower() != 'yes':
             abort(400, description='АHA! Changed your mind?')
 
         sql_query = """UPDATE users SET active = 'False' WHERE email = '{0}'""".format(email)
@@ -747,6 +746,8 @@ def active_storage():
                 abort(400, description='The <size_name> should contain only numbers')
 
             size_id = get_value_from_table('size_id', 'sizes', 'size_name', size_name)
+            if not size_id:
+                abort(404, description='Unfortunately, we do not have storage shelves you need')
 
             if active_only == 'yes':
 
@@ -919,13 +920,13 @@ def storage_order():
             else:
                 # Если пересекаются, отправляем контакты менеджера
                 # Внедрить: рекомендации по ближайшим свободным датам
-                abort(400, description='We do not have available storage place on the dates you need')
+                abort(404, description='We do not have available storage place on the dates you need')
                 # Если незанятых полок нужного размера нет, сверяем даты
                 # Выбираем полки с необходимым размером и минимальной дельтой от необходимых дат
                 # предоставляем информацию о дельтах дат и перенаправляем на ресепшн
 
         if shelf_id == 0:
-            abort(400, description='Shelf_id is undefined')
+            abort(404, description='Shelf_id is undefined')
         # get the new storage order id
         new_storage_order_id = get_value_from_table('storage_order_id', 'storage_orders', 'shelf_id', shelf_id)
 
@@ -1259,11 +1260,11 @@ def tire_service_order():
             'service_order_id': order_id,
             'user_vehicle_id': user_vehicle_id,
             'manager:': manager_data,
-            'service order type': order_type,
-            'order datetime': str(order_date),
-            'estimated service duration': str(service_duration),
-            'estimated end of service datetime': str(end_time),
-            'service order cost': service_order_cost,
+            'service_order_type': order_type,
+            'order_datetime': str(order_date),
+            'estimated_service_duration': str(service_duration),
+            'estimated_end_of_service_datetime': str(end_time),
+            'service_order_cost': service_order_cost,
             'tasks': service_order_tasks
         })
 
@@ -1567,16 +1568,16 @@ def push():
             repository.git.commit(m='update' + str(file_name))
             origin = repository.remote(name='origin')
             origin.push()
-            return 'pushed'
+            return 'pushed', 200
         except:
-            return 'error'
+            return 'error', 500
     else:
         abort(405)
 
 
 @app.route("/admin/password", methods=['POST', 'PATCH'])
 def password():
-    # restore the user's password (this can be done only by the admin)
+    # user password recovery (this can only be done by an admin)
     if request.method == 'POST':
         email = request.form.get('email')
         token = request.form.get('token')
@@ -1593,8 +1594,9 @@ def password():
         r.expire(email, 600)
         check_db_connection()
 
-        check_user_exists('', user_email)
         admin_authorization(email)
+        validate_email(user_email)
+        check_user_exists('', user_email)
 
         with FileReadBackwards("user_auth.txt", encoding="utf-8") as file:
             for line in file:
@@ -1627,8 +1629,9 @@ def password():
         r.expire(email, 600)
         check_db_connection()
 
-        check_user_exists('', user_email)
         admin_authorization(email)
+        validate_email(user_email)
+        check_user_exists('', user_email)
         validate_password(new_password)
 
         hash_password, salt = generate_password_hash(new_password)
@@ -1642,7 +1645,7 @@ def password():
         save_to_file(user_id, user_email, new_password, 'admin_change_password')
 
         result = {
-            "ID": user_id,
+            "user_id": user_id,
             "email": user_email,
             "confirmation": 'The password has been changed'
         }
