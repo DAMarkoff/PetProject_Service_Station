@@ -92,17 +92,18 @@ def users():
         l_name = request.form.get('last_name')
         password = request.form.get('password')
         phone = request.form.get('phone')
-        email = request.form.get('email')
+        email_str = request.form.get('email')
 
         required_fields = {
             'first_name': f_name,
             'last_name': l_name,
             'password': password,
             'phone': phone,
-            'email': email
+            'email': email_str
         }
         check_required_fields(required_fields)
 
+        email = email_str.lower()
         check_user_exists('already exists', email)
         validate_names('first name', f_name)
         validate_names('last name', l_name)
@@ -1252,11 +1253,23 @@ def tire_service_order():
         service_order_tasks = create_tasks_for_the_service_order(tasks, order_id, worker_id)
         manager_data = get_employee_data(manager_id, 'manager')
 
+        # =========================================================================================================
+        # tasks cost
         sql_query = """SELECT SUM(task_cost) FROM tasks
                         JOIN list_of_works USING(task_id) WHERE service_order_id = '{0}';""".format(order_id)
         cursor.execute(sql_query)
         conn.commit()
         service_order_cost = int(cursor.fetchone()[0])
+
+        # workers money
+        duration_in_minutes = service_duration.hour * 60 + service_duration.minute
+        sql_query = """SELECT hour_cost FROM staff WHERE worker_id = '{0}'""".format(worker_id)
+        cursor.execute(sql_query)
+        conn.commit()
+        hour_cost = cursor.fetchone()[0]
+        workers_money = hour_cost * duration_in_minutes / 60
+
+        service_order_cost += workers_money
 
         # =========================================================================================================
 
