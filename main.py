@@ -1,23 +1,30 @@
-from pathlib import Path
-
-from flask import request, jsonify
+import psycopg2
+import redis
+from flask import request, jsonify, Flask
 import uuid
 from datetime import date
 from file_read_backwards import FileReadBackwards
 from flask_swagger_ui import get_swaggerui_blueprint
+from git import Repo
 
 from package import app, repository
 from package.defs import *
 from package.decorators import *
 
+app = Flask(__name__)
 
 SWAGGER_URL = '/swagger'
-# API_URL = '/static/swagger.yaml'
-API_URL = Path("/~/PetProject_Service_Station/static/swagger.yaml")
+API_URL = '/static/swagger.yaml'
 swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "Service_Station"})
 
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
+repository = Repo('~/PetProject_Service_Station')
+# logging
+
+r = redis.StrictRedis(host='localhost', port=6379, db=0, charset="utf-8", decode_responses=True)
+conn = psycopg2.connect(dbname='user_20_db', user='user_20', password='123', host='159.69.151.133', port='5056')
+cursor = conn.cursor()
 
 @app.route("/users", methods=['GET', 'POST', 'PATCH'])  # request a short data/register a new user/change the user's info
 def users():
