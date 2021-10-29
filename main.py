@@ -1199,7 +1199,8 @@ def tire_service_order():
                 abort(400, description='The <active_only>, <balancing> and <wheel_alignment> should be <yes> or <no>')
 
         delta_db = get_value_from_table('delta_minutes', 'positions', 'position_name', 'worker')
-        delta_between_orders = datetime.datetime.timedelta(minutes=int(delta_db))
+        # delta_between_orders = datetime.datetime.timedelta(minutes=int(delta_db))
+        delta_between_orders = datetime.timedelta(minutes=int(delta_db))
         date_to_query = str(order_date.date())
 
         if int(order_date.hour) < 8:
