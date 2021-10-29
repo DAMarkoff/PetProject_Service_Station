@@ -4,7 +4,7 @@ from file_read_backwards import FileReadBackwards
 from flask_swagger_ui import get_swaggerui_blueprint
 import datetime
 from datetime import date
-from package import cursor, conn, r
+from package import cursor, conn, r, repository
 from package.defs import *
 from jinja2 import Template
 from werkzeug.exceptions import abort
@@ -839,12 +839,12 @@ def storage_order():
                 abort(400, description='The <user_vehicle_id> should contain only numbers')
 
         try:
-            start_date = datetime.strptime(start_date, '%Y-%m-%d').date()
+            start_date = datetime.datetime.strptime(start_date, '%Y-%m-%d').date()
         except ValueError:
             abort(400, description='The <start_date> should be in YYYY-MM-DD format')
 
         try:
-            stop_date = datetime.strptime(stop_date, '%Y-%m-%d').date()
+            stop_date = datetime.datetime.strptime(stop_date, '%Y-%m-%d').date()
         except ValueError:
             abort(400, description='The <stop_date> should be in YYYY-MM-DD format')
 
@@ -1000,11 +1000,11 @@ def storage_order():
     #         abort(400, description='The stop date can not be less than the start date')
     #
     # if start_date and not stop_date:
-    #     if datetime.strptime(start_date, '%Y-%m-%d') > datetime.strptime(str(stop_date_db), '%Y-%m-%d'):
+    #     if datetime.datetime..strptime(start_date, '%Y-%m-%d') > datetime.datetime..strptime(str(stop_date_db), '%Y-%m-%d'):
     #         abort(400, description='The start date can not be greater than the stop date')
     #
     # if not start_date and stop_date:
-    #     if datetime.strptime(stop_date, '%Y-%m-%d') < datetime.strptime(str(start_date_db), '%Y-%m-%d'):
+    #     if datetime.datetime..strptime(stop_date, '%Y-%m-%d') < datetime.datetime..strptime(str(start_date_db), '%Y-%m-%d'):
     #         abort(400, description='The stop date can not be less than the start date')
     #
     # if not start_date:
@@ -1164,7 +1164,7 @@ def tire_service_order():
             abort(400, description='The <numbers_of_wheels> should contain only numbers')
 
         try:
-            order_date = datetime.strptime(order_date, '%Y-%m-%d %H:%M')
+            order_date = datetime.datetime.strptime(order_date, '%Y-%m-%d %H:%M')
         except ValueError:
             abort(400, description='The <order_date> should be in YYYY-MM-DD HH-MM format')
 
@@ -1328,8 +1328,8 @@ def tire_service_order():
     #             order_date_to_db = start_datetime_db
     #             new_order_date = 'The tire service date has not been changed'
     #         else:
-    #             if datetime.strptime(new_order_date[:10], '%Y-%m-%d') < \
-    #                     datetime.strptime(str(datetime.now())[:10], '%Y-%m-%d'):
+    #             if datetime.datetime..strptime(new_order_date[:10], '%Y-%m-%d') < \
+    #                     datetime.datetime..strptime(str(datetime.datetime..now())[:10], '%Y-%m-%d'):
     #                 abort(400, description='The new tire service date can not be earlier than today')
     #             order_date_to_db = new_order_date
     #
