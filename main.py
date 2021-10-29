@@ -67,7 +67,7 @@ def users():
             res = cursor.fetchone()
 
             result = []
-            if not res:
+            if res:
                 result = [{
                     "ID": res[0],
                     "f_name": res[1],
