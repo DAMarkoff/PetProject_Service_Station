@@ -43,25 +43,25 @@ def check_user_exists(reason: str, email: str):
         if reason == 'already exists':
             abort(400, description="The user with this email already exists")
         elif not reason or reason == 'does not exist':
-            abort(400, description='The user does not exist')
+            abort(404, description='The user does not exist')
 
 
 def check_vehicle_exists(user_vehicle_id: int):
     """Checks that the vehicle with this vehicle_id exists"""
     if not get_value_from_table('user_id', 'user_vehicle', 'user_vehicle_id', user_vehicle_id):
-        abort(400, description='The vehicle does not exist')
+        abort(404, description='The vehicle does not exist')
 
 
 def check_storage_order_exists(storage_order_id: int):
     """Checks that the vehicle with this vehicle_id exists"""
     if not get_value_from_table('user_id', 'storage_orders', 'storage_order_id', storage_order_id):
-        abort(400, description='The storage order does not exist')
+        abort(404, description='The storage order does not exist')
 
 
 def check_tire_service_order_exists(service_order_id: int):
     """Checks that the service order exists"""
     if not get_value_from_table('user_id', 'tire_service_order', 'service_order_id', service_order_id):
-        abort(400, description='The tire service order does not exist')
+        abort(404, description='The tire service order does not exist')
 
 
 def get_user_id(email: str) -> str:
@@ -194,7 +194,7 @@ def choose_a_manager(date_to_query: str) -> int or dict:
             return manager_id
         else:
             # unreachable o_O
-            abort(400, description='There are no managers for the required time')
+            abort(404, description='There are no managers for the required time')
 
 
 def duration_of_service(tasks: dict) -> datetime:
@@ -259,7 +259,7 @@ def choose_a_worker(order_date: datetime, end_time: datetime) -> int:
     if res_:
         return random.choice(res_)  # randomly choose a worker
     else:
-        abort(400, description='There are no workers for the required time')
+        abort(404, description='There are no workers for the required time')
 
 
 def create_a_service_order(user_id, order_date, end_time, user_vehicle_id, manager_id, service_type_id) -> int:

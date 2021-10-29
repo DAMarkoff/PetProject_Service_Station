@@ -480,7 +480,7 @@ def deactivate_user():
         user_authentication(email, token)
         check_db_connection()
 
-        if sure != 'True':
+        if sure.lower() != 'true':
             abort(400, description='АHA! Changed your mind?')
 
         sql_query = """UPDATE users SET active = 'False' WHERE email = '{0}'""".format(email)
@@ -534,10 +534,10 @@ def users_vehicle():
         vehicle_id = get_value_from_table('vehicle_id', 'vehicle', 'vehicle_name', vehicle_name)
 
         if not size_id:
-            abort(400, description='Unknown size_name')
+            abort(404, description='Unknown size_name')
 
         if not vehicle_id:
-            abort(400, description='Unknown vehicle_name')
+            abort(404, description='Unknown vehicle_name')
 
         created = datetime.datetime.now()
         sql_query = """INSERT INTO user_vehicle (user_id, vehicle_id, size_id, created) 
@@ -604,7 +604,7 @@ def users_vehicle():
                 abort(400, description='The <user_vehicle_id> should contain only numbers')
             new_vehicle_id = get_value_from_table('vehicle_id', 'vehicle', 'vehicle_name', new_vehicle_name)
             if not new_vehicle_id:
-                abort(400, description='Unknown vehicle_name')
+                abort(404, description='Unknown vehicle_name')
 
         if not new_size_name or new_size_name == size_name_db:
             new_size_id = size_id_db
@@ -616,7 +616,7 @@ def users_vehicle():
                 abort(400, description='The <new_size_name> should contain only numbers')
             new_size_id = get_value_from_table('size_id', 'sizes', 'size_name', new_size_name)
             if not new_size_id:
-                abort(400, description='Unknown size_name')
+                abort(404, description='Unknown size_name')
 
         sql_query = """UPDATE user_vehicle SET vehicle_id = '{0}', size_id = '{1}' 
                         WHERE user_vehicle_id = '{2}'""".format(new_vehicle_id, new_size_id, user_vehicle_id)
@@ -964,7 +964,7 @@ def storage_order():
     # check_db_connection()
     #
     # if not storage_order_exists(storage_order_id):
-    #     abort(400, description='The storage order does not exists')
+    #     abort(404, description='The storage order does not exists')
     #
     # # get the initial data of the storage order
     # sql_query = """SELECT start_date, stop_date, size_id, storage_order_cost, shelf_id, user_id
@@ -1030,7 +1030,7 @@ def storage_order():
     #             conn.commit()
     #
     #         else:
-    #             abort(400, description='Sorry, we do not have the storage you need')
+    #             abort(404, description='Sorry, we do not have the storage you need')
     #
     # if shelf_id == 0:
     #     shelf_id = shelf_id_db
@@ -1090,7 +1090,7 @@ def storage_order():
             abort(403, description='It is not your storage order!')
 
         if start_date < datetime.datetime.now().date():
-            abort(400, description='You cannot delete a completed storage order')
+            abort(400, description='You cannot delete a storage order that has started. Please call us.')
 
         sql_query = """DELETE FROM storage_orders WHERE storage_order_id = '{0}';""".format(storage_order_id)
         cursor.execute(sql_query)
@@ -1294,7 +1294,7 @@ def tire_service_order():
     #         check_db_connection()
     #
     #         if not tire_service_order_exists(service_order_id):
-    #             abort(400, description='The tire service order does not exist')
+    #             abort(404, description='The tire service order does not exist')
     #
     #         # get the initial data about the tire_service_order
     #         sql_query = """SELECT user_id, user_vehicle_id, start_datetime FROM tire_service_order
@@ -1377,7 +1377,7 @@ def tire_service_order():
         user_id, user_vehicle_id, manager_id, start_datetime = cursor.fetchone()
 
         if start_datetime < datetime.datetime.now():
-            abort(400, description='You cannot delete a completed service order')
+            abort(400, description='You cannot delete a service order that has started')
 
         if get_user_id(email) != user_id:
             abort(403, description='It is not your tire service order!')
@@ -1438,7 +1438,7 @@ def task():
         # task_id = get_value_from_table('task_id', 'tasks', 'task_name', task_name)
         #
         # if not task_id:
-        #     abort(400, description='Sorry, we do not offer this service')
+        #     abort(404, description='Sorry, we do not offer this service')
         #
         # for _ in range(int(numbers_of_task)):
         #
@@ -1530,7 +1530,7 @@ def task():
         #             break
         #
         #     if not flag:
-        #         abort(400, description='Incorrect task number')
+        #         abort(404, description='Incorrect task number')
         #
         #     sql_query = """DELETE FROM list_of_works WHERE work_id = {0}""". format(task_number)
         #     cursor.execute(sql_query)
