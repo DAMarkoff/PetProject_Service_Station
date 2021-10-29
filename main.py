@@ -9,7 +9,7 @@ from package.defs import *
 from package.decorators import *
 
 
-SWAGGER_URL = '/static'
+SWAGGER_URL = '/swagger'
 API_URL = '/static/swagger.yaml'
 swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "Service_Station"})
 
