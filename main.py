@@ -1264,16 +1264,16 @@ def tire_service_order():
 
         # workers money
         duration_in_minutes = (service_duration.seconds % 3600) // 60
-        sql_query = """SELECT hour_cost FROM staff WHERE worker_id = '{0}'""".format(worker_id)
+        sql_query = """SELECT hour_cost FROM staff WHERE worker_id = '{0}';""".format(worker_id)
         cursor.execute(sql_query)
         conn.commit()
         hour_cost = cursor.fetchone()[0]
         workers_money = hour_cost * duration_in_minutes / 60
 
-        service_order_cost += workers_money
+        service_order_cost = round(service_order_cost + workers_money)
 
         sql_query = """INSERT INTO tire_service_order (service_order_cost) 
-                        VALUES ({0}) WHERE service_order_id = '{1}'""".format(service_order_cost, order_id)
+                        VALUES ({0}) WHERE service_order_id = {1};""".format(service_order_cost, order_id)
         cursor.execute(sql_query)
         conn.commit()
 
