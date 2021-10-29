@@ -304,6 +304,7 @@ def user_info():
         sql_query = """CREATE OR REPLACE VIEW temp AS
                                 SELECT 
                                     service_order_id,
+                                    service_order_cost,
                                     tso.user_id,
                                     start_datetime,
                                     stop_datetime,
@@ -357,7 +358,7 @@ def user_info():
                 for order in service_order_data:
                     service_order_id = order[0]
                     tire_service_order_cost = \
-                        get_value_from_table('SUM(task_cost)', 'temp', 'service_order_id', service_order_id)
+                        get_value_from_table('service_order_cost', 'temp', 'service_order_id', service_order_id)
 
                     sql_query = """SELECT task_name, worker_id, task_cost FROM temp 
                                     WHERE service_order_id = '{0}'""".format(service_order_id)
@@ -1270,6 +1271,11 @@ def tire_service_order():
         workers_money = hour_cost * duration_in_minutes / 60
 
         service_order_cost += workers_money
+
+        sql_query = """INSERT INTO tire_service_order (service_order_cost) 
+                        VALUES ({0}) WHERE service_order_id = '{1}'""".format(service_order_cost, order_id)
+        cursor.execute(sql_query)
+        conn.commit()
 
         # =========================================================================================================
 
