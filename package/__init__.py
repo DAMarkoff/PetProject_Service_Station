@@ -6,8 +6,8 @@ from git import Repo
 
 app = Flask(__name__)
 
-SWAGGER_URL = 'static/'
-API_URL = 'static/swagger.yaml'
+SWAGGER_URL = '/static/'
+API_URL = '/static/swagger.yaml'
 swaggerui_blueprint = get_swaggerui_blueprint(SWAGGER_URL, API_URL, config={'app_name': "Service_Station"})
 
 app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
