@@ -5,7 +5,7 @@ from file_read_backwards import FileReadBackwards
 
 from Package import app, repository
 from Package.defs import *
-import Package.error_handlers
+from Package.error_handlers import *
 
 
 @app.route("/users", methods=['GET', 'POST', 'PATCH'])  # request a short data/register a new user/change the user's info
