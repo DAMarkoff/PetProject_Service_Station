@@ -122,7 +122,7 @@ def users():
 
         hash_password, salt = generate_password_hash(password)
 
-        created = datetime.now()
+        created = datetime.datetime.now()
         sql_query = """INSERT INTO users (first_name, last_name, password, phone, email, active, salt, created, group_id) 
                     VALUES ('{0}', '{1}', '{2}', '{3}', '{4}', '{5}', '{6}', '{7}', {8})""". \
             format(f_name, l_name, hash_password, phone, email, active, salt, created, group_id)
@@ -548,7 +548,7 @@ def users_vehicle():
         if not vehicle_id:
             abort(404, description='Unknown vehicle_name')
 
-        created = datetime.now()
+        created = datetime.datetime.now()
         sql_query = """INSERT INTO user_vehicle (user_id, vehicle_id, size_id, created) 
                         VALUES ('{0}', '{1}', '{2}', '{3}');""".format(user_id, vehicle_id, size_id, created)
         cursor.execute(sql_query)
@@ -919,7 +919,7 @@ def storage_order():
                 # Если таких несколько, выбираем меньшую по ИД
                 shelf_id = min(res_)
 
-                created = datetime.now()
+                created = datetime.datetime.now()
                 # create storage order
                 sql_query = """INSERT INTO storage_orders (user_id, start_date, stop_date, shelf_id, 
                             storage_order_cost, created) VALUES('{0}', '{1}', '{2}', '{3}', '{4}', '{5}');""". \
@@ -1100,7 +1100,7 @@ def storage_order():
         if get_user_id(email) != user_id:
             abort(403, description='It is not your storage order!')
 
-        if start_date < datetime.now().date():
+        if start_date < datetime.datetime.now().date():
             abort(400, description='You cannot delete a storage order that has started. Please call us.')
 
         sql_query = """DELETE FROM storage_orders WHERE storage_order_id = '{0}';""".format(storage_order_id)
@@ -1168,7 +1168,7 @@ def tire_service_order():
         except ValueError:
             abort(400, description='The <order_date> should be in YYYY-MM-DD HH-MM format')
 
-        if order_date.date() < datetime.now().date():
+        if order_date.date() < datetime.datetime.now().date():
             abort(400, description='The <start_date> can not be less than today')
 
         sql_query = """SELECT DISTINCT service_type_name FROM tire_service_order_type;"""
@@ -1387,7 +1387,7 @@ def tire_service_order():
         conn.commit()
         user_id, user_vehicle_id, manager_id, start_datetime = cursor.fetchone()
 
-        if start_datetime < datetime.now():
+        if start_datetime < datetime.datetime.now():
             abort(400, description='You cannot delete a service order that has started')
 
         if get_user_id(email) != user_id:
