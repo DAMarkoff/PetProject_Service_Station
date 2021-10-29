@@ -3,3 +3,5 @@
 /test.py
 /tire_order_old.py
 /__pycache__/
+package/__pycache__/
+.gitignore
