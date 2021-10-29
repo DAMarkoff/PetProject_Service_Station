@@ -552,7 +552,7 @@ def users_vehicle():
             'vehicle_name': vehicle_name,
             'size_name': size_name
         }
-        return jsonify(result)
+        return jsonify(result), 201
 
     # Update the user's vehicle data
     elif request.method == 'PATCH':
