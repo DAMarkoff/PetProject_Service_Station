@@ -1,7 +1,7 @@
 openapi: 3.0.0
 servers:
   - description: PetProgect
-    url: http://23.88.52.139:5999
+    url: http://23.88.52.139:5006
 info:
   description: |
       # in progress...
@@ -41,7 +41,8 @@ paths:
       - "Users"
       summary: A JSON array of user(s) data
       description: |
-        - If the 'user_id' is not provided, returns short info about all users
+        - If the 'user_id' has not been provided, returns short info about all users
+        - If the 'user_id' has been provided - the 'active' parameter will be ignored
         - If the 'active' parameter is 'yes' - output info about active user(s) only
         - If the 'active' parameter is 'no' - output info about inactive user(s) only
         - If the 'active' parameter is blank - output info about both active and inactive users
@@ -341,7 +342,7 @@ paths:
     patch:
       tags:
       - "Vehicle"
-      summary: Change your vehicle type or tire size
+      summary: 'Change your vehicle type or tire size'
       description: |
                 - You can change the vehicle_name or/and size_name.
                 - *This can only be done by the logged user.*
@@ -451,6 +452,7 @@ paths:
     post:
       tags:
       - "Users"
+      summary: 'Log in'
       requestBody:
         required: true
         content:
@@ -1569,19 +1571,19 @@ paths:
 
 components:
   schemas:
-    tire_service_order_changed:
-      type: object
-      properties:
-        tire service order:
-          type: string
-        old_vehicle_id:
-          type: string
-        new_vehicle_id:
-          type: string
-        old_order_date:
-          type: string
-        new_order_date:
-          type: string
+    # tire_service_order_changed:
+    #   type: object
+    #   properties:
+    #     tire service order:
+    #       type: string
+    #     old_vehicle_id:
+    #       type: string
+    #     new_vehicle_id:
+    #       type: string
+    #     old_order_date:
+    #       type: string
+    #     new_order_date:
+    #       type: string
     tire_service_order:
       type: object
       properties:
