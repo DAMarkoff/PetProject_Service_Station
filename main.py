@@ -1,14 +1,13 @@
 from flask import request, jsonify, Flask
 import uuid
 from file_read_backwards import FileReadBackwards
-# from flask_swagger_ui import get_swaggerui_blueprint
 import datetime
 from datetime import date
-from package import cursor, conn, r, repository
-from package.defs import *
 from jinja2 import Template
 from werkzeug.exceptions import abort
 
+from package import cursor, conn, r, repository
+from package.defs import *
 from package.decorators import *
 
 
