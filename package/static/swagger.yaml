@@ -585,67 +585,67 @@ paths:
 
 #----------------------------------------------------------------------------------------------
 
-  /users/activate:
-    post:
-      tags:
-      - "Users"
-      summary: Mark the user as active
-      description: 'Note: Only the admin can mark you as an active user'
-      requestBody:
-        required: true
-        content:
-          multipart/form-data:
-            schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  description: |
-                      - ***required*** - Enter your email
-                  minLength: 4
-                  maxLength: 100
-                token:
-                  type: string
-                  description: |
-                    - ***required*** - Enter your token
-                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
-                  minLength: 1
-                  maxLength: 36
-      responses:
-        '200':
-          description: Successful operation
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  confirmation:
-                    type: string
-              example: 'User {first_name last_name} has been successfully activated'
-        '400':
-          description: bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-        '405':
-          description: method not allowed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-        '401':
-          description: unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
-        '503':
-          description: Could not connect to the database
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/error'
+#  /users/activate:
+#    post:
+#      tags:
+#      - "Users"
+#      summary: Mark the user as active
+#      description: 'Note: Only the admin can mark you as an active user'
+#      requestBody:
+#        required: true
+#        content:
+#          multipart/form-data:
+#            schema:
+#              type: object
+#              properties:
+#                email:
+#                  type: string
+#                  description: |
+#                      - ***required*** - Enter your email
+#                  minLength: 4
+#                  maxLength: 100
+#                token:
+#                  type: string
+#                  description: |
+#                    - ***required*** - Enter your token
+#                    - example - faf353cd-2e44-46c5-9864-7c53426eb58a
+#                  minLength: 1
+#                  maxLength: 36
+#      responses:
+#        '200':
+#          description: Successful operation
+#          content:
+#            application/json:
+#              schema:
+#                type: object
+#                properties:
+#                  confirmation:
+#                    type: string
+#              example: 'User {first_name last_name} has been successfully activated'
+#        '400':
+#          description: bad request
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/error'
+#        '405':
+#          description: method not allowed
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/error'
+#        '401':
+#          description: unauthorized
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/error'
+#        '503':
+#          description: Could not connect to the database
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/error'
 
 #----------------------------------------------------------------------------------------------
 
