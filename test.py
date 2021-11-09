@@ -85,11 +85,19 @@ def generate_password_hash_and_salt(password, salt):
     password = bcrypt.hashpw(str.encode(password), salt)
     return password.decode(), salt.decode()
 
+<<<<<<< HEAD
 # repository = Repo('/QA/Git/Course')
 # def push():
 #     repository.git.add('user_auth.txt')
 #     repository.git.commit(m='update user_auth.txt')
 #     repository.git.push()
+=======
+repository = Repo('/QA/Git/Course')
+def push():
+    repository.git.add('user_auth.txt')
+    repository.git.commit(m='update user_auth.txt')
+    repository.git.push()
+>>>>>>> a8db9030e6886cd95b5b3961310665977c74b28b
 
 def wh():
     sql_query = """SELECT shelf_id, size_id, available FROM warehouse WHERE available = 'False'
@@ -501,6 +509,7 @@ def validate(name: str)->bool:
 # print(dur)
 # print(cost)
 
+<<<<<<< HEAD
 # sql_query = """DELETE FROM tire_service_order WHERE service_order_id = 45"""
 # cursor.execute(sql_query)
 # conn.commit()
@@ -537,3 +546,8 @@ b_item_relult_division = b_item_t / b_item_f
 
 #  57. Вывести b_item_relult_division в консоль. (Получить ошибку)
 print(b_item_relult_division)
+=======
+sql_query = """DELETE FROM tire_service_order WHERE service_order_id = 45"""
+cursor.execute(sql_query)
+conn.commit()
+>>>>>>> a8db9030e6886cd95b5b3961310665977c74b28b
