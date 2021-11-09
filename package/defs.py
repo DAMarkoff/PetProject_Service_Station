@@ -123,6 +123,7 @@ def validate_phone(phone: str):
     if not return_val['result']:
         abort(400, description=return_val['text'])
 
+
 def validate_names(name_type: str, name: str):
     """Names can only include the ' '(space) and '.,- chars;
     must be at least 1 chars long and not exceed 30 chars"""
