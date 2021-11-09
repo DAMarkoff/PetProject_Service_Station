@@ -1,6 +1,6 @@
 openapi: 3.0.0
 servers:
-  - description: PetProgect
+  - description: PetProject
     url: http://23.88.52.139:5006
 info:
   description: |

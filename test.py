@@ -1,6 +1,6 @@
 import random
 import psycopg2
-# from file_read_backwards import FileReadBackwards
+from file_read_backwards import FileReadBackwards
 import os
 import bcrypt
 import git
@@ -85,11 +85,11 @@ def generate_password_hash_and_salt(password, salt):
     password = bcrypt.hashpw(str.encode(password), salt)
     return password.decode(), salt.decode()
 
-repository = Repo('/QA/Git/Course')
-def push():
-    repository.git.add('user_auth.txt')
-    repository.git.commit(m='update user_auth.txt')
-    repository.git.push()
+# repository = Repo('/QA/Git/Course')
+# def push():
+#     repository.git.add('user_auth.txt')
+#     repository.git.commit(m='update user_auth.txt')
+#     repository.git.push()
 
 def wh():
     sql_query = """SELECT shelf_id, size_id, available FROM warehouse WHERE available = 'False'
@@ -501,6 +501,39 @@ def validate(name: str)->bool:
 # print(dur)
 # print(cost)
 
-sql_query = """DELETE FROM tire_service_order WHERE service_order_id = 45"""
-cursor.execute(sql_query)
-conn.commit()
+# sql_query = """DELETE FROM tire_service_order WHERE service_order_id = 45"""
+# cursor.execute(sql_query)
+# conn.commit()
+
+# sql_query = """SELECT * FROM users"""
+# cursor.execute(sql_query)
+# conn.commit()
+# print(cursor.fetchall())
+from math import *
+b_item_t = True
+
+#  49. Создать переменную b_item_f и присвоить False
+b_item_f = False
+
+#  50. Создать переменную b_item_relult_sum и присвоить сумму b_item_t и b_item_f
+b_item_relult_sum = b_item_t + b_item_f
+
+#  51. Вывести b_item_relult_sum в консоль.
+print('b_item_relult_sum =', b_item_relult_sum)
+
+#  52. Создать переменную b_item_relult_subtr и присвоить разницу b_item_t и b_item_f
+b_item_relult_subtr = b_item_t - b_item_f
+
+#  53. Вывести b_item_relult_subtr в консоль.
+print('b_item_relult_subtr =', b_item_relult_subtr)
+
+#  54. Создать переменную b_item_relult_multi и присвоить умножение b_item_t и b_item_f
+b_item_relult_multi = b_item_t and b_item_f
+
+#  55. Вывести b_item_relult_multi в консоль.
+print('b_item_relult_multi =', b_item_relult_multi)
+
+b_item_relult_division = b_item_t / b_item_f
+
+#  57. Вывести b_item_relult_division в консоль. (Получить ошибку)
+print(b_item_relult_division)
