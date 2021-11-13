@@ -383,7 +383,7 @@ def user_info():
                     # res_info = cursor.fetchone()
 
                     start_datetime, stop_datetime, manager_id, user_vehicle_id, \
-                    vehicle_name, size_name = cursor.fetchone()
+                        vehicle_name, size_name = cursor.fetchone()
                     manager_data = get_employee_data(manager_id, 'manager')
 
                     result_tire_service_order.append({
