@@ -375,7 +375,7 @@ def user_info():
                                 'task_cost': task[2]
                             })
 
-                    sql_query = """SELECT start_datetime, stop_datetime, manager_id, manager_name, manager_surname, 
+                    sql_query = """SELECT start_datetime, stop_datetime, manager_id, 
                                 user_vehicle_id, vehicle_name, size_name FROM temp WHERE service_order_id = '{0}'""". \
                         format(service_order_id)
                     cursor.execute(sql_query)
