@@ -43,9 +43,9 @@ paths:
       description: |
         - If the 'user_id' has not been provided, returns short info about all users
         - If the 'user_id' has been provided - the 'active' parameter will be ignored
-        - If the 'active' parameter is 'yes' - output info about active user(s) only
-        - If the 'active' parameter is 'no' - output info about inactive user(s) only
-        - If the 'active' parameter is blank - output info about both active and inactive users
+        - If the 'active' parameter is 'yes' - returns info about active user(s) only
+        - If the 'active' parameter is 'no' - returns info about inactive user(s) only
+        - If the 'active' parameter is blank - returns info about both active and inactive users
       parameters:
       - name: user_id
         in: query
@@ -256,7 +256,7 @@ paths:
     post:
       tags:
       - "Vehicle"
-      summary: Register a new user's vehicle.
+      summary: Register the user's new vehicle.
       description: |
                 *This can only be done by the logged user.*
       requestBody:
@@ -715,7 +715,7 @@ paths:
     post:
       tags:
       - "Storage order"
-      summary: Create a new storage order
+      summary: 'Create a new storage order'
       description: |
             - The size_name OR user_vehicle_id is required. If both of them were provided - the size_name will be ignored.
             - *This can only be done by the logged user.*
@@ -810,9 +810,9 @@ paths:
     put:
       tags:
       - "Storage order"
-      summary: Change your storage order
+      summary: 'Change your storage order'
       description: |
-            ***ON MAINTENANCE.***
+            ***ON MAINTENANCE***
       responses:
         '200':
           description: Successful operation
@@ -905,7 +905,7 @@ paths:
     delete:
       tags:
       - "Storage order"
-      summary: Delete your storage order
+      summary: 'Delete your storage order'
       description: |
         The OpenAPI 3.0 Specification and Swagger tools does not implement DELETE requests with a request body. Open API 3.1 will fix that, see github.com/OAI/OpenAPI-Specification/pull/2117
         - ***To delete it, you must provide an email, token and storage_order_id in form-data***
@@ -923,7 +923,7 @@ paths:
     post:
       tags:
       - "Tire service order"
-      summary: Create a new tire service order
+      summary: 'Create a new tire service order'
       description: |
             *This can only be done by the logged user.*
       requestBody:
