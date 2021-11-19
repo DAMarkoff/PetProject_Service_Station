@@ -1,11 +1,19 @@
+import os
 import uuid
 
 from file_read_backwards import FileReadBackwards
-from flask import request
+from flask import request, send_from_directory
 
 from package import app, cursor, r, repository
 from package.defs import *
 from package.decorators import *
+
+
+@app.route("/cv", methods=['POST', 'GET'])
+def cv():
+    workingdir = os.path.abspath(os.getcwd())
+    filepath = workingdir + '/package/docs/'
+    return send_from_directory(filepath, 'cv.pdf')
 
 
 @app.route("/users",
